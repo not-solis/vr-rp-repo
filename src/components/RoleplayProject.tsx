@@ -4,7 +4,7 @@ export enum RoleplayStatus {
   Active,
   Inactive,
   Upcoming,
-  Hiatus
+  Hiatus,
 }
 
 export enum RoleplayEntryProcess {
@@ -12,31 +12,32 @@ export enum RoleplayEntryProcess {
   Vouch,
   Vetting,
   InviteOnly,
-  Application
+  Application,
 }
 
 export enum RoleplayApplicationProcess {
   NoApplication,
   PlayerApplication,
   CharacterSheet,
-  EventSignup
+  EventSignup,
 }
 
 interface ProjectProps {
-  name: string
-  imageUrl?: string
-  description?: string
-  setting?: string
-  tags: string[]
-  runtime: Date[]
-  status: RoleplayStatus,
-  entryProcess: RoleplayEntryProcess,
-  applicationProcess: RoleplayApplicationProcess,
-  hasSupportingCast: boolean,
-  isMetaverse: boolean,
-  isQuestCompatible: boolean,
-  discordUrl?: string,
-  otherLinks: string[]
+  name: string;
+  owners: string[];
+  imageUrl?: string;
+  description?: string;
+  setting?: string;
+  tags: string[];
+  runtime: Date[];
+  status: RoleplayStatus;
+  entryProcess: RoleplayEntryProcess;
+  applicationProcess: RoleplayApplicationProcess;
+  hasSupportingCast: boolean;
+  isMetaverse: boolean;
+  isQuestCompatible: boolean;
+  discordUrl?: string;
+  otherLinks: string[];
 }
 
 export const RoleplayProject = (props: ProjectProps) => {
@@ -50,13 +51,30 @@ export const RoleplayProject = (props: ProjectProps) => {
         <div className='tag'>{RoleplayStatus[props.status]}</div>
         <p>{props.description}</p>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
-          {props.tags.map(t => <div className='tag'>{t}</div>)}
+          {props.tags.map((t) => (
+            <div className='tag'>{t}</div>
+          ))}
         </div>
         <div>
-          {props.runtime.map(d => <p>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()]}s at {d.toLocaleTimeString()}</p>)}
+          {props.runtime.map((d) => (
+            <p>
+              {
+                [
+                  'Sunday',
+                  'Monday',
+                  'Tuesday',
+                  'Wednesday',
+                  'Thursday',
+                  'Friday',
+                  'Saturday',
+                ][d.getDay()]
+              }
+              s at {d.toLocaleTimeString()}
+            </p>
+          ))}
         </div>
-        <a href={props.discordUrl} >Discord</a>
+        <a href={props.discordUrl}>Discord</a>
       </div>
     </div>
-  )
-}
+  );
+};
