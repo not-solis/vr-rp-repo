@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Toggle from 'react-toggle';
 import { useMediaQuery } from 'react-responsive';
 

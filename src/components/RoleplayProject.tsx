@@ -1,3 +1,4 @@
+import { useAuth } from '../context/AuthProvider';
 import './RoleplayProject.css';
 
 export enum RoleplayStatus {
@@ -41,13 +42,19 @@ interface ProjectProps {
 }
 
 export const RoleplayProject = (props: ProjectProps) => {
+  const { userData } = useAuth();
+  const isOwner = props.owners.includes(userData?.username || '');
+
   return (
     <div className='project-card'>
       <div className='project-image'>
         <img src={props.imageUrl} />
       </div>
       <div className='project-details'>
-        <h3>{props.name}</h3>
+        <h3>
+          {props.name}
+          {isOwner ? ' (OWNED)' : null}
+        </h3>
         <div className='tag'>{RoleplayStatus[props.status]}</div>
         <p>{props.description}</p>
         <div style={{ display: 'flex', flexDirection: 'row' }}>
