@@ -5,10 +5,14 @@ import { CookiesProvider } from 'react-cookie';
 import { AuthContext, UserData } from './context/AuthProvider';
 import { LoginComponent } from './components/LoginComponent';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import './App.css';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
+
+library.add(faDiscord);
 
 export function App() {
   const [userData, setUserData] = useState<UserData>({});
