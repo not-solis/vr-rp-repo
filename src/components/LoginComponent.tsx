@@ -3,9 +3,12 @@ import { useAuth, UserData } from '../context/AuthProvider';
 import { useCookies } from 'react-cookie';
 import { USER_DATA_COOKIE } from '../App';
 import OAuth2Login from 'react-simple-oauth2-login';
+import { Box, Button, useTheme } from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const LoginComponent = () => {
   const { userData, setUserData } = useAuth();
+  const theme = useTheme();
   const [cookies, setCookie] = useCookies(['user']);
 
   useEffect(() => {
@@ -44,12 +47,20 @@ export const LoginComponent = () => {
   const onAuthFailure = (err: Error) => console.error(err);
 
   return userData?.id ? (
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <div style={{ paddingRight: '20px' }}>
+    <Box
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <Box style={{ paddingRight: '20px' }}>
         Logged in as: {userData.globalName}
-      </div>
-      <input type='button' onClick={handleLogout} value='Logout' />
-    </div>
+      </Box>
+      <Button color='error' variant='contained' onClick={handleLogout}>
+        Logout
+      </Button>
+    </Box>
   ) : (
     <OAuth2Login
       authorizationUrl='https://discord.com/oauth2/authorize'
@@ -60,6 +71,19 @@ export const LoginComponent = () => {
       buttonText='Login with Discord'
       onSuccess={onAuthSuccess}
       onFailure={onAuthFailure}
+      render={({ className, buttonText, children, onClick }) => (
+        <Button
+          style={{
+            backgroundColor: '#5865F2',
+            color: theme.palette.text.primary,
+          }}
+          variant='contained'
+          startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
+          onClick={onClick}
+        >
+          Login with Discord
+        </Button>
+      )}
     />
   );
 };

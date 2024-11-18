@@ -1,3 +1,10 @@
 .project-container {
-  margin: min(20px, 2vw) 4vw;
+  margin: min(20px, 2vw) 3vw;
+}
+
+@media (max-width: 720px) {
+  .project-container {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }

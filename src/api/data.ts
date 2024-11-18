@@ -8,7 +8,7 @@ import {
 const testProjects = Array.from({ length: 10 }, (v, k) => {
   return {
     name: `The Best Roleplay ${k}`,
-    owners: ['solis'],
+    owners: Math.random() > 0.5 ? ['solis'] : ['not solis!'],
     lastUpdated: new Date(Math.random() * Date.now()),
     imageUrl:
       'https://i.kym-cdn.com/photos/images/original/001/240/860/528.png',
