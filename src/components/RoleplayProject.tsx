@@ -5,7 +5,6 @@ import './RoleplayProject.css';
 export const RoleplayProject = (props: RoleplayProjectProps) => {
   const { userData } = useAuth();
   const isOwner = props.owners.includes(userData?.username || '');
-  console.log(process.env.NODE_ENV);
 
   return (
     <div className='project-card'>
@@ -17,19 +16,21 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
           <div style={{ whiteSpace: 'nowrap' }}>
             <h3>
               {props.name}
-              {isOwner ? ' (OWNED)' : null}
+              {isOwner && ' (OWNED)'}
             </h3>
             <div className='tag'>{RoleplayStatus[props.status]}</div>
           </div>
           <div>
             {props.tags.map((t) => (
-              <div className='tag'>{t}</div>
+              <div key={t} className='tag'>
+                {t}
+              </div>
             ))}
           </div>
           <p>{props.description}</p>
           <div>
             {props.runtime.map((d) => (
-              <p>
+              <p key={d.toISOString()}>
                 {
                   [
                     'Sunday',

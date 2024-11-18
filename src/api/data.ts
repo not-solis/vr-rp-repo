@@ -9,7 +9,7 @@ const testProjects = Array.from({ length: 10 }, (v, k) => {
   return {
     name: `The Best Roleplay ${k}`,
     owners: ['solis'],
-    lastUpdated: new Date(Math.random() * 1000000000000),
+    lastUpdated: new Date(Math.random() * Date.now()),
     imageUrl:
       'https://i.kym-cdn.com/photos/images/original/001/240/860/528.png',
     description:
