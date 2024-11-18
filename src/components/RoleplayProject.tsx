@@ -9,14 +9,12 @@ import {
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProject.css';
-import { useEffect } from 'react';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
   const { userData } = useAuth();
   const isOwner = props.owners.includes(userData?.username || '');
 
   return (
-    // <div className='project-card'>
     <Card variant='outlined' className='project-card'>
       <CardActionArea>
         <CardContent>
@@ -95,7 +93,5 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
         </CardContent>
       </CardActionArea>
     </Card>
-
-    // </div>
   );
 };

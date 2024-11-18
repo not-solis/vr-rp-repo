@@ -2,6 +2,7 @@ import './Repo.css';
 import { RoleplayProject } from '../components/RoleplayProject';
 import { getProjects } from '../api/data';
 import { useQuery } from 'react-query';
+import { Box } from '@mui/material';
 
 export const Repo = () => {
   const {
@@ -17,10 +18,10 @@ export const Repo = () => {
   }
 
   return (
-    <div className='project-container'>
+    <Box className='project-container'>
       {projects?.map((p) => (
         <RoleplayProject key={p.name} {...p} />
       ))}
-    </div>
+    </Box>
   );
 };

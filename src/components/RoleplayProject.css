@@ -1,5 +1,4 @@
 .project-card {
-  background-color: var(--color-background-secondary);
   border-radius: 20px !important;
   border-width: 1.5px !important;
   display: flex;
@@ -10,7 +9,7 @@
 }
 
 .project-card a {
-  color: var(--color-foreground-secondary);
+  color: var(--mui-palette-text-secondary);
   text-decoration-style: dotted;
   text-decoration-color: #5d5d5d;
   text-decoration-thickness: 1.2px;
@@ -28,7 +27,7 @@
   height: var(--project-image-size);
   border-width: 1.5px;
   border-style: double;
-  border-color: var(--color-outline);
+  border-color: var(--mui-palette-divider);
   border-radius: 20px;
   overflow: hidden;
   margin-right: 12px;

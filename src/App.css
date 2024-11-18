@@ -1,62 +1,14 @@
-body {
-  --color-background-primary: #fafafa;
-  --color-background-secondary: #e0e0e0;
-  --color-foreground-primary: #1f2023;
-  --color-foreground-secondary: #2e2f34;
-  --color-outline: #35363b;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    --color-background-primary: #1f2023;
-    --color-background-secondary: #2e3034;
-    --color-foreground-primary: #efefef;
-    --color-foreground-secondary: #adadad;
-    --color-outline: #44454a;
-  }
-}
-
-body {
-  background-color: var(--color-background-primary);
-  color: var(--color-foreground-primary);
-}
-
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .nav {
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: min(3vw, 1em) min(2vw, 40px);
-  border-bottom: var(--color-outline) solid 2px;
+  border-bottom: var(--mui-palette-divider) solid 2px;
+  background-color: var(--mui-palette-background-default);
+  z-index: 1;
 }
 
 .nav header {

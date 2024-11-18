@@ -32,7 +32,6 @@ export const LoginComponent = () => {
       headers: { Authorization: `Bearer ${data.access_token}` },
     }).then((response) =>
       response.json().then((json) => {
-        console.log(json);
         const { id, username, global_name, avatar } = json;
         handleLogin({
           id,

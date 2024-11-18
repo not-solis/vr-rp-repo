@@ -8,7 +8,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import './App.css';
-import { createTheme, ThemeProvider } from '@mui/material';
+import { Box, createTheme, ThemeProvider } from '@mui/material';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
@@ -18,6 +18,7 @@ library.add(faDiscord);
 export function App() {
   const [userData, setUserData] = useState<UserData>({});
   const theme = createTheme({
+    cssVariables: true,
     palette: {
       mode: 'dark',
       background: {
@@ -37,12 +38,18 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider value={{ userData, setUserData }}>
           <CookiesProvider>
-            <div style={{ height: '100vh' }}>
-              <div className='nav'>
+            <Box
+              style={{
+                color: theme.palette.text.primary,
+                backgroundColor: theme.palette.background.default,
+                minHeight: '100vh',
+              }}
+            >
+              <Box className='nav'>
                 <header>VR Roleplay Repo</header>
                 {/* <DarkModeToggle /> */}
                 <LoginComponent />
-              </div>
+              </Box>
               <BrowserRouter>
                 <Routes>
                   <Route path='/repo' element={<Repo />} />
@@ -53,7 +60,7 @@ export function App() {
                   />
                 </Routes>
               </BrowserRouter>
-            </div>
+            </Box>
           </CookiesProvider>
         </AuthContext.Provider>
       </QueryClientProvider>
