@@ -1,50 +1,11 @@
 import { useAuth } from '../context/AuthProvider';
+import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProject.css';
 
-export enum RoleplayStatus {
-  Active,
-  Inactive,
-  Upcoming,
-  Hiatus,
-}
-
-export enum RoleplayEntryProcess {
-  Open,
-  Vouch,
-  Vetting,
-  InviteOnly,
-  Application,
-}
-
-export enum RoleplayApplicationProcess {
-  NoApplication,
-  PlayerApplication,
-  CharacterSheet,
-  EventSignup,
-}
-
-interface ProjectProps {
-  name: string;
-  owners: string[];
-  lastUpdated: Date;
-  imageUrl?: string;
-  description?: string;
-  setting?: string;
-  tags: string[];
-  runtime: Date[];
-  status: RoleplayStatus;
-  entryProcess: RoleplayEntryProcess;
-  applicationProcess: RoleplayApplicationProcess;
-  hasSupportingCast: boolean;
-  isMetaverse: boolean;
-  isQuestCompatible: boolean;
-  discordUrl?: string;
-  otherLinks: string[];
-}
-
-export const RoleplayProject = (props: ProjectProps) => {
+export const RoleplayProject = (props: RoleplayProjectProps) => {
   const { userData } = useAuth();
   const isOwner = props.owners.includes(userData?.username || '');
+  console.log(process.env.NODE_ENV);
 
   return (
     <div className='project-card'>
@@ -85,7 +46,9 @@ export const RoleplayProject = (props: ProjectProps) => {
             ))}
           </div>
           <a href={props.discordUrl}>Discord</a>
-          <p>LAST UPDATED: {props.lastUpdated.toISOString()}</p>
+          {process.env.NODE_ENV === 'development' && (
+            <p>LAST UPDATED: {props.lastUpdated.toISOString()}</p>
+          )}
         </div>
       </div>
     </div>
