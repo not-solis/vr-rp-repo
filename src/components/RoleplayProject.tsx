@@ -26,6 +26,7 @@ export enum RoleplayApplicationProcess {
 interface ProjectProps {
   name: string;
   owners: string[];
+  lastUpdated: Date;
   imageUrl?: string;
   description?: string;
   setting?: string;
@@ -47,40 +48,45 @@ export const RoleplayProject = (props: ProjectProps) => {
 
   return (
     <div className='project-card'>
-      <div className='project-image'>
-        <img src={props.imageUrl} />
-      </div>
-      <div className='project-details'>
-        <h3>
-          {props.name}
-          {isOwner ? ' (OWNED)' : null}
-        </h3>
-        <div className='tag'>{RoleplayStatus[props.status]}</div>
-        <p>{props.description}</p>
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          {props.tags.map((t) => (
-            <div className='tag'>{t}</div>
-          ))}
+      <div className='project-header'>
+        <div className='project-image'>
+          <img src={props.imageUrl} />
         </div>
-        <div>
-          {props.runtime.map((d) => (
-            <p>
-              {
-                [
-                  'Sunday',
-                  'Monday',
-                  'Tuesday',
-                  'Wednesday',
-                  'Thursday',
-                  'Friday',
-                  'Saturday',
-                ][d.getDay()]
-              }
-              s at {d.toLocaleTimeString()}
-            </p>
-          ))}
+        <div className='project-overview'>
+          <div style={{ whiteSpace: 'nowrap' }}>
+            <h3>
+              {props.name}
+              {isOwner ? ' (OWNED)' : null}
+            </h3>
+            <div className='tag'>{RoleplayStatus[props.status]}</div>
+          </div>
+          <div>
+            {props.tags.map((t) => (
+              <div className='tag'>{t}</div>
+            ))}
+          </div>
+          <p>{props.description}</p>
+          <div>
+            {props.runtime.map((d) => (
+              <p>
+                {
+                  [
+                    'Sunday',
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                  ][d.getDay()]
+                }
+                s at {d.toLocaleTimeString()}
+              </p>
+            ))}
+          </div>
+          <a href={props.discordUrl}>Discord</a>
+          <p>LAST UPDATED: {props.lastUpdated.toISOString()}</p>
         </div>
-        <a href={props.discordUrl}>Discord</a>
       </div>
     </div>
   );

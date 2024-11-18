@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import Repo from './repo/Repo';
+import { Repo } from './repo/Repo';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
-import './App.css';
 import { AuthContext, UserData } from './context/AuthProvider';
 import { LoginComponent } from './components/LoginComponent';
+import './App.css';
 
 export const USER_DATA_COOKIE = 'user';
 
-function App() {
+export function App() {
   const [userData, setUserData] = useState<UserData>({});
 
   return (
@@ -35,5 +35,3 @@ function App() {
     </AuthContext.Provider>
   );
 }
-
-export default App;

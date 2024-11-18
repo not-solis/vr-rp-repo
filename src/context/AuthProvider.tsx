@@ -15,6 +15,7 @@ export interface AuthContextData {
 export const AuthContext = createContext<AuthContextData>({
   setUserData: () => {},
 });
+
 export const useAuth = () => {
   return useContext(AuthContext);
 };

@@ -55,5 +55,15 @@ body {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 0 3vw;
+  padding: min(3vw, 1em) min(2vw, 40px);
+  border-bottom: var(--color-outline) solid 2px;
+}
+
+.nav header {
+  height: 1em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: calc(10px + 2vmin);
 }
