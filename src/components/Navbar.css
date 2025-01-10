@@ -1,0 +1,41 @@
+.nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: min(3vw, 2em) min(2vw, 40px);
+  border-bottom: var(--mui-palette-divider) solid 2px;
+  background-color: var(--mui-palette-background-default);
+  z-index: 1;
+}
+
+.nav header {
+  height: 1em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: min(3em, 10px + 3vw);
+  cursor: pointer;
+}
+
+.main-menu {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 20px 0px;
+}
+
+.main-menu a {
+  padding: 0 min(1.25vw, 16px);
+  font-size: min(1.6em, 2px + 1.9vw);
+}
+
+.main-menu a:hover {
+  color: #babc6f;
+  cursor: pointer;
+}

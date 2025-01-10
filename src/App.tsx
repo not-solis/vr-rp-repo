@@ -9,6 +9,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import './App.css';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
+import { Navbar } from './components/Navbar';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
@@ -45,18 +46,21 @@ export function App() {
                 minHeight: '100vh',
               }}
             >
-              <Box className='nav'>
-                <header>VR Roleplay Repo</header>
-                {/* <DarkModeToggle /> */}
-                <LoginComponent />
-              </Box>
+              <Navbar />
               <BrowserRouter>
                 <Routes>
+                  <Route path='/' element={<div>HOME</div>} />
                   <Route path='/repo' element={<Repo />} />
+                  <Route path='/blog' element={<div>Where the blog go</div>} />
+                  <Route
+                    path='/resources'
+                    element={<div>Avatars, worlds, and docs, oh my!</div>}
+                  />
+                  <Route path='/about-us' element={<div>Memememememe</div>} />
                   <Route path='/auth/*' element={<div>you did it!</div>} />
                   <Route
                     path='*'
-                    element={<Navigate to='/repo' replace={true} />}
+                    element={<Navigate to='/' replace={true} />}
                   />
                 </Routes>
               </BrowserRouter>
