@@ -1,14 +1,18 @@
 import './Repo.css';
 import { RoleplayProject } from '../components/RoleplayProject';
 import { getProjects, SortType } from '../api/data';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { Box } from '@mui/material';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { Box, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
+import { RoleplayProjectProps } from '../model/RoleplayProject';
+import { RepoFilters } from './RepoFilters';
 
 const PAGE_SIZE = 10;
 
 export const Repo = () => {
+  const theme = useTheme();
+  const [filters, setFilters] = useState<Partial<RoleplayProjectProps>>({});
   const {
     data: pageData,
     error,
@@ -17,14 +21,12 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['projects'],
-    queryFn: ({ pageParam }) => {
-      console.log('query starts at', pageParam);
-      return getProjects(pageParam, PAGE_SIZE, SortType.UPDATED_TIME);
-    },
+    queryKey: ['projects', filters],
+    queryFn: ({ pageParam }) =>
+      getProjects(pageParam, PAGE_SIZE, SortType.UPDATED_TIME, filters),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, _2, lastPageParam) =>
-      lastPage.hasNextPage ? lastPageParam + PAGE_SIZE : undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.nextCursor : undefined,
   });
 
   if (isFetching) {
@@ -37,6 +39,7 @@ export const Repo = () => {
 
   return (
     <Box className='project-container'>
+      <RepoFilters filters={filters} applyFilters={setFilters} />
       <InfiniteScroll
         dataLength={projects?.length ?? 0}
         next={() => !isFetching && fetchNextPage()}

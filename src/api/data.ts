@@ -22,7 +22,8 @@ const TEST_PROJECTS = Array.from({ length: 100 }, (v, k) => {
       'This roleplay is incredible. It takes place in the most fantasy place with the most weapony weapons and more dice than you can humanly accept in a given setting.',
     tags: ['cool', 'nice'],
     runtime: [new Date(1111111111111)],
-    status: RoleplayStatus.Active,
+    status:
+      Math.random() > 0.8 ? RoleplayStatus.Active : RoleplayStatus.Inactive,
     entryProcess: RoleplayEntryProcess.Open,
     applicationProcess: RoleplayApplicationProcess.NoApplication,
     hasSupportingCast: true,
@@ -37,10 +38,28 @@ export async function getProjects(
   start: number,
   limit: number,
   sortType: SortType,
+  filters: Partial<RoleplayProjectProps> = {},
   ascending: boolean = true
-): Promise<{ data: RoleplayProjectProps[]; hasNextPage: boolean }> {
+): Promise<{
+  data: RoleplayProjectProps[];
+  nextCursor: number;
+  hasNextPage: boolean;
+}> {
   // TODO: return based on project env
-  const projects = [...TEST_PROJECTS];
+  // TODO: replace this logic with proper db query/filter
+  let projects = [...TEST_PROJECTS];
+  const queryFilters: ((props: RoleplayProjectProps) => boolean)[] = [];
+
+  if (filters.name) {
+    projects = projects.filter((props) =>
+      props.name.toLowerCase().includes(filters.name!.toLowerCase())
+    );
+  }
+
+  if (filters.status) {
+    projects = projects.filter((props) => props.status === filters.status);
+  }
+
   const order = ascending ? 1 : -1;
   switch (sortType) {
     case SortType.UPDATED_TIME:
@@ -53,10 +72,12 @@ export async function getProjects(
       break;
   }
 
-  const end = start + limit;
+  const data = projects.slice(start, start + limit);
+  const end = start + data.length;
   const hasNextPage = end < projects.length;
   return {
-    data: projects.slice(start, end),
+    data,
+    nextCursor: end,
     hasNextPage,
   };
 }

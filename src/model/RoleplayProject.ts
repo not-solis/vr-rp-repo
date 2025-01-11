@@ -1,5 +1,5 @@
 export enum RoleplayStatus {
-  Active,
+  Active = 1,
   Inactive,
   Upcoming,
   Hiatus,

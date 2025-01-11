@@ -33,9 +33,10 @@
 .main-menu a {
   padding: 0 min(1.25vw, 16px);
   font-size: min(1.6em, 2px + 1.9vw);
+  transition: 0.3s;
 }
 
 .main-menu a:hover {
-  color: #babc6f;
+  color: #babc6f; /* TODO: find a better color */
   cursor: pointer;
 }
