@@ -5,7 +5,13 @@ import {
   RoleplayStatus,
 } from '../model/RoleplayProject';
 
-const testProjects = Array.from({ length: 10 }, (v, k) => {
+export enum SortType {
+  NAME,
+  CREATED_TIME,
+  UPDATED_TIME,
+}
+
+const TEST_PROJECTS = Array.from({ length: 100 }, (v, k) => {
   return {
     name: `The Best Roleplay ${k}`,
     owners: Math.random() > 0.5 ? ['solis'] : ['not solis!'],
@@ -27,7 +33,30 @@ const testProjects = Array.from({ length: 10 }, (v, k) => {
   };
 });
 
-export const getProjects: () => Promise<RoleplayProjectProps[]> = async () => {
+export async function getProjects(
+  start: number,
+  limit: number,
+  sortType: SortType,
+  ascending: boolean = true
+): Promise<{ data: RoleplayProjectProps[]; hasNextPage: boolean }> {
   // TODO: return based on project env
-  return testProjects;
-};
+  const projects = [...TEST_PROJECTS];
+  const order = ascending ? 1 : -1;
+  switch (sortType) {
+    case SortType.UPDATED_TIME:
+      projects.sort(
+        (a, b) => order * (a.lastUpdated.getTime() - b.lastUpdated.getTime())
+      );
+      break;
+    case SortType.NAME:
+      projects.sort((a, b) => order * (a.name > b.name ? 1 : -1));
+      break;
+  }
+
+  const end = start + limit;
+  const hasNextPage = end < projects.length;
+  return {
+    data: projects.slice(start, end),
+    hasNextPage,
+  };
+}
