@@ -1,6 +1,5 @@
 import './Repo.css';
 import { RoleplayProject } from '../components/RoleplayProject';
-import { getProjects, SortType } from '../api/data';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Box, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -9,6 +8,12 @@ import { RoleplayProjectProps } from '../model/RoleplayProject';
 import { RepoFilters } from './RepoFilters';
 
 const PAGE_SIZE = 10;
+
+interface ProjectQueryResponse {
+  hasNextPage: boolean;
+  data: RoleplayProjectProps[];
+  nextCursor: number;
+}
 
 export const Repo = () => {
   const theme = useTheme();
@@ -21,21 +26,51 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['projects', filters],
+    queryKey: ['projects'],
     queryFn: ({ pageParam }) =>
-      getProjects(pageParam, PAGE_SIZE, SortType.UPDATED_TIME, filters),
+      fetch(
+        `http://localhost:3001/projects?start=${pageParam}&limit=${PAGE_SIZE}&sortBy=last_updated&asc=false`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+        .then((res) => res.json())
+        .then((json) => {
+          const data = [...json.data];
+          json.data = data.map((project) => ({
+            name: project.name,
+            owners: project.owners,
+            lastUpdated: new Date(project.last_updated),
+            imageUrl: project.image_url,
+            description: project.description,
+            setting: project.setting,
+            tags: project.tags,
+            runtime: [],
+            status: project.status,
+            entryProcess: project.entry_process,
+            applicationProcess: project.application_process,
+            hasSupportingCast: project.has_support_cast,
+            isMetaverse: project.is_metaverse,
+            isQuestCompatible: project.is_quest_compatible,
+            discordUrl: project.discord_link,
+            otherLinks: project.other_links,
+          }));
+          return json;
+        }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.nextCursor : undefined,
+      lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
 
-  if (isFetching) {
+  const projects = pageData?.pages.map((p) => p.data).flat();
+
+  if (isFetching && (projects?.length ?? 0) === 0) {
     return <div>Loading repo...</div>;
   } else if (error) {
     return <div>Error loading repo, please try again.</div>;
   }
-
-  const projects = pageData?.pages.map((p) => p.data).flat();
 
   return (
     <Box className='project-container'>

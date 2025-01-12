@@ -5,11 +5,7 @@ import {
   RoleplayStatus,
 } from '../model/RoleplayProject';
 
-export enum SortType {
-  NAME,
-  CREATED_TIME,
-  UPDATED_TIME,
-}
+// TODO: migrate from old TS api
 
 const TEST_PROJECTS = Array.from({ length: 100 }, (v, k) => {
   return {

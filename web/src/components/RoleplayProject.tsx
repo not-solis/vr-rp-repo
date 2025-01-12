@@ -12,7 +12,18 @@ import './RoleplayProject.css';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
   const { userData } = useAuth();
-  const isOwner = props.owners.includes(userData?.username || '');
+  const {
+    name,
+    lastUpdated,
+    owners,
+    imageUrl,
+    status,
+    tags,
+    description,
+    runtime,
+    discordUrl,
+  } = props;
+  const isOwner = owners?.includes(userData?.username || '') ?? false;
 
   return (
     <Card variant='outlined' className='project-card'>
@@ -22,8 +33,8 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
             <Box className='project-image'>
               <CardMedia
                 component='img'
-                image={props.imageUrl}
-                alt={`${props.name} icon`}
+                image={imageUrl}
+                alt={`${name} icon`}
               />
             </Box>
             <Box className='project-overview'>
@@ -43,10 +54,10 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                     fontWeight: 'bolder',
                   }}
                 >
-                  {props.name}
+                  {name}
                   {isOwner && ' (OWNED)'}
                 </Typography>
-                <Box className='tag'>{RoleplayStatus[props.status]}</Box>
+                <Box className='tag'>{status}</Box>
               </Box>
               <Typography
                 style={{
@@ -56,18 +67,18 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                 color='textSecondary'
                 variant='body2'
               >
-                {props.owners.join(', ')}
+                {owners?.join(', ') || ''}
               </Typography>
               <Box>
-                {props.tags.map((t) => (
+                {tags?.map((t) => (
                   <Box key={t} className='tag'>
                     {t}
                   </Box>
                 ))}
               </Box>
-              <p>{props.description}</p>
+              <p>{description}</p>
               <Box>
-                {props.runtime.map((d) => (
+                {runtime?.map((d) => (
                   <p key={d.toISOString()}>
                     {
                       [
@@ -84,9 +95,9 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                   </p>
                 ))}
               </Box>
-              <a href={props.discordUrl}>Discord</a>
+              <a href={discordUrl}>Discord</a>
               {process.env.NODE_ENV === 'development' && (
-                <p>LAST UPDATED: {props.lastUpdated.toISOString()}</p>
+                <p>LAST UPDATED: {lastUpdated?.toISOString()}</p>
               )}
             </Box>
           </Box>

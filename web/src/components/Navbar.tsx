@@ -34,6 +34,7 @@ export const Navbar = () => {
         {windowDimensions.width > 1100 ? (
           ['Repo', 'Blog', 'Resources', 'About Us'].map((t) => (
             <Link
+              key={t}
               href={t.toLowerCase().replace(' ', '-')}
               component='a'
               variant='h6'

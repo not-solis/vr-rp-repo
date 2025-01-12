@@ -8,7 +8,7 @@
   padding: min(3vw, 2em) min(2vw, 40px);
   border-bottom: var(--mui-palette-divider) solid 2px;
   background-color: var(--mui-palette-background-default);
-  z-index: 1;
+  z-index: 100;
 }
 
 .nav header {
