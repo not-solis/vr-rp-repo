@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthProvider';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
 import { useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
   const [isTitleOverflowed, setTitleOverflowed] = useState(false);
@@ -71,7 +72,7 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
             height: '100%',
             zIndex: 1,
           }}
-        />
+        ></CardActionArea>
         {titleRect && isTitleOverflowed && (
           <Tooltip
             arrow
@@ -99,17 +100,42 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
           </Tooltip>
         )}
       </Link>
-      <CardContent style={{ position: 'relative', top: '-100%' }}>
+      <CardContent
+        style={{
+          position: 'relative',
+          top: '-100%',
+        }}
+      >
         <Box className='project-card-content'>
-          <Box className='project-image'>
-            {imageUrl && (
-              <CardMedia
-                component='img'
-                image={imageUrl}
-                alt={`${name} icon`}
-              />
+          <div>
+            <Box className='project-image'>
+              {imageUrl && (
+                <CardMedia
+                  component='img'
+                  image={imageUrl}
+                  alt={`${name} icon`}
+                />
+              )}
+            </Box>
+            {discordUrl && (
+              <Link
+                style={{ position: 'relative', zIndex: 3 }}
+                href={discordUrl}
+              >
+                <FontAwesomeIcon
+                  to={discordUrl}
+                  style={{
+                    width: 20,
+                    height: 'auto',
+                    padding: '12 6 0',
+                  }}
+                  icon={['fab', 'discord']}
+                />
+                Discord
+              </Link>
             )}
-          </Box>
+          </div>
+
           <Box className='project-overview'>
             <Box className='project-header'>
               <Typography ref={titleRef} variant='h3'>
@@ -161,7 +187,6 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
             {/* TODO: make compact date time display */}
 
             {/* TODO: redesign discord link */}
-            {discordUrl && <a href={discordUrl}>Discord</a>}
             {process.env.NODE_ENV === 'development' && (
               <p>LAST UPDATED: {lastUpdated?.toISOString()}</p>
             )}

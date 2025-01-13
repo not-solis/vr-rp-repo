@@ -16,6 +16,7 @@
   text-decoration-color: #5d5d5d;
   text-decoration-thickness: 1.2px;
   text-underline-offset: 2.4px;
+  transition: 0.2s;
 }
 
 .project-card .interactable {
