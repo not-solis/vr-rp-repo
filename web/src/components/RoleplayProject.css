@@ -1,4 +1,5 @@
 .project-card {
+  --min-card-width: 500px;
   border-radius: 20px !important;
   border-width: 1.5px !important;
   display: flex;
@@ -6,6 +7,9 @@
   margin: max(0.5vw, 8px) 0;
   overflow: hidden;
   font-size: clamp(0.7em, 1vw, 1em);
+  min-width: var(--min-card-width);
+  max-width: 1200px;
+  flex: 1 0;
 }
 
 .project-card a {
@@ -18,6 +22,7 @@
 
 .project-header {
   display: flex;
+  width: 100%;
 }
 
 .project-image {
@@ -45,6 +50,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
 }
 
 .project-overview p {
@@ -56,15 +63,38 @@
 .tag {
   display: inline-block;
   padding: 3px 8px;
-  margin-right: 10px;
   border-radius: 5px;
   background-color: #50326c;
 }
+
+/* @media (max-width: 2200px) {
+  .project-card {
+    flex-basis: 32.2%;
+  }
+}
+
+@media (max-width: 1500px) {
+  .project-card {
+    flex-basis: 48%;
+  }
+}
+
+@media (max-width: 900px) {
+  .project-card {
+    flex: 1 0 98%;
+  }
+} */
 
 @media (max-width: 720px) {
   .project-card {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .project-card {
+    min-width: 100%;
   }
 }

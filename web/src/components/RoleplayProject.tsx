@@ -36,15 +36,17 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
 
   return (
     <Card variant='outlined' className='project-card'>
-      <CardActionArea>
-        <CardContent>
+      <CardActionArea style={{ height: '100%' }}>
+        <CardContent style={{ height: '100%' }}>
           <Box className='project-header'>
             <Box className='project-image'>
-              <CardMedia
-                component='img'
-                image={imageUrl}
-                alt={`${name} icon`}
-              />
+              {imageUrl && (
+                <CardMedia
+                  component='img'
+                  image={imageUrl}
+                  alt={`${name} icon`}
+                />
+              )}
             </Box>
             <Box className='project-overview'>
               <Box
@@ -52,15 +54,19 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                   whiteSpace: 'nowrap',
                   display: 'flex',
                   alignItems: 'center',
+                  maxWidth: '100%',
                 }}
               >
                 <Typography
                   variant='h3'
                   style={{
                     paddingRight: '12px',
-                    display: 'inline-block',
                     fontSize: '1.5em',
                     fontWeight: 'bolder',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    flex: '1 0',
                   }}
                 >
                   {name}
@@ -68,7 +74,9 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                 </Typography>
                 <Box
                   className='tag'
-                  style={{ backgroundColor: statusColors[status] }}
+                  style={{
+                    backgroundColor: statusColors[status],
+                  }}
                 >
                   {status}
                 </Box>
@@ -83,7 +91,7 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
               >
                 {owners?.join(', ') || ''}
               </Typography>
-              <Box>
+              <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {tags?.map((t) => (
                   <Box key={t} className='tag'>
                     {t}

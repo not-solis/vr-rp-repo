@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { RoleplayProjectProps } from '../model/RoleplayProject';
 import { RepoFilters } from './RepoFilters';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 50;
 
 interface ProjectQueryResponse {
   hasNextPage: boolean;
@@ -76,6 +76,12 @@ export const Repo = () => {
     <Box className='project-container'>
       <RepoFilters filters={filters} applyFilters={setFilters} />
       <InfiniteScroll
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '1.4%',
+          width: '100%',
+        }}
         dataLength={projects?.length ?? 0}
         next={() => !isFetching && fetchNextPage()}
         hasMore={hasNextPage}

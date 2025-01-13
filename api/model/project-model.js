@@ -25,7 +25,7 @@ export const getProjects = async (
       pool.query(
         `SELECT * FROM RoleplayProjects ORDER BY $1 ${
           asc ? 'ASC' : 'DESC'
-        } OFFSET $2 LIMIT $3`,
+        }, name ASC OFFSET $2 LIMIT $3`,
         [sortBy, start, limit + 1], // using limit + 1 to see if there are any remaining
         (error, results) => {
           if (error) {
