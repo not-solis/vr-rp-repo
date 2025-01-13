@@ -33,7 +33,7 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
     imageUrl,
     status,
     tags,
-    description,
+    shortDescription,
     runtime,
     discordUrl,
   } = props;
@@ -112,28 +112,12 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
           </Box>
           <Box className='project-overview'>
             <Box className='project-header'>
-              {/* <Tooltip
-                arrow
-                title={name}
-                placement='top'
-                enterDelay={100}
-                leaveDelay={100}
-                disableHoverListener={!isTitleOverflowed}
-                slotProps={{
-                  popper: {
-                    modifiers: [
-                      { name: 'offset', options: { offset: [0, -8] } },
-                    ],
-                  },
-                }}
-              > */}
               <Typography ref={titleRef} variant='h3'>
                 {name}
                 {isOwner && ' (OWNED)'}
               </Typography>
-              {/* </Tooltip> */}
               <Box
-                className='tag'
+                className='tag disabled-text-interaction'
                 style={{
                   backgroundColor: statusColors[status],
                 }}
@@ -158,16 +142,19 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
             {tags && tags.length > 0 && (
               <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {tags.map((t) => (
-                  <Box key={t} className='tag interactable'>
+                  <Box
+                    key={t}
+                    className='tag disabled-text-interaction interactable'
+                  >
                     {t}
                   </Box>
                 ))}
               </Box>
             )}
 
-            {description && (
+            {shortDescription && (
               <Typography variant='body2' style={{ padding: 0 }}>
-                {description}
+                {shortDescription}
               </Typography>
             )}
 

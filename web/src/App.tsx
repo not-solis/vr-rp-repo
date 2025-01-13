@@ -56,6 +56,19 @@ export function App() {
       divider: borderColor,
     },
     components: {
+      MuiTypography: {
+        styleOverrides: {
+          h1: {
+            fontSize: 72,
+          },
+          body1: {
+            fontSize: 22,
+          },
+          body2: {
+            fontSize: 18,
+          },
+        },
+      },
       MuiTooltip: {
         styleOverrides: {
           tooltip: {
@@ -88,27 +101,34 @@ export function App() {
                 color: theme.palette.text.primary,
                 backgroundColor: theme.palette.background.default,
                 minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
               <Navbar />
-              <BrowserRouter>
-                <Routes>
-                  <Route path='/' element={<div>HOME</div>} />
-                  <Route path='/repo' element={<Repo />} />
-                  <Route path='/repo/:id' element={<RoleplayProjectPage />} />
-                  <Route path='/blog' element={<div>Where the blog go</div>} />
-                  <Route
-                    path='/resources'
-                    element={<div>Avatars, worlds, and docs, oh my!</div>}
-                  />
-                  <Route path='/about-us' element={<div>Memememememe</div>} />
-                  <Route path='/auth/*' element={<div>you did it!</div>} />
-                  <Route
-                    path='*'
-                    element={<Navigate to='/' replace={true} />}
-                  />
-                </Routes>
-              </BrowserRouter>
+              <div style={{ flexGrow: 1 }}>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path='/' element={<div>HOME</div>} />
+                    <Route path='/repo' element={<Repo />} />
+                    <Route path='/repo/:id' element={<RoleplayProjectPage />} />
+                    <Route
+                      path='/blog'
+                      element={<div>Where the blog go</div>}
+                    />
+                    <Route
+                      path='/resources'
+                      element={<div>Avatars, worlds, and docs, oh my!</div>}
+                    />
+                    <Route path='/about-us' element={<div>Memememememe</div>} />
+                    <Route path='/auth/*' element={<div>you did it!</div>} />
+                    <Route
+                      path='*'
+                      element={<Navigate to='/' replace={true} />}
+                    />
+                  </Routes>
+                </BrowserRouter>
+              </div>
             </Box>
           </CookiesProvider>
         </AuthContext.Provider>

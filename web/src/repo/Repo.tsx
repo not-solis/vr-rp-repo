@@ -4,7 +4,10 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { Box, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
-import { RoleplayProjectProps } from '../model/RoleplayProject';
+import {
+  remapRoleplayProject,
+  RoleplayProjectProps,
+} from '../model/RoleplayProject';
 import { RepoFilters } from './RepoFilters';
 
 const PAGE_SIZE = 50;
@@ -39,25 +42,7 @@ export const Repo = () => {
         .then((res) => res.json())
         .then((json) => {
           const data = [...json.data];
-          json.data = data.map((project) => ({
-            id: project.id,
-            name: project.name,
-            owners: project.owners,
-            lastUpdated: new Date(project.last_updated),
-            imageUrl: project.image_url,
-            description: project.description,
-            setting: project.setting,
-            tags: project.tags,
-            runtime: [],
-            status: project.status,
-            entryProcess: project.entry_process,
-            applicationProcess: project.application_process,
-            hasSupportingCast: project.has_support_cast,
-            isMetaverse: project.is_metaverse,
-            isQuestCompatible: project.is_quest_compatible,
-            discordUrl: project.discord_link,
-            otherLinks: project.other_links,
-          }));
+          json.data = data.map(remapRoleplayProject);
           return json;
         }),
     initialPageParam: 0,

@@ -1,7 +1,13 @@
+import { CardMedia, Drawer, Typography, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
+import { remapRoleplayProject } from '../model/RoleplayProject';
+import './RoleplayProjectPage.css';
+import { useEffect, useRef, useState } from 'react';
 
 export const RoleplayProjectPage = () => {
+  const [isSidebarExpanded, setSidebarExpanded] = useState(true);
+  const theme = useTheme();
   const { id } = useParams();
   const {
     data: project,
@@ -18,25 +24,7 @@ export const RoleplayProjectPage = () => {
         .then((res) => res.json())
         .then((json) => {
           const project = json.data;
-          return {
-            id: project.id,
-            name: project.name,
-            owners: project.owners,
-            lastUpdated: new Date(project.last_updated),
-            imageUrl: project.image_url,
-            description: project.description,
-            setting: project.setting,
-            tags: project.tags,
-            runtime: [],
-            status: project.status,
-            entryProcess: project.entry_process,
-            applicationProcess: project.application_process,
-            hasSupportingCast: project.has_support_cast,
-            isMetaverse: project.is_metaverse,
-            isQuestCompatible: project.is_quest_compatible,
-            discordUrl: project.discord_link,
-            otherLinks: project.other_links,
-          };
+          return remapRoleplayProject(project);
         }),
   });
 
@@ -51,7 +39,76 @@ export const RoleplayProjectPage = () => {
   if (!project) {
     // ID is invalid
     window.location.href = '/';
+    return null;
   }
 
-  return <div>{project?.name}</div>;
+  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif'; // DELETE
+
+  const { name, owners, description, shortDescription, imageUrl } = project;
+
+  let descriptionElement;
+  if (description) {
+    descriptionElement = <Typography variant='h5'>{description}</Typography>;
+  } else if (shortDescription) {
+    descriptionElement = (
+      <>
+        <Typography
+          style={{
+            fontStyle: 'italic',
+            paddingTop: 0,
+          }}
+          color='textSecondary'
+          variant='body2'
+        >
+          (no description provided, using short description)
+        </Typography>
+        <Typography variant='body1'>{shortDescription}</Typography>
+      </>
+    );
+  } else {
+    descriptionElement = (
+      <Typography
+        style={{
+          fontStyle: 'italic',
+          paddingTop: 0,
+        }}
+        color='textSecondary'
+        variant='body2'
+      >
+        (no description provided)
+      </Typography>
+    );
+  }
+
+  const toggleSidebar = () => setSidebarExpanded(!isSidebarExpanded);
+
+  return (
+    <div className='project-page'>
+      <div className={`project-info${isSidebarExpanded ? '' : ' closed'}`}>
+        <Typography variant='h1' fontWeight='bold'>
+          {project.name}
+        </Typography>
+        {descriptionElement}
+      </div>
+      <div className={`project-sidebar${isSidebarExpanded ? '' : ' closed'}`}>
+        <div style={{ padding: '20px' }}>
+          {imageUrl && (
+            <CardMedia component='img' image={imageUrl} alt={`${name} icon`} />
+          )}
+        </div>
+        <div
+          id='sidebar-toggle'
+          className='disabled-text-interaction'
+          onClick={toggleSidebar}
+        >
+          <Typography
+            variant='h5'
+            style={{ marginLeft: '4px', marginBottom: '4px' }}
+          >
+            {isSidebarExpanded ? '>>>' : '<<<'}
+          </Typography>
+        </div>
+      </div>
+    </div>
+  );
 };

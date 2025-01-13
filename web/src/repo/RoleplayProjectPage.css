@@ -1,0 +1,49 @@
+@property --project-sidebar-width {
+  syntax: '<number>';
+  inherits: false;
+}
+
+.project-page {
+  --project-sidebar-width: min(500px, 20vw + 160px);
+}
+
+.project-info {
+  padding: 20px 40px;
+  margin-right: var(--project-sidebar-width);
+  transition: margin-right 0.5s;
+}
+
+.project-sidebar {
+  position: fixed;
+  float: right;
+  top: min(116px, 6.7vw + 33px);
+  right: 0;
+  width: var(--project-sidebar-width);
+  height: 100%;
+  border-left: 2px solid var(--mui-palette-divider);
+  transition: right 0.5s;
+}
+
+.project-sidebar #sidebar-toggle {
+  --toggle-width: 70px;
+  position: absolute;
+  top: -2px;
+  left: calc(var(--toggle-width) * -1 - 4px);
+  background-color: var(--mui-palette-background-paper);
+  width: var(--toggle-width);
+  height: 50px;
+  border-bottom-left-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--mui-palette-divider);
+}
+
+.project-sidebar.closed {
+  right: calc(-2px - var(--project-sidebar-width));
+}
+
+.project-info.closed {
+  margin-right: 0;
+}
