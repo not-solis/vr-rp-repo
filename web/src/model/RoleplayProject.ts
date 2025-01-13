@@ -1,8 +1,8 @@
 export enum RoleplayStatus {
-  Active = 1,
-  Inactive,
-  Upcoming,
-  Hiatus,
+  Active = 'Active',
+  Inactive = 'Inactive',
+  Upcoming = 'Upcoming',
+  Hiatus = 'Hiatus',
 }
 
 export enum RoleplayEntryProcess {

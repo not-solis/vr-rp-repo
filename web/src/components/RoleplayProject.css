@@ -58,8 +58,7 @@
   padding: 3px 8px;
   margin-right: 10px;
   border-radius: 5px;
-  /* TODO: vary this! */
-  background-color: green;
+  background-color: #50326c;
 }
 
 @media (max-width: 720px) {

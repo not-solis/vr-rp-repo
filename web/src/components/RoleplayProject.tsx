@@ -5,12 +5,14 @@ import {
   CardContent,
   CardMedia,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProject.css';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
+  const theme = useTheme();
   const { userData } = useAuth();
   const {
     name,
@@ -24,6 +26,13 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
     discordUrl,
   } = props;
   const isOwner = owners?.includes(userData?.username || '') ?? false;
+
+  const statusColors: Record<RoleplayStatus, string> = {
+    [RoleplayStatus.Active]: theme.roleplayStatus.active,
+    [RoleplayStatus.Inactive]: theme.roleplayStatus.inactive,
+    [RoleplayStatus.Upcoming]: theme.roleplayStatus.upcoming,
+    [RoleplayStatus.Hiatus]: theme.roleplayStatus.hiatus,
+  };
 
   return (
     <Card variant='outlined' className='project-card'>
@@ -57,7 +66,12 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                   {name}
                   {isOwner && ' (OWNED)'}
                 </Typography>
-                <Box className='tag'>{status}</Box>
+                <Box
+                  className='tag'
+                  style={{ backgroundColor: statusColors[status] }}
+                >
+                  {status}
+                </Box>
               </Box>
               <Typography
                 style={{

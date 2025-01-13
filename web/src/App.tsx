@@ -16,6 +16,26 @@ const queryClient = new QueryClient();
 
 library.add(faDiscord);
 
+declare module '@mui/material/styles' {
+  interface Theme {
+    roleplayStatus: {
+      active: string;
+      hiatus: string;
+      upcoming: string;
+      inactive: string;
+    };
+  }
+  // allow configuration using `createTheme()`
+  interface ThemeOptions {
+    roleplayStatus?: {
+      active?: string;
+      hiatus?: string;
+      upcoming?: string;
+      inactive?: string;
+    };
+  }
+}
+
 export function App() {
   const [userData, setUserData] = useState<UserData>({});
   const theme = createTheme({
@@ -31,6 +51,12 @@ export function App() {
         secondary: '#adadad',
       },
       divider: '#44454a',
+    },
+    roleplayStatus: {
+      active: '#009200',
+      inactive: '#424647',
+      upcoming: '#067f8c',
+      hiatus: '#9e561b',
     },
   });
 
