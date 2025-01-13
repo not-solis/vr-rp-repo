@@ -10,6 +10,7 @@ import { faDiscord } from '@fortawesome/free-brands-svg-icons';
 import './App.css';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { Navbar } from './components/Navbar';
+import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
@@ -94,6 +95,7 @@ export function App() {
                 <Routes>
                   <Route path='/' element={<div>HOME</div>} />
                   <Route path='/repo' element={<Repo />} />
+                  <Route path='/repo/:id' element={<RoleplayProjectPage />} />
                   <Route path='/blog' element={<div>Where the blog go</div>} />
                   <Route
                     path='/resources'

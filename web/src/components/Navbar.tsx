@@ -35,7 +35,7 @@ export const Navbar = () => {
           ['Repo', 'Blog', 'Resources', 'About Us'].map((t) => (
             <Link
               key={t}
-              href={t.toLowerCase().replace(' ', '-')}
+              href={`/${t.toLowerCase().replace(' ', '-')}`}
               component='a'
               variant='h6'
               color='textSecondary'

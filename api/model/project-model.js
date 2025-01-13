@@ -51,3 +51,30 @@ export const getProjects = async (
     throw new Error('Internal server error.');
   }
 };
+
+export const getProjectById = async (id) => {
+  try {
+    return await new Promise((resolve, reject) => {
+      pool.query(
+        'SELECT * FROM RoleplayProjects WHERE id=$1',
+        [id],
+        (error, results) => {
+          if (error) {
+            reject(error);
+          }
+
+          if (results?.rows) {
+            resolve({
+              data: results.rows[0],
+            });
+          } else {
+            reject(new Error('No results found.'));
+          }
+        }
+      );
+    });
+  } catch (err) {
+    console.error(err);
+    throw new Error('Internal server error.');
+  }
+};

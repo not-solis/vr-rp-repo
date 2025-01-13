@@ -1,6 +1,6 @@
 import express from 'express';
 import mung from 'express-mung';
-import { getProjects } from './model/project-model.js';
+import { getProjectById, getProjects } from './model/project-model.js';
 
 // TODO: use service architecture. Served all-in-one in index for now.
 
@@ -40,6 +40,15 @@ app.get('/projects', (req, res) => {
     filters?.split('|'),
     asc === 'true'
   )
+    .then((response) => {
+      res.status(200).send(response);
+    })
+    .catch((error) => res.status(500).send(error));
+});
+
+app.get('/projects/:id', (req, res) => {
+  const { id } = req.params;
+  getProjectById(id)
     .then((response) => {
       res.status(200).send(response);
     })

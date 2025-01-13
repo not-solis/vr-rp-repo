@@ -16,11 +16,12 @@ import {
 } from '@mui/material';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
-import './RoleplayProject.css';
+import './RoleplayProjectCard.css';
 import { useEffect, useRef, useState } from 'react';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
   const [isTitleOverflowed, setTitleOverflowed] = useState(false);
+  const [titleRect, setTitleRect] = useState<DOMRect>();
   const titleRef = useRef<HTMLSpanElement>(null);
   const theme = useTheme();
   const { userData } = useAuth();
@@ -38,11 +39,15 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
   } = props;
 
   useEffect(() => {
+    if (!titleRef.current) {
+      setTitleOverflowed(false);
+      setTitleRect(undefined);
+      return;
+    }
     setTitleOverflowed(
-      titleRef.current
-        ? titleRef.current.scrollWidth > titleRef.current.clientWidth
-        : false
+      titleRef.current.scrollWidth > titleRef.current.clientWidth
     );
+    setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);
 
   const isOwner = owners?.includes(userData?.username || '') ?? false;
@@ -67,6 +72,32 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
             zIndex: 1,
           }}
         />
+        {titleRect && isTitleOverflowed && (
+          <Tooltip
+            arrow
+            title={name}
+            placement='top'
+            enterDelay={100}
+            leaveDelay={100}
+            disableHoverListener={!isTitleOverflowed}
+            slotProps={{
+              popper: {
+                modifiers: [{ name: 'offset', options: { offset: [0, -8] } }],
+              },
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: titleRect.top,
+                left: titleRect.left,
+                width: titleRect.right - titleRect.left,
+                height: titleRect.bottom - titleRect.top,
+                zIndex: 2,
+              }}
+            />
+          </Tooltip>
+        )}
       </Link>
       <CardContent style={{ position: 'relative', top: '-100%' }}>
         <Box className='project-card-content'>
@@ -81,7 +112,7 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
           </Box>
           <Box className='project-overview'>
             <Box className='project-header'>
-              <Tooltip
+              {/* <Tooltip
                 arrow
                 title={name}
                 placement='top'
@@ -95,12 +126,12 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                     ],
                   },
                 }}
-              >
-                <Typography ref={titleRef} variant='h3'>
-                  {name}
-                  {isOwner && ' (OWNED)'}
-                </Typography>
-              </Tooltip>
+              > */}
+              <Typography ref={titleRef} variant='h3'>
+                {name}
+                {isOwner && ' (OWNED)'}
+              </Typography>
+              {/* </Tooltip> */}
               <Box
                 className='tag'
                 style={{

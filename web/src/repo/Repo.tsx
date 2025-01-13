@@ -1,5 +1,5 @@
 import './Repo.css';
-import { RoleplayProject } from '../components/RoleplayProject';
+import { RoleplayProject } from '../components/RoleplayProjectCard';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Box, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
