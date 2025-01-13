@@ -21,6 +21,7 @@ export enum RoleplayApplicationProcess {
 }
 
 export interface RoleplayProjectProps {
+  id: string;
   name: string;
   owners: string[];
   lastUpdated: Date;

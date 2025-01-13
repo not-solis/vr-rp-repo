@@ -16,7 +16,12 @@
   text-decoration-color: #5d5d5d;
   text-decoration-thickness: 1.2px;
   text-underline-offset: 2.4px;
-  z-index: 1;
+}
+
+.project-card .interactable {
+  cursor: pointer;
+  z-index: 2;
+  transition: 0.15s;
 }
 
 .project-card-content {
@@ -87,6 +92,17 @@
   padding: 3px 8px;
   border-radius: 5px;
   background-color: #50326c;
+}
+
+.tag.interactable:hover {
+  transform: scale(1.02);
+  filter: brightness(105%);
+}
+
+.project-card .interactable:active {
+  transform: scale(0.98);
+  filter: brightness(90%);
+  box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
 }
 
 @media (max-width: 720px) {

@@ -40,6 +40,7 @@ export const Repo = () => {
         .then((json) => {
           const data = [...json.data];
           json.data = data.map((project) => ({
+            id: project.id,
             name: project.name,
             owners: project.owners,
             lastUpdated: new Date(project.last_updated),
