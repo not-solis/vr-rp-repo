@@ -38,19 +38,36 @@ declare module '@mui/material/styles' {
 
 export function App() {
   const [userData, setUserData] = useState<UserData>({});
+  const borderColor = '#44454a';
+  const primaryBackgroundColor = '#1f2023';
   const theme = createTheme({
     cssVariables: true,
     palette: {
       mode: 'dark',
       background: {
-        default: '#1f2023',
+        default: primaryBackgroundColor,
         paper: '#2e3034',
       },
       text: {
         primary: '#efefef',
         secondary: '#adadad',
       },
-      divider: '#44454a',
+      divider: borderColor,
+    },
+    components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: primaryBackgroundColor,
+            border: `1.4px solid ${borderColor}`,
+            fontSize: '1em',
+          },
+          arrow: {
+            color: primaryBackgroundColor,
+            borderTop: 'none',
+          },
+        },
+      },
     },
     roleplayStatus: {
       active: '#009200',

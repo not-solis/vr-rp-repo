@@ -1,6 +1,13 @@
 .project-container {
   padding: min(10px, 0.8vw) 0;
-  margin: 0 3vw;
+  margin: 0 min(20px, 1vw);
+}
+
+.repo-search-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4%;
+  width: 100%;
 }
 
 @media (max-width: 720px) {

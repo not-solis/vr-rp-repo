@@ -76,12 +76,7 @@ export const Repo = () => {
     <Box className='project-container'>
       <RepoFilters filters={filters} applyFilters={setFilters} />
       <InfiniteScroll
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1.4%',
-          width: '100%',
-        }}
+        className='repo-search-results'
         dataLength={projects?.length ?? 0}
         next={() => !isFetching && fetchNextPage()}
         hasMore={hasNextPage}

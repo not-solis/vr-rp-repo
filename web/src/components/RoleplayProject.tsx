@@ -4,14 +4,23 @@ import {
   CardActionArea,
   CardContent,
   CardMedia,
+  makeStyles,
+  styled,
+  Theme,
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
   Typography,
   useTheme,
 } from '@mui/material';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProject.css';
+import { useEffect, useRef, useState } from 'react';
 
 export const RoleplayProject = (props: RoleplayProjectProps) => {
+  const [isTitleOverflowed, setTitleOverflowed] = useState(false);
+  const titleRef = useRef<HTMLSpanElement>(null);
   const theme = useTheme();
   const { userData } = useAuth();
   const {
@@ -25,6 +34,15 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
     runtime,
     discordUrl,
   } = props;
+
+  useEffect(() => {
+    setTitleOverflowed(
+      titleRef.current
+        ? titleRef.current.scrollWidth > titleRef.current.clientWidth
+        : false
+    );
+  }, []);
+
   const isOwner = owners?.includes(userData?.username || '') ?? false;
 
   const statusColors: Record<RoleplayStatus, string> = {
@@ -38,7 +56,7 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
     <Card variant='outlined' className='project-card'>
       <CardActionArea style={{ height: '100%' }}>
         <CardContent style={{ height: '100%' }}>
-          <Box className='project-header'>
+          <Box className='project-card-content'>
             <Box className='project-image'>
               {imageUrl && (
                 <CardMedia
@@ -49,29 +67,27 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
               )}
             </Box>
             <Box className='project-overview'>
-              <Box
-                style={{
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  maxWidth: '100%',
-                }}
-              >
-                <Typography
-                  variant='h3'
-                  style={{
-                    paddingRight: '12px',
-                    fontSize: '1.5em',
-                    fontWeight: 'bolder',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    flex: '1 0',
+              <Box className='project-header'>
+                <Tooltip
+                  arrow
+                  title={name}
+                  placement='top'
+                  enterDelay={100}
+                  leaveDelay={100}
+                  disableHoverListener={!isTitleOverflowed}
+                  slotProps={{
+                    popper: {
+                      modifiers: [
+                        { name: 'offset', options: { offset: [0, -8] } },
+                      ],
+                    },
                   }}
                 >
-                  {name}
-                  {isOwner && ' (OWNED)'}
-                </Typography>
+                  <Typography ref={titleRef} variant='h3'>
+                    {name}
+                    {isOwner && ' (OWNED)'}
+                  </Typography>
+                </Tooltip>
                 <Box
                   className='tag'
                   style={{
@@ -81,43 +97,40 @@ export const RoleplayProject = (props: RoleplayProjectProps) => {
                   {status}
                 </Box>
               </Box>
-              <Typography
-                style={{
-                  fontStyle: 'italic',
-                  paddingTop: 0,
-                }}
-                color='textSecondary'
-                variant='body2'
-              >
-                {owners?.join(', ') || ''}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {tags?.map((t) => (
-                  <Box key={t} className='tag'>
-                    {t}
-                  </Box>
-                ))}
-              </Box>
-              <p>{description}</p>
-              <Box>
-                {runtime?.map((d) => (
-                  <p key={d.toISOString()}>
-                    {
-                      [
-                        'Sunday',
-                        'Monday',
-                        'Tuesday',
-                        'Wednesday',
-                        'Thursday',
-                        'Friday',
-                        'Saturday',
-                      ][d.getDay()]
-                    }
-                    s at {d.toLocaleTimeString()}
-                  </p>
-                ))}
-              </Box>
-              <a href={discordUrl}>Discord</a>
+
+              {owners && owners.length > 0 && (
+                <Typography
+                  style={{
+                    fontStyle: 'italic',
+                    paddingTop: 0,
+                  }}
+                  color='textSecondary'
+                  variant='body2'
+                >
+                  {owners.join(', ')}
+                </Typography>
+              )}
+
+              {tags && tags.length > 0 && (
+                <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {tags.map((t) => (
+                    <Box key={t} className='tag'>
+                      {t}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              {description && (
+                <Typography variant='body2' style={{ padding: 0 }}>
+                  {description}
+                </Typography>
+              )}
+
+              {/* TODO: make compact date time display */}
+
+              {/* TODO: redesign discord link */}
+              {discordUrl && <a href={discordUrl}>Discord</a>}
               {process.env.NODE_ENV === 'development' && (
                 <p>LAST UPDATED: {lastUpdated?.toISOString()}</p>
               )}
