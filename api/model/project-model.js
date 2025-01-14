@@ -39,10 +39,9 @@ export const getProjects = async (
 
       const queryString = `SELECT * FROM RoleplayProjects ${
         where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''
-      }ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'}, name ASC OFFSET $1 LIMIT $2`;
-      console.log(queryString);
-      console.log(sortBy);
-      console.log(addedQueryParams);
+      }ORDER BY ${sortBy} ${
+        asc ? 'ASC' : 'DESC'
+      }, name ASC OFFSET $1 LIMIT $2;`;
       pool.query(
         queryString,
         queryParams.concat(addedQueryParams), // using limit + 1 to see if there are any remaining
@@ -53,7 +52,9 @@ export const getProjects = async (
 
           if (results?.rows) {
             const { rows, rowCount } = results;
-            rows.pop();
+            if (rowCount > limit) {
+              rows.pop();
+            }
             resolve({
               hasNext: rowCount > limit,
               data: rows,
