@@ -18,7 +18,8 @@ export const getProjects = async (
   sortBy,
   name = '',
   tags = [],
-  asc = true
+  asc = true,
+  activeOnly = false
 ) => {
   try {
     // TODO: implement proper filters
@@ -35,6 +36,10 @@ export const getProjects = async (
       if (hasTags) {
         addedQueryParams.push(`{${tags.map((t) => `"${t}"`).join(',')}}`);
         where.push(`tags @> $${addedQueryParams.length + queryParams.length}`);
+      }
+
+      if (activeOnly) {
+        where.push(`status = 'Active'`);
       }
 
       const queryString = `SELECT * FROM RoleplayProjects ${

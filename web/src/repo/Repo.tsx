@@ -22,6 +22,7 @@ export const Repo = () => {
   const theme = useTheme();
   const [nameFilter, setNameFilter] = useState<string>('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [showActiveOnly, setShowActiveOnly] = useState(true);
   const {
     data: pageData,
     error,
@@ -30,18 +31,21 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['projects', nameFilter, tagFilters],
+    queryKey: ['projects', nameFilter, tagFilters, showActiveOnly],
     queryFn: async ({ pageParam }) => {
       const url = new URL('/projects', 'http://localhost:3001'); // TODO: set base url from env
       url.searchParams.append('start', `${pageParam}`);
       url.searchParams.append('limit', `${PAGE_SIZE}`);
       url.searchParams.append('sortBy', 'last_updated');
-      url.searchParams.append('asc', `false`);
+      url.searchParams.append('asc', 'false');
       if (nameFilter) {
         url.searchParams.append('name', nameFilter);
       }
       if (tagFilters && tagFilters.length > 0) {
         url.searchParams.append('tags', tagFilters.join('|'));
+      }
+      if (showActiveOnly) {
+        url.searchParams.append('active', 'true');
       }
       return fetch(url.toString(), {
         headers: {
@@ -88,7 +92,10 @@ export const Repo = () => {
         nameFilter={nameFilter}
         setNameFilter={setNameFilter}
         tagFilters={tagFilters}
+        addTagFilter={addTag}
         removeTagFilter={removeTag}
+        showActiveOnly={showActiveOnly}
+        setShowActiveOnly={setShowActiveOnly}
       />
       <InfiniteScroll
         className='repo-search-results'

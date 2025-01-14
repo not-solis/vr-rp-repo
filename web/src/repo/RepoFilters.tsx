@@ -1,8 +1,11 @@
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   FormGroup,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -12,18 +15,31 @@ import {
 import { useState } from 'react';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import { TextTag } from '../components/TextTag';
+import { CheckBox } from '@mui/icons-material';
 
 interface FilterProps {
   nameFilter: string;
   setNameFilter: (name: string) => void;
   tagFilters: string[];
+  addTagFilter: (tag: string) => void;
   removeTagFilter: (tag: string) => void;
+  showActiveOnly: boolean;
+  setShowActiveOnly: (showActiveOnly: boolean) => void;
 }
 
 export const RepoFilters = (props: FilterProps) => {
-  const { nameFilter, setNameFilter, tagFilters, removeTagFilter } = props;
+  const {
+    nameFilter,
+    setNameFilter,
+    tagFilters,
+    addTagFilter,
+    removeTagFilter,
+    showActiveOnly,
+    setShowActiveOnly,
+  } = props;
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
+  const [tempTag, setTempTag] = useState('');
   // const [status, setStatus] = useState(filters.status);
 
   const applyFilters = () => {
@@ -37,24 +53,86 @@ export const RepoFilters = (props: FilterProps) => {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: '12px',
+          gap: '16px',
         }}
       >
         <TextField
           label='Name'
           variant='outlined'
           onChange={(e) => setName(e.target.value)}
+          onBlur={() => {
+            if (name) {
+              setNameFilter(name);
+            }
+          }}
           value={name}
+          slotProps={{
+            input: {
+              style: {
+                height: 46,
+              },
+            },
+          }}
         />
-        {tagFilters && tagFilters.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: 6 }}>
-            {tagFilters.map((t) => (
-              <TextTag tag={t} interactive onClick={() => removeTagFilter(t)} />
-            ))}
-          </div>
-        )}
-        <FormControl style={{ minWidth: '80px' }}>
-          {/* <InputLabel id='status-label'>Status</InputLabel>
+        <TextField
+          label='Tags'
+          variant='outlined'
+          onChange={(e) => setTempTag(e.target.value)}
+          onBlur={() => {
+            if (tempTag) {
+              addTagFilter(tempTag.toLowerCase());
+              setTempTag('');
+            }
+          }}
+          value={tempTag}
+          style={{ minWidth: 500, textOverflow: 'inherit' }}
+          slotProps={{
+            input: {
+              style: {
+                height: 46,
+              },
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      gap: 6,
+                    }}
+                  >
+                    {tagFilters &&
+                      tagFilters.length > 0 &&
+                      tagFilters.map((t) => (
+                        <TextTag
+                          tag={t}
+                          interactive
+                          onClick={() => removeTagFilter(t)}
+                        />
+                      ))}
+                  </div>
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showActiveOnly}
+              onChange={(e) => setShowActiveOnly(e.target.checked)}
+            />
+          }
+          label='Show Active Only'
+          labelPlacement='start'
+          slotProps={{
+            typography: {
+              variant: 'body2',
+            },
+          }}
+        />
+
+        {/* <FormControl style={{ minWidth: '80px' }}>
+          <InputLabel id='status-label'>Status</InputLabel>
           <Select
             labelId='status-label'
             value={status ?? 0}
@@ -69,10 +147,11 @@ export const RepoFilters = (props: FilterProps) => {
             <MenuItem value={RoleplayStatus.Inactive}>Inactive</MenuItem>
             <MenuItem value={RoleplayStatus.Upcoming}>Upcoming</MenuItem>
             <MenuItem value={RoleplayStatus.Hiatus}>Hiatus</MenuItem>
-          </Select> */}
-        </FormControl>
+          </Select>
+        </FormControl> */}
 
-        <Button
+        {/* <Button
+          type='submit'
           style={{
             backgroundColor: 'blue',
             color: theme.palette.text.primary,
@@ -81,7 +160,7 @@ export const RepoFilters = (props: FilterProps) => {
           onClick={applyFilters}
         >
           Apply Filters
-        </Button>
+        </Button> */}
       </FormGroup>
     </Box>
   );

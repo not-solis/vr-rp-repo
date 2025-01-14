@@ -32,14 +32,15 @@ app.use(
 );
 
 app.get('/projects', (req, res) => {
-  const { start, limit, sortBy, name, tags, asc } = req.query;
+  const { start, limit, sortBy, name, tags, asc, active } = req.query;
   getProjects(
     parseInt(start),
     parseInt(limit),
     sortBy,
     name,
     tags ? tags.split('|') : [],
-    asc === 'true'
+    asc === 'true',
+    active === 'true'
   )
     .then((response) => {
       res.status(200).send(response);
