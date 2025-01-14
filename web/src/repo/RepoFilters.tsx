@@ -13,15 +13,21 @@ import { useState } from 'react';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 
 interface FilterProps {
-  filters: Partial<RoleplayProjectProps>;
-  applyFilters: (props: Partial<RoleplayProjectProps>) => void;
+  nameFilter: string;
+  setNameFilter: (name: string) => void;
+  tagFilters: string[];
+  setTagFilters: (tags: string[]) => void;
 }
 
 export const RepoFilters = (props: FilterProps) => {
-  const { filters, applyFilters } = props;
+  const { nameFilter, setNameFilter, tagFilters, setTagFilters } = props;
   const theme = useTheme();
-  const [nameFilter, setNameFilter] = useState(filters.name || '');
-  const [status, setStatus] = useState(filters.status);
+  const [name, setName] = useState(nameFilter || '');
+  // const [status, setStatus] = useState(filters.status);
+
+  const applyFilters = () => {
+    setNameFilter(name);
+  };
 
   return (
     <Box>
@@ -36,11 +42,18 @@ export const RepoFilters = (props: FilterProps) => {
         <TextField
           label='Name'
           variant='outlined'
-          onChange={(e) => setNameFilter(e.target.value)}
-          value={nameFilter}
+          onChange={(e) => setName(e.target.value)}
+          value={name}
         />
+        {tagFilters && tagFilters.length > 0 && (
+          <div>
+            {tagFilters.map((t) => (
+              <div>{t}</div>
+            ))}
+          </div>
+        )}
         <FormControl style={{ minWidth: '80px' }}>
-          <InputLabel id='status-label'>Status</InputLabel>
+          {/* <InputLabel id='status-label'>Status</InputLabel>
           <Select
             labelId='status-label'
             value={status ?? 0}
@@ -55,7 +68,7 @@ export const RepoFilters = (props: FilterProps) => {
             <MenuItem value={RoleplayStatus.Inactive}>Inactive</MenuItem>
             <MenuItem value={RoleplayStatus.Upcoming}>Upcoming</MenuItem>
             <MenuItem value={RoleplayStatus.Hiatus}>Hiatus</MenuItem>
-          </Select>
+          </Select> */}
         </FormControl>
 
         <Button
@@ -64,7 +77,7 @@ export const RepoFilters = (props: FilterProps) => {
             color: theme.palette.text.primary,
           }}
           variant='contained'
-          onClick={() => applyFilters({ name: nameFilter, status: status })}
+          onClick={applyFilters}
         >
           Apply Filters
         </Button>

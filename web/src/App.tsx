@@ -11,6 +11,7 @@ import './App.css';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { Navbar } from './components/Navbar';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
+import { transform } from 'typescript';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
@@ -66,6 +67,17 @@ export function App() {
           },
           body2: {
             fontSize: 18,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            transition: '0.2s',
+            '&:hover': {
+              transform: 'scale(0.996)',
+              borderColor: '#707176',
+            },
           },
         },
       },

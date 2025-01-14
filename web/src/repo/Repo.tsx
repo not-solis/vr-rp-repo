@@ -20,7 +20,8 @@ interface ProjectQueryResponse {
 
 export const Repo = () => {
   const theme = useTheme();
-  const [filters, setFilters] = useState<Partial<RoleplayProjectProps>>({});
+  const [nameFilter, setNameFilter] = useState<string>('');
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const {
     data: pageData,
     error,
@@ -29,26 +30,50 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['projects'],
-    queryFn: ({ pageParam }) =>
-      fetch(
-        `http://localhost:3001/projects?start=${pageParam}&limit=${PAGE_SIZE}&sortBy=last_updated&asc=false`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
+    queryKey: ['projects', nameFilter, tagFilters],
+    queryFn: async ({ pageParam }) => {
+      const url = new URL('/projects', 'http://localhost:3001'); // TODO: set base url from env
+      url.searchParams.append('start', `${pageParam}`);
+      url.searchParams.append('limit', `${PAGE_SIZE}`);
+      url.searchParams.append('sortBy', 'last_updated');
+      url.searchParams.append('asc', `false`);
+      console.log(nameFilter);
+      if (nameFilter) {
+        url.searchParams.append('name', nameFilter);
+      }
+      if (tagFilters && tagFilters.length > 0) {
+        url.searchParams.append('tags', tagFilters.join('|'));
+      }
+      return fetch(url.toString(), {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then((res) => res.json())
         .then((json) => {
           const data = [...json.data];
           json.data = data.map(remapRoleplayProject);
           return json;
-        }),
+        });
+    },
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
+
+  const addTag = (tag: string) => {
+    if (tagFilters.includes(tag)) {
+      return;
+    }
+    setTagFilters(tagFilters.concat([tag]));
+  };
+
+  const removeTag = (tag: string) => {
+    const index = tagFilters.indexOf(tag);
+    if (index !== -1) {
+      setTagFilters(tagFilters.filter((t) => t !== tag));
+    }
+  };
 
   const projects = pageData?.pages.map((p) => p.data).flat();
 
@@ -60,7 +85,12 @@ export const Repo = () => {
 
   return (
     <Box className='project-container'>
-      <RepoFilters filters={filters} applyFilters={setFilters} />
+      <RepoFilters
+        nameFilter={nameFilter}
+        setNameFilter={setNameFilter}
+        tagFilters={tagFilters}
+        setTagFilters={setTagFilters}
+      />
       <InfiniteScroll
         className='repo-search-results'
         dataLength={projects?.length ?? 0}
@@ -71,7 +101,7 @@ export const Repo = () => {
         } // TODO: use nicer loader
       >
         {projects?.map((p) => (
-          <RoleplayProject key={p.name} {...p} />
+          <RoleplayProject key={p.name} project={p} addTag={addTag} />
         ))}
       </InfiniteScroll>
     </Box>

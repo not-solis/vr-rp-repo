@@ -8,7 +8,12 @@
   min-width: var(--min-card-width);
   max-width: 1200px;
   flex: 1 0;
+  /* transition: 0.3s !important; */
 }
+
+/* .project-card:hover {
+  background-color: blue !important;
+} */
 
 .project-card a {
   color: var(--mui-palette-text-secondary);
@@ -16,12 +21,22 @@
   text-decoration-color: #5d5d5d;
   text-decoration-thickness: 1.2px;
   text-underline-offset: 2.4px;
-  transition: 0.2s;
+  transition: color 0.2s;
+}
+
+#card-link {
+  height: 100%;
+}
+
+#card-link,
+#card-link:visited,
+#card-link:hover,
+#card-link:active {
+  color: inherit;
 }
 
 .project-card .interactable {
   cursor: pointer;
-  z-index: 2;
   transition: 0.15s;
 }
 

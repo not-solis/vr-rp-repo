@@ -16,17 +16,36 @@ export const getProjects = async (
   start,
   limit,
   sortBy,
-  filters = [],
+  name = '',
+  tags = [],
   asc = true
 ) => {
   try {
     // TODO: implement proper filters
     return await new Promise((resolve, reject) => {
+      const queryParams = [start, limit + 1];
+      const addedQueryParams = [];
+      const where = [];
+      if (name) {
+        sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(name), 1, 20, 9, 50)`;
+        asc = true;
+      }
+
+      const hasTags = tags && tags.length > 0;
+      if (hasTags) {
+        addedQueryParams.push(`{${tags.map((t) => `"${t}"`).join(',')}}`);
+        where.push(`tags @> $${addedQueryParams.length + queryParams.length}`);
+      }
+
+      const queryString = `SELECT * FROM RoleplayProjects ${
+        where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''
+      }ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'}, name ASC OFFSET $1 LIMIT $2`;
+      console.log(queryString);
+      console.log(sortBy);
+      console.log(addedQueryParams);
       pool.query(
-        `SELECT * FROM RoleplayProjects ORDER BY $1 ${
-          asc ? 'ASC' : 'DESC'
-        }, name ASC OFFSET $2 LIMIT $3`,
-        [sortBy, start, limit + 1], // using limit + 1 to see if there are any remaining
+        queryString,
+        queryParams.concat(addedQueryParams), // using limit + 1 to see if there are any remaining
         (error, results) => {
           if (error) {
             reject(error);

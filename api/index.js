@@ -32,12 +32,13 @@ app.use(
 );
 
 app.get('/projects', (req, res) => {
-  const { start, limit, sortBy, filters, asc } = req.query;
+  const { start, limit, sortBy, name, tags, asc } = req.query;
   getProjects(
     parseInt(start),
     parseInt(limit),
     sortBy,
-    filters?.split('|'),
+    name,
+    tags ? tags.split('|') : [],
     asc === 'true'
   )
     .then((response) => {
