@@ -8,12 +8,7 @@
   min-width: var(--min-card-width);
   max-width: 1200px;
   flex: 1 0;
-  /* transition: 0.3s !important; */
 }
-
-/* .project-card:hover {
-  background-color: blue !important;
-} */
 
 .project-card a {
   color: var(--mui-palette-text-secondary);
@@ -33,11 +28,6 @@
 #card-link:hover,
 #card-link:active {
   color: inherit;
-}
-
-.project-card .interactable {
-  cursor: pointer;
-  transition: 0.15s;
 }
 
 .project-card-content {
@@ -97,24 +87,6 @@
   margin: 0;
   padding: 6px 0;
   min-width: 12em;
-}
-
-.tag {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 5px;
-  background-color: #50326c;
-}
-
-.tag.interactable:hover {
-  transform: scale(1.02);
-  filter: brightness(105%);
-}
-
-.project-card .interactable:active {
-  transform: scale(0.98);
-  filter: brightness(90%);
-  box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
 }
 
 @media (max-width: 720px) {

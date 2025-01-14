@@ -37,7 +37,6 @@ export const Repo = () => {
       url.searchParams.append('limit', `${PAGE_SIZE}`);
       url.searchParams.append('sortBy', 'last_updated');
       url.searchParams.append('asc', `false`);
-      console.log(nameFilter);
       if (nameFilter) {
         url.searchParams.append('name', nameFilter);
       }
@@ -89,7 +88,7 @@ export const Repo = () => {
         nameFilter={nameFilter}
         setNameFilter={setNameFilter}
         tagFilters={tagFilters}
-        setTagFilters={setTagFilters}
+        removeTagFilter={removeTag}
       />
       <InfiniteScroll
         className='repo-search-results'

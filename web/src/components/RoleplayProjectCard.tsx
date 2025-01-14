@@ -19,6 +19,7 @@ import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TextTag } from './TextTag';
 
 export const RoleplayProject = (props: {
   project: RoleplayProjectProps;
@@ -120,14 +121,12 @@ export const RoleplayProject = (props: {
                     {isOwner && ' (OWNED)'}
                   </Typography>
                 </Tooltip>
-                <Box
-                  className='tag disabled-text-interaction'
+                <TextTag
+                  tag={status}
                   style={{
                     backgroundColor: statusColors[status],
                   }}
-                >
-                  {status}
-                </Box>
+                />
               </Box>
 
               {owners && owners.length > 0 && (
@@ -145,17 +144,15 @@ export const RoleplayProject = (props: {
 
               {tags && tags.length > 0 && (
                 <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {tags.map((t) => (
-                    <Box
-                      key={t}
-                      onClick={(e) => {
+                  {tags.map((tag) => (
+                    <TextTag
+                      tag={tag}
+                      interactive
+                      onClick={(e: any) => {
                         e.preventDefault();
                         addTag(e.currentTarget.innerHTML);
                       }}
-                      className='tag disabled-text-interaction interactable'
-                    >
-                      {t}
-                    </Box>
+                    />
                   ))}
                 </Box>
               )}

@@ -11,16 +11,17 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
+import { TextTag } from '../components/TextTag';
 
 interface FilterProps {
   nameFilter: string;
   setNameFilter: (name: string) => void;
   tagFilters: string[];
-  setTagFilters: (tags: string[]) => void;
+  removeTagFilter: (tag: string) => void;
 }
 
 export const RepoFilters = (props: FilterProps) => {
-  const { nameFilter, setNameFilter, tagFilters, setTagFilters } = props;
+  const { nameFilter, setNameFilter, tagFilters, removeTagFilter } = props;
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
   // const [status, setStatus] = useState(filters.status);
@@ -46,9 +47,9 @@ export const RepoFilters = (props: FilterProps) => {
           value={name}
         />
         {tagFilters && tagFilters.length > 0 && (
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: 6 }}>
             {tagFilters.map((t) => (
-              <div>{t}</div>
+              <TextTag tag={t} interactive onClick={() => removeTagFilter(t)} />
             ))}
           </div>
         )}

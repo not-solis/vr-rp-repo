@@ -10,6 +10,11 @@
   width: 100%;
 }
 
+.interactable {
+  cursor: pointer;
+  transition: 0.15s;
+}
+
 @media (max-width: 720px) {
   .project-container {
     margin-left: 0;
