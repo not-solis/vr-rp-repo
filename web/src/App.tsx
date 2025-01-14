@@ -14,6 +14,7 @@ import {
   faDoorOpen,
   faEarthAmericas,
   faGlobe,
+  faHandshake,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { faClipboard } from '@fortawesome/free-regular-svg-icons';
@@ -28,6 +29,7 @@ library.add(faClipboard);
 library.add(faGlobe);
 library.add(faUser);
 library.add(faMeta);
+library.add(faHandshake);
 
 declare module '@mui/material/styles' {
   interface Theme {

@@ -168,6 +168,9 @@ export const RoleplayProjectPage = () => {
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {owners &&
+              owners.length > 0 &&
+              sidebarInfoElement('Owners', owners.join(', '), 'user')}
             {sidebarInfoElement('Setting', setting, 'earth-americas')}
             {sidebarInfoElement(
               'Metaverse',
@@ -186,7 +189,7 @@ export const RoleplayProjectPage = () => {
               `Support cast positions ${
                 hasSupportingCast ? '' : 'un'
               }available`,
-              'user'
+              'handshake'
             )}
             {sidebarInfoElement(
               'Quest Compatibility',
