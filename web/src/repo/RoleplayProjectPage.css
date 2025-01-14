@@ -40,6 +40,13 @@
   border: 2px solid var(--mui-palette-divider);
 }
 
+#project-sidebar-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .project-sidebar.closed {
   right: calc(-2px - var(--project-sidebar-width));
 }

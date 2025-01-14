@@ -6,18 +6,18 @@ export enum RoleplayStatus {
 }
 
 export enum RoleplayEntryProcess {
-  Open,
-  Vouch,
-  Vetting,
-  InviteOnly,
-  Application,
+  Open = 'Open',
+  Vouch = 'Vouch',
+  Vetting = 'Vetting',
+  InviteOnly = 'Invite Only',
+  Application = 'Application',
 }
 
 export enum RoleplayApplicationProcess {
-  NoApplication,
-  PlayerApplication,
-  CharacterSheet,
-  EventSignup,
+  NoApplication = 'None',
+  PlayerApplication = 'Player App',
+  CharacterSheet = 'Character Sheet',
+  EventSignup = 'Event Sign-up',
 }
 
 export interface RoleplayProjectProps {

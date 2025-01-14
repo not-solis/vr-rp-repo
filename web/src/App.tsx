@@ -3,20 +3,31 @@ import { Repo } from './repo/Repo';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { CookiesProvider } from 'react-cookie';
 import { AuthContext, UserData } from './context/AuthProvider';
-import { LoginComponent } from './components/LoginComponent';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faDiscord } from '@fortawesome/free-brands-svg-icons';
+import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
 import './App.css';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { Navbar } from './components/Navbar';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
-import { transform } from 'typescript';
+import {
+  faDoorOpen,
+  faEarthAmericas,
+  faGlobe,
+  faUser,
+} from '@fortawesome/free-solid-svg-icons';
+import { faClipboard } from '@fortawesome/free-regular-svg-icons';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
 
 library.add(faDiscord);
+library.add(faEarthAmericas);
+library.add(faDoorOpen);
+library.add(faClipboard);
+library.add(faGlobe);
+library.add(faUser);
+library.add(faMeta);
 
 declare module '@mui/material/styles' {
   interface Theme {
