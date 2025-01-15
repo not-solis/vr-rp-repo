@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
-import { useAuth, UserData } from '../context/AuthProvider';
-import { useCookies } from 'react-cookie';
-import { USER_DATA_COOKIE } from '../App';
-import OAuth2Login from 'react-simple-oauth2-login';
-import { Box, Button, useTheme } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Box, Button, useTheme } from '@mui/material';
+import { useEffect } from 'react';
+import { useCookies } from 'react-cookie';
+import OAuth2Login from 'react-simple-oauth2-login';
+
+import { USER_DATA_COOKIE } from '../App';
+import { useAuth, UserData } from '../context/AuthProvider';
 
 export const LoginComponent = () => {
   const { userData, setUserData } = useAuth();
@@ -39,7 +40,7 @@ export const LoginComponent = () => {
           globalName: global_name,
           avatar,
         });
-      })
+      }),
     );
   };
 

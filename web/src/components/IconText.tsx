@@ -46,7 +46,7 @@ export const IconText = (props: IconTextProps) => {
       )}
       <Typography
         variant='body1'
-        style={{ paddingLeft: icon ? iconPadding ?? 12 : 0 }}
+        style={{ paddingLeft: icon ? (iconPadding ?? 12) : 0 }}
       >
         {text}
       </Typography>

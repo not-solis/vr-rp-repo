@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
 import { Box, Link, useTheme } from '@mui/material';
-import { LoginComponent } from './LoginComponent';
+import { useEffect, useState } from 'react';
 
+import { LoginComponent } from './LoginComponent';
 import './Navbar.css';
 
 export const Navbar = () => {

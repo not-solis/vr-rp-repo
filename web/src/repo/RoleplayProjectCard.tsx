@@ -8,12 +8,13 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+
+import { IconText } from '../components/IconText';
+import { TextTag } from '../components/TextTag';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProject, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
-import { useEffect, useRef, useState } from 'react';
-import { TextTag } from '../components/TextTag';
-import { IconText } from '../components/IconText';
 
 export const RoleplayProjectCard = (props: {
   project: RoleplayProject;
@@ -45,7 +46,7 @@ export const RoleplayProjectCard = (props: {
       return;
     }
     setTitleOverflowed(
-      titleRef.current.scrollWidth > titleRef.current.clientWidth
+      titleRef.current.scrollWidth > titleRef.current.clientWidth,
     );
     setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);

@@ -1,15 +1,6 @@
-import { useState } from 'react';
-import { Repo } from './repo/Repo';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { CookiesProvider } from 'react-cookie';
-import { AuthContext, UserData } from './context/AuthProvider';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
-import './App.css';
-import { Box, createTheme, ThemeProvider } from '@mui/material';
-import { Navbar } from './components/Navbar';
-import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
+import { faClipboard } from '@fortawesome/free-regular-svg-icons';
 import {
   faDoorOpen,
   faEarthAmericas,
@@ -18,7 +9,17 @@ import {
   faLink,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
-import { faClipboard } from '@fortawesome/free-regular-svg-icons';
+import { Box, createTheme, ThemeProvider } from '@mui/material';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { CookiesProvider } from 'react-cookie';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+
+import { Navbar } from './components/Navbar';
+import { AuthContext, UserData } from './context/AuthProvider';
+import { Repo } from './repo/Repo';
+import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
+import './App.css';
 
 export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();

@@ -1,15 +1,16 @@
 import { CardMedia, Typography, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+
+import { IconText } from '../components/IconText';
+import { TextTag } from '../components/TextTag';
+import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
 import './RoleplayProjectPage.css';
-import { useState } from 'react';
-import { TextTag } from '../components/TextTag';
-import { ThemedMarkdown } from '../components/ThemedMarkdown';
-import { IconText } from '../components/IconText';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);

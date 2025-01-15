@@ -1,14 +1,15 @@
 import './Repo.css';
-import { RoleplayProjectCard } from './RoleplayProjectCard';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { Box, useTheme } from '@mui/material';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+
+import { RepoFilters } from './RepoFilters';
+import { RoleplayProjectCard } from './RoleplayProjectCard';
 import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
-import { RepoFilters } from './RepoFilters';
 
 const PAGE_SIZE = 50;
 
