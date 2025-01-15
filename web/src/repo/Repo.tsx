@@ -2,6 +2,7 @@ import './Repo.css';
 import { Box, useTheme } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Helmet } from 'react-helmet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { RepoFilters } from './RepoFilters';
@@ -18,6 +19,8 @@ interface ProjectQueryResponse {
   data: RoleplayProject[];
   nextCursor: number;
 }
+
+const TITLE = 'The VR Roleplay Repo';
 
 export const Repo = () => {
   const theme = useTheme();
@@ -89,6 +92,15 @@ export const Repo = () => {
 
   return (
     <Box className='project-container'>
+      <Helmet>
+        <title>{TITLE}</title>
+        <meta title={TITLE} />
+        <meta property='og:title' content={TITLE} />
+        <meta
+          property='og:description'
+          content='The collection of all roleplays run in VR.'
+        />
+      </Helmet>
       <RepoFilters
         nameFilter={nameFilter}
         setNameFilter={setNameFilter}

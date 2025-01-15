@@ -90,12 +90,6 @@
   margin: auto;
 }
 
-.project-overview p {
-  margin: 0;
-  padding: 6px 0;
-  min-width: 12em;
-}
-
 @media (max-width: 720px) {
   .project-card {
     border-radius: 0 !important;

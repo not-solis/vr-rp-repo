@@ -13,6 +13,7 @@ import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CookiesProvider } from 'react-cookie';
+import { Helmet } from 'react-helmet';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
@@ -165,6 +166,9 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider value={{ userData, setUserData }}>
           <CookiesProvider>
+            <Helmet>
+              <meta property='og:url' content={window.location.href} />
+            </Helmet>
             <Box
               style={{
                 color: theme.palette.text.primary,

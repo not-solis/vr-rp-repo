@@ -1,6 +1,7 @@
 import { CardMedia, Typography, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
 import { IconText } from '../components/IconText';
@@ -149,6 +150,14 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
 
   return (
     <div className='project-page'>
+      <Helmet>
+        <title>{name}</title>
+        <meta title={name} />
+        <meta property='og:title' content={name} />
+        <meta property='og:image' content={imageUrl} />
+        <meta property='og:image:alt' content={`${name} icon`} />
+        <meta property='og:description' content={shortDescription} />
+      </Helmet>
       <div className={`project-info${isSidebarExpanded ? '' : ' closed'}`}>
         <Typography variant='title'>{project.name}</Typography>
         {descriptionElement}

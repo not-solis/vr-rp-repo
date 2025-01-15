@@ -139,9 +139,7 @@ export const RoleplayProjectCard = (props: {
               )}
 
               {shortDescription && (
-                <Typography variant='body1' style={{ padding: 0 }}>
-                  {shortDescription}
-                </Typography>
+                <Typography variant='body1'>{shortDescription}</Typography>
               )}
 
               {/* TODO: make compact date time display */}
