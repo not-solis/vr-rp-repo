@@ -62,7 +62,7 @@ export const IconText = (props: IconTextProps) => {
       <Tooltip
         title={tooltip}
         placement={tooltipPlacement ?? 'top'}
-        enterDelay={50}
+        enterDelay={150}
         leaveDelay={100}
         slotProps={{
           popper: {

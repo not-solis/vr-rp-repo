@@ -67,7 +67,7 @@ Inbutum faciente, Clytii tu infelix ordine et positus fertur conpositas dedit
 palmas numina! Dicta verba, pecudesque *nunc*: poenam patriaque notam, frater
 gaudet, ira cum redeamus? Si dicta materiam iungit; nondum non ne domosque
 fessos cum rudente poteram, morte. Sua matrem recusat numina precari
-[ululatibus](http://dabaturmoly.com/pertimui.aspx) recumbis.
+[ululatibus](http://dabaturmoly.com/pertimui.aspx) recumbis
 
 ### Gloria subit neque
 
