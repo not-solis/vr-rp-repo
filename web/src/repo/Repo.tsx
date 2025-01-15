@@ -1,20 +1,20 @@
 import './Repo.css';
-import { RoleplayProject } from '../components/RoleplayProjectCard';
+import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Box, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import {
   remapRoleplayProject,
-  RoleplayProjectProps,
+  RoleplayProject,
 } from '../model/RoleplayProject';
 import { RepoFilters } from './RepoFilters';
 
 const PAGE_SIZE = 50;
 
 interface ProjectQueryResponse {
-  hasNextPage: boolean;
-  data: RoleplayProjectProps[];
+  hasNext: boolean;
+  data: RoleplayProject[];
   nextCursor: number;
 }
 
@@ -53,7 +53,7 @@ export const Repo = () => {
         },
       })
         .then((res) => res.json())
-        .then((json) => {
+        .then<ProjectQueryResponse>((json) => {
           const data = [...json.data];
           json.data = data.map(remapRoleplayProject);
           return json;
@@ -107,7 +107,7 @@ export const Repo = () => {
         } // TODO: use nicer loader
       >
         {projects?.map((p) => (
-          <RoleplayProject key={p.name} project={p} addTag={addTag} />
+          <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
         ))}
       </InfiniteScroll>
     </Box>

@@ -1,23 +1,13 @@
-import {
-  CardMedia,
-  Drawer,
-  Link,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { CardMedia, Typography, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import {
   remapRoleplayProject,
-  RoleplayProjectProps,
+  RoleplayProject,
 } from '../model/RoleplayProject';
 import './RoleplayProjectPage.css';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { TextTag } from '../components/TextTag';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
-import Markdown from 'react-markdown';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { IconText } from '../components/IconText';
 
@@ -40,7 +30,7 @@ export const RoleplayProjectPage = () => {
         .then((res) => res.json())
         .then((json) => {
           const project = json.data;
-          return remapRoleplayProject(project) as RoleplayProjectProps;
+          return remapRoleplayProject(project) as RoleplayProject;
         }),
   });
 
@@ -155,20 +145,6 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
   }
 
   const toggleSidebar = () => setSidebarExpanded(!isSidebarExpanded);
-
-  const sidebarLinkElement = (
-    urlName: string,
-    url: string,
-    icon: IconName,
-    iconPrefix: IconPrefix = 'fas'
-  ) => (
-    <Link href={url} style={{ display: 'flex', alignItems: 'center' }}>
-      <FontAwesomeIcon width={20} icon={[iconPrefix, icon]} />
-      <Typography variant='body1' style={{ paddingLeft: 6 }}>
-        {urlName}
-      </Typography>
-    </Link>
-  );
 
   return (
     <div className='project-page'>

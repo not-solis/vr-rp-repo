@@ -1,21 +1,14 @@
 import {
   Box,
-  Button,
   Checkbox,
-  FormControl,
   FormControlLabel,
   FormGroup,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
   useTheme,
 } from '@mui/material';
 import { useState } from 'react';
-import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
 import { TextTag } from '../components/TextTag';
-import { CheckBox } from '@mui/icons-material';
 
 interface FilterProps {
   nameFilter: string;

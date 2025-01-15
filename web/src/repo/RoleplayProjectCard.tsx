@@ -1,30 +1,22 @@
 import {
   Box,
   Card,
-  CardActionArea,
   CardContent,
   CardMedia,
   Link,
-  makeStyles,
-  styled,
-  Theme,
   Tooltip,
-  tooltipClasses,
-  TooltipProps,
   Typography,
   useTheme,
 } from '@mui/material';
 import { useAuth } from '../context/AuthProvider';
-import { RoleplayProjectProps, RoleplayStatus } from '../model/RoleplayProject';
+import { RoleplayProject, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
-import { MouseEventHandler, useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TextTag } from './TextTag';
-import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
-import { IconText } from './IconText';
+import { useEffect, useRef, useState } from 'react';
+import { TextTag } from '../components/TextTag';
+import { IconText } from '../components/IconText';
 
-export const RoleplayProject = (props: {
-  project: RoleplayProjectProps;
+export const RoleplayProjectCard = (props: {
+  project: RoleplayProject;
   addTag: (tag: string) => void;
 }) => {
   const [isTitleOverflowed, setTitleOverflowed] = useState(false);

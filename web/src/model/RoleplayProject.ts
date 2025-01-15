@@ -20,7 +20,7 @@ export enum RoleplayApplicationProcess {
   EventSignup = 'Event Sign-up',
 }
 
-export interface RoleplayProjectProps {
+export interface RoleplayProject {
   id: string;
   name: string;
   owners: string[];
