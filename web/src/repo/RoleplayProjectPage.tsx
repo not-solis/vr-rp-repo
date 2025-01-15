@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import { IconText } from '../components/IconText';
 import { TextTag } from '../components/TextTag';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
+import { useAuth } from '../context/AuthProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -15,7 +16,7 @@ import './RoleplayProjectPage.css';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
-  const theme = useTheme();
+  const auth = useAuth();
   const { id } = useParams();
   const {
     data: project,
@@ -265,6 +266,12 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
                 url={url}
               />
             ))}
+
+          {/* TODO: Add authenticated edit button */}
+          {auth.userData &&
+            auth.userData.username &&
+            owners &&
+            owners.includes(auth.userData.username) && <button>HIT ME</button>}
 
           <div
             id='sidebar-toggle'
