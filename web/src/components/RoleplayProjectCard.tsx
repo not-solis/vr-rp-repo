@@ -130,16 +130,7 @@ export const RoleplayProject = (props: {
               </Box>
 
               {owners && owners.length > 0 && (
-                <Typography
-                  style={{
-                    fontStyle: 'italic',
-                    paddingTop: 0,
-                  }}
-                  color='textSecondary'
-                  variant='body2'
-                >
-                  {owners.join(', ')}
-                </Typography>
+                <Typography variant='subtitle1'>{owners.join(', ')}</Typography>
               )}
 
               {tags && tags.length > 0 && (
@@ -150,7 +141,7 @@ export const RoleplayProject = (props: {
                       interactive
                       onClick={(e: any) => {
                         e.preventDefault();
-                        addTag(e.currentTarget.innerHTML);
+                        addTag(tag);
                       }}
                     />
                   ))}
@@ -158,7 +149,7 @@ export const RoleplayProject = (props: {
               )}
 
               {shortDescription && (
-                <Typography variant='body2' style={{ padding: 0 }}>
+                <Typography variant='body1' style={{ padding: 0 }}>
                   {shortDescription}
                 </Typography>
               )}

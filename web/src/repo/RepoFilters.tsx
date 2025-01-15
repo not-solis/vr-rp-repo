@@ -61,18 +61,10 @@ export const RepoFilters = (props: FilterProps) => {
           variant='outlined'
           onChange={(e) => setName(e.target.value)}
           onBlur={() => {
-            if (name) {
-              setNameFilter(name);
-            }
+            setNameFilter(name);
           }}
           value={name}
-          slotProps={{
-            input: {
-              style: {
-                height: 46,
-              },
-            },
-          }}
+          size='small'
         />
         <TextField
           label='Tags'
@@ -86,11 +78,9 @@ export const RepoFilters = (props: FilterProps) => {
           }}
           value={tempTag}
           style={{ minWidth: 500, textOverflow: 'inherit' }}
+          size='small'
           slotProps={{
             input: {
-              style: {
-                height: 46,
-              },
               startAdornment: (
                 <InputAdornment position='start'>
                   <div
@@ -105,8 +95,10 @@ export const RepoFilters = (props: FilterProps) => {
                       tagFilters.map((t) => (
                         <TextTag
                           tag={t}
+                          variant='body1'
                           interactive
                           onClick={() => removeTagFilter(t)}
+                          style={{ paddingTop: 0, paddingBottom: 0 }}
                         />
                       ))}
                   </div>
@@ -126,7 +118,7 @@ export const RepoFilters = (props: FilterProps) => {
           labelPlacement='start'
           slotProps={{
             typography: {
-              variant: 'body2',
+              variant: 'body1',
             },
           }}
         />

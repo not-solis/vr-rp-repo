@@ -49,40 +49,41 @@ declare module '@mui/material/styles' {
       inactive?: string;
     };
   }
+
+  interface TypographyVariants {
+    title: React.CSSProperties;
+  }
+
+  // allow configuration using `createTheme`
+  interface TypographyVariantsOptions {
+    title?: React.CSSProperties;
+  }
+}
+
+// Update the Typography's variant prop options
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    title: true;
+  }
 }
 
 export function App() {
   const [userData, setUserData] = useState<UserData>({});
-  const borderColor = '#44454a';
-  const primaryBackgroundColor = '#1f2023';
   const theme = createTheme({
     cssVariables: true,
     palette: {
       mode: 'dark',
       background: {
-        default: primaryBackgroundColor,
+        default: '#1f2023',
         paper: '#2e3034',
       },
       text: {
         primary: '#efefef',
         secondary: '#adadad',
       },
-      divider: borderColor,
+      divider: '#44454a',
     },
     components: {
-      MuiTypography: {
-        styleOverrides: {
-          h1: {
-            fontSize: 72,
-          },
-          body1: {
-            fontSize: 22,
-          },
-          body2: {
-            fontSize: 18,
-          },
-        },
-      },
       MuiCard: {
         styleOverrides: {
           root: {
@@ -97,15 +98,40 @@ export function App() {
       MuiTooltip: {
         styleOverrides: {
           tooltip: {
-            backgroundColor: primaryBackgroundColor,
-            border: `1.4px solid ${borderColor}`,
+            backgroundColor: 'var(--mui-palette-background-default)',
+            border: `1.4px solid var(--mui-palette-divider)`,
             fontSize: '1em',
           },
           arrow: {
-            color: primaryBackgroundColor,
+            color: 'var(--mui-palette-background-default)',
             borderTop: 'none',
           },
         },
+      },
+    },
+    typography: {
+      title: {
+        fontSize: 72,
+        fontWeight: 'bold',
+      },
+      subtitle1: {
+        fontSize: '1rem',
+        fontStyle: 'italic',
+        color: 'var(--mui-palette-text-secondary)',
+      },
+      h1: {
+        fontSize: 56,
+        fontWeight: 'bold',
+      },
+      h2: {
+        fontSize: 42,
+        fontWeight: 'bold',
+      },
+      body1: {
+        fontSize: '1.1rem',
+      },
+      body2: {
+        fontSize: '0.9rem',
       },
     },
     roleplayStatus: {

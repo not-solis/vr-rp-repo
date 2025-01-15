@@ -17,6 +17,8 @@ import { useEffect, useRef, useState } from 'react';
 import { TextTag } from '../components/TextTag';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
+import Markdown from 'react-markdown';
+import { ThemedMarkdown } from '../components/ThemedMarkdown';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
@@ -55,7 +57,61 @@ export const RoleplayProjectPage = () => {
     return null;
   }
 
-  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif'; // DELETE
+  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif'; // TODO: DELETE
+  project.description = `
+  # Vertit auras ille
+
+## Vana nitidissima fugit portat
+
+Lorem markdownum mihi. Post nunc pater, puerum Cnosia iamque, dei suus ritu,
+mixtaeque aries. *Elin est*, et abesse e auctor sanguine fossas. Una virtus
+vires; cum discedit defectos, [tueri](http://www.quasfuerat.net/ferrum.php) dum!
+Infitianda honoratos longe: **iura**: posse fuit ab siquid est, lateri sequitur
+et nisi.
+
+Inbutum faciente, Clytii tu infelix ordine et positus fertur conpositas dedit
+palmas numina! Dicta verba, pecudesque *nunc*: poenam patriaque notam, frater
+gaudet, ira cum redeamus? Si dicta materiam iungit; nondum non ne domosque
+fessos cum rudente poteram, morte. Sua matrem recusat numina precari
+[ululatibus](http://dabaturmoly.com/pertimui.aspx) recumbis.
+
+## Gloria subit neque
+
+Catenis meritis aliisque natantia dubitet certamine terribili in muros sine.
+Fugit finierat mea cetera reddit crescere **Pario** sub velant quorum, illo.
+
+> Nunc tellus, sub nostros inplicuit cineres Talia contenta et altis: et. Dantur
+dabat gradu sibi promptu Nise, nec, *a supplex sine*, satis facti.
+
+- Abdita nec nec conpescuit lintea utque
+- Adoratis ornabant simul
+- In primi fastigia nitidum currum iusto capiunt
+- Vestes quidve
+
+## Moveant inpatiens natus
+
+Dabat Oechalia congerie volucres dant caede repellite et certe, proles neque
+Bacchus coniunx citus num lecto illo mille. Torvis umeros. Mora alvum erat piae
+petit: urbem, opus ille oblivia corpora *Propoetides* aura edidicisse iam nec;
+**ubi**.
+
+- Quibus Pyramus fatigat vultu silentia Caenis incinxit
+- Macareus ubi eventu stimulis inpune auxiliaris cetera
+- Partim volucres
+- Saturnia turba
+- Flammaeque satis
+- Non at victima visa mille nostri coepit
+
+## Redditur vincendo
+
+Vestis qua videant parva si tale ut Asopidos numina: dixit deos impetus in quae.
+Prosunt pependit an vulnera nervis.
+
+Tendunt suos parari poscor hominis meorum traherent erat des multiplicique
+petebar teneros. Genus profana spolieris, ille coepit solverat et duxit stupuit!
+Sortem distinctas *sic* mox molles luridus scitis *aras Iuppiter* manum nunc
+cadit cervus vulnera adhuc virentem est dixit iaculo.
+  `;
 
   const {
     name,
@@ -75,18 +131,15 @@ export const RoleplayProjectPage = () => {
 
   let descriptionElement;
   if (description) {
-    descriptionElement = <Typography variant='h5'>{description}</Typography>;
+    descriptionElement = (
+      <Typography variant='h5'>
+        <ThemedMarkdown>{description}</ThemedMarkdown>
+      </Typography>
+    );
   } else if (shortDescription) {
     descriptionElement = (
       <>
-        <Typography
-          style={{
-            fontStyle: 'italic',
-            paddingTop: 0,
-          }}
-          color='textSecondary'
-          variant='body2'
-        >
+        <Typography variant='subtitle1'>
           (no description provided, using short description)
         </Typography>
         <Typography variant='body1'>{shortDescription}</Typography>
@@ -94,16 +147,7 @@ export const RoleplayProjectPage = () => {
     );
   } else {
     descriptionElement = (
-      <Typography
-        style={{
-          fontStyle: 'italic',
-          paddingTop: 0,
-        }}
-        color='textSecondary'
-        variant='body2'
-      >
-        (no description provided)
-      </Typography>
+      <Typography variant='subtitle1'>(no description provided)</Typography>
     );
   }
 
@@ -131,7 +175,7 @@ export const RoleplayProjectPage = () => {
           icon={[iconPrefix, icon]}
           style={{ paddingTop: 4 }}
         />
-        <Typography variant='body2' style={{ paddingTop: 0, paddingLeft: 12 }}>
+        <Typography variant='body1' style={{ paddingTop: 0, paddingLeft: 12 }}>
           {value}
         </Typography>
       </div>
@@ -141,9 +185,7 @@ export const RoleplayProjectPage = () => {
   return (
     <div className='project-page'>
       <div className={`project-info${isSidebarExpanded ? '' : ' closed'}`}>
-        <Typography variant='h1' fontWeight='bold'>
-          {project.name}
-        </Typography>
+        <Typography variant='title'>{project.name}</Typography>
         {descriptionElement}
       </div>
       <div className={`project-sidebar${isSidebarExpanded ? '' : ' closed'}`}>

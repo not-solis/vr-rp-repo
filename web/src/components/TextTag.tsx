@@ -1,17 +1,17 @@
-import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import './TextTag.css';
 
 export const TextTag = (props: any) => {
-  const { tag, interactive, ...restProps } = props;
+  const { tag, interactive, variant, ...restProps } = props;
   return (
-    <Box
+    <div
       key={tag}
       className={`tag disabled-text-interaction${
         interactive ? ' interactable' : ''
       }`}
       {...restProps}
     >
-      {tag}
-    </Box>
+      <Typography variant={variant ?? 'body2'}>{tag}</Typography>
+    </div>
   );
 };

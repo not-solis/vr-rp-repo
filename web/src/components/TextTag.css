@@ -5,6 +5,11 @@
   background-color: #50326c;
 }
 
+.tag p {
+  min-width: 0;
+  padding: 0;
+}
+
 .tag.interactable:hover {
   transform: scale(1.02);
   filter: brightness(105%);
