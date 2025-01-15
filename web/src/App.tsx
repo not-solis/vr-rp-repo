@@ -15,6 +15,7 @@ import {
   faEarthAmericas,
   faGlobe,
   faHandshake,
+  faLink,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { faClipboard } from '@fortawesome/free-regular-svg-icons';
@@ -30,6 +31,7 @@ library.add(faGlobe);
 library.add(faUser);
 library.add(faMeta);
 library.add(faHandshake);
+library.add(faLink);
 
 declare module '@mui/material/styles' {
   interface Theme {
@@ -131,7 +133,7 @@ export function App() {
         fontWeight: 'bold',
       },
       h3: {
-        fontSize: '2.1rem',
+        fontSize: '2.2rem',
       },
       h4: {
         fontSize: '1.8rem',

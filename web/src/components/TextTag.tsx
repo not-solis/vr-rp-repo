@@ -5,7 +5,6 @@ export const TextTag = (props: any) => {
   const { tag, interactive, variant, ...restProps } = props;
   return (
     <div
-      key={tag}
       className={`tag disabled-text-interaction${
         interactive ? ' interactable' : ''
       }`}

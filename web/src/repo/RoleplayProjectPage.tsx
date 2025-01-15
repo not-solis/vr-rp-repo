@@ -19,6 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import Markdown from 'react-markdown';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
+import { IconText } from '../components/IconText';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
@@ -128,6 +129,7 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
     hasSupportingCast,
     isQuestCompatible,
     discordUrl,
+    otherLinks,
   } = project;
 
   let descriptionElement;
@@ -153,34 +155,19 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
   }
 
   const toggleSidebar = () => setSidebarExpanded(!isSidebarExpanded);
-  const sidebarInfoElement = (
-    label: string,
-    value: string | undefined,
+
+  const sidebarLinkElement = (
+    urlName: string,
+    url: string,
     icon: IconName,
     iconPrefix: IconPrefix = 'fas'
   ) => (
-    <Tooltip
-      title={label}
-      placement='left'
-      enterDelay={50}
-      leaveDelay={100}
-      slotProps={{
-        popper: {
-          modifiers: [{ name: 'offset', options: { offset: [0, -6] } }],
-        },
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-        <FontAwesomeIcon
-          width={20}
-          icon={[iconPrefix, icon]}
-          style={{ paddingTop: 4 }}
-        />
-        <Typography variant='body1' style={{ paddingTop: 0, paddingLeft: 12 }}>
-          {value}
-        </Typography>
-      </div>
-    </Tooltip>
+    <Link href={url} style={{ display: 'flex', alignItems: 'center' }}>
+      <FontAwesomeIcon width={20} icon={[iconPrefix, icon]} />
+      <Typography variant='body1' style={{ paddingLeft: 6 }}>
+        {urlName}
+      </Typography>
+    </Link>
   );
 
   return (
@@ -205,54 +192,93 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
               }}
             >
               {tags.map((t) => (
-                <TextTag tag={t} />
+                <TextTag key={t} tag={t} />
               ))}
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {owners &&
-              owners.length > 0 &&
-              sidebarInfoElement('Owners', owners.join(', '), 'user')}
-            {sidebarInfoElement('Setting', setting, 'earth-americas')}
-            {sidebarInfoElement(
-              'Metaverse',
-              `${isMetaverse ? 'In' : 'Not in'} the Metaverse`,
-              'globe'
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 4,
+            }}
+          >
+            {owners && owners.length > 0 && (
+              <IconText
+                tooltip={'Owners'}
+                tooltipPlacement='left'
+                text={owners.join(', ')}
+                icon={'user'}
+              />
             )}
-            {sidebarInfoElement('Entry Process', entryProcess, 'door-open')}
-            {sidebarInfoElement(
-              'Application Process',
-              applicationProcess,
-              'clipboard',
-              'far'
+            {setting && (
+              <IconText
+                tooltip={'Setting'}
+                tooltipPlacement='left'
+                text={setting}
+                icon={'earth-americas'}
+              />
             )}
-            {sidebarInfoElement(
-              'Supporting Cast',
-              `Support cast positions ${
+            <IconText
+              tooltip={'Metaverse'}
+              tooltipPlacement='left'
+              text={`${isMetaverse ? 'In' : 'Not in'} the Metaverse`}
+              icon={'globe'}
+            />
+            <IconText
+              tooltip={'Entry Process'}
+              tooltipPlacement='left'
+              text={entryProcess}
+              icon={'door-open'}
+            />
+            <IconText
+              tooltip={'Application Process'}
+              tooltipPlacement='left'
+              text={applicationProcess}
+              icon={'clipboard'}
+              iconPrefix='far'
+            />
+            <IconText
+              tooltip={'Supporting Cast'}
+              tooltipPlacement='left'
+              text={`Support cast positions ${
                 hasSupportingCast ? '' : 'un'
-              }available`,
-              'handshake'
-            )}
-            {sidebarInfoElement(
-              'Quest Compatibility',
-              `${isQuestCompatible ? '' : 'Not '}Quest compatible`,
-              'meta',
-              'fab'
-            )}
+              }available`}
+              icon={'handshake'}
+            />
+            <IconText
+              tooltip={'Quest Compatibility'}
+              tooltipPlacement='left'
+              text={`${isQuestCompatible ? '' : 'Not '}Quest compatible`}
+              icon={'meta'}
+              iconPrefix='fab'
+            />
           </div>
 
           {discordUrl && (
-            <Link
-              href={discordUrl}
-              style={{ display: 'flex', alignItems: 'center' }}
-            >
-              <FontAwesomeIcon width={20} icon={['fab', 'discord']} />
-              <Typography variant='body1' style={{ paddingLeft: 6 }}>
-                Discord
-              </Typography>
-            </Link>
+            <IconText
+              text={'Discord'}
+              tooltip={'Discord'}
+              tooltipPlacement='left'
+              icon={'discord'}
+              iconPrefix='fab'
+              url={discordUrl}
+            />
           )}
+
+          {otherLinks &&
+            otherLinks.length > 0 &&
+            otherLinks.map((url) => (
+              <IconText // TODO: use link names
+                text={'Link'}
+                tooltip={'Link'}
+                tooltipPlacement='left'
+                icon={'link'}
+                url={url}
+              />
+            ))}
 
           <div
             id='sidebar-toggle'

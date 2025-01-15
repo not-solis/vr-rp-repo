@@ -20,6 +20,8 @@ import './RoleplayProjectCard.css';
 import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TextTag } from './TextTag';
+import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
+import { IconText } from './IconText';
 
 export const RoleplayProject = (props: {
   project: RoleplayProjectProps;
@@ -80,23 +82,17 @@ export const RoleplayProject = (props: {
                   />
                 )}
               </Box>
-              {discordUrl && (
-                <Link
-                  style={{ position: 'relative', zIndex: 3 }}
-                  href={discordUrl}
-                >
-                  <FontAwesomeIcon
-                    to={discordUrl}
-                    style={{
-                      width: 20,
-                      height: 'auto',
-                      padding: '12 6 0',
-                    }}
-                    icon={['fab', 'discord']}
+              <div className='project-image-footer'>
+                {discordUrl && (
+                  <IconText
+                    text='Discord'
+                    url={discordUrl}
+                    iconPrefix='fab'
+                    icon='discord'
+                    iconPadding={8}
                   />
-                  Discord
-                </Link>
-              )}
+                )}
+              </div>
             </div>
 
             <Box className='project-overview'>
@@ -116,7 +112,7 @@ export const RoleplayProject = (props: {
                     },
                   }}
                 >
-                  <Typography ref={titleRef} variant='h3'>
+                  <Typography ref={titleRef} variant='h4'>
                     {name}
                     {isOwner && ' (OWNED)'}
                   </Typography>
@@ -137,6 +133,7 @@ export const RoleplayProject = (props: {
                 <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {tags.map((tag) => (
                     <TextTag
+                      key={tag}
                       tag={tag}
                       interactive
                       onClick={(e: any) => {
