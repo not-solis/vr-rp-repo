@@ -2,6 +2,8 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
 import { faClipboard } from '@fortawesome/free-regular-svg-icons';
 import {
+  faAnglesLeft,
+  faAnglesRight,
   faDoorOpen,
   faEarthAmericas,
   faGlobe,
@@ -34,6 +36,8 @@ library.add(faUser);
 library.add(faMeta);
 library.add(faHandshake);
 library.add(faLink);
+library.add(faAnglesRight);
+library.add(faAnglesLeft);
 
 declare module '@mui/material/styles' {
   interface Theme {

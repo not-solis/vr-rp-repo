@@ -27,7 +27,7 @@
 }
 
 .project-sidebar #sidebar-toggle {
-  --toggle-width: 70px;
+  --toggle-width: 60px;
   position: absolute;
   top: -2px;
   left: calc(var(--toggle-width) * -1 - 4px);

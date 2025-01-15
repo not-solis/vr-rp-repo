@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CardMedia, Typography, useTheme } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -12,6 +13,7 @@ import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
+
 import './RoleplayProjectPage.css';
 
 export const RoleplayProjectPage = () => {
@@ -278,12 +280,14 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
             className='disabled-text-interaction'
             onClick={toggleSidebar}
           >
-            <Typography
-              variant='h5'
-              style={{ marginLeft: '4px', marginBottom: '4px' }}
-            >
-              {isSidebarExpanded ? '>>>' : '<<<'}
-            </Typography>
+            <FontAwesomeIcon
+              height={4}
+              fixedWidth={true}
+              style={{
+                fontSize: 30,
+              }}
+              icon={['fas', isSidebarExpanded ? 'angles-right' : 'angles-left']}
+            />
           </div>
         </div>
       </div>
