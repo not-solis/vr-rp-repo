@@ -57,7 +57,8 @@ export const RoleplayProjectPage = () => {
     return null;
   }
 
-  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif'; // TODO: DELETE
+  // TODO: DELETE
+  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif';
   project.description = `
   # Vertit auras ille
 
@@ -75,7 +76,7 @@ gaudet, ira cum redeamus? Si dicta materiam iungit; nondum non ne domosque
 fessos cum rudente poteram, morte. Sua matrem recusat numina precari
 [ululatibus](http://dabaturmoly.com/pertimui.aspx) recumbis.
 
-## Gloria subit neque
+### Gloria subit neque
 
 Catenis meritis aliisque natantia dubitet certamine terribili in muros sine.
 Fugit finierat mea cetera reddit crescere **Pario** sub velant quorum, illo.
@@ -132,7 +133,7 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
   let descriptionElement;
   if (description) {
     descriptionElement = (
-      <Typography variant='h5'>
+      <Typography variant='text'>
         <ThemedMarkdown>{description}</ThemedMarkdown>
       </Typography>
     );
@@ -247,7 +248,7 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
               style={{ display: 'flex', alignItems: 'center' }}
             >
               <FontAwesomeIcon width={20} icon={['fab', 'discord']} />
-              <Typography variant='body2' style={{ paddingLeft: 6 }}>
+              <Typography variant='body1' style={{ paddingLeft: 6 }}>
                 Discord
               </Typography>
             </Link>

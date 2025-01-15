@@ -8,7 +8,7 @@
 }
 
 .project-info {
-  padding: 20px 40px;
+  padding: 30px 50px;
   margin-right: var(--project-sidebar-width);
   transition: margin-right 0.5s;
 }

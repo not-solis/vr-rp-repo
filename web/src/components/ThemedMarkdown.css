@@ -1,0 +1,17 @@
+.markdown blockquote {
+  margin-left: 0px;
+  padding-left: 24px;
+  border-left: 4px solid var(--mui-palette-text-secondary);
+}
+
+.markdown h1 {
+  font: var(--mui-font-h1);
+}
+
+.markdown h2 {
+  font: var(--mui-font-h2);
+}
+
+.markdown h3 {
+  font: var(--mui-font-h3);
+}

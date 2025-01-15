@@ -52,11 +52,13 @@ declare module '@mui/material/styles' {
 
   interface TypographyVariants {
     title: React.CSSProperties;
+    text: React.CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
     title?: React.CSSProperties;
+    text?: React.CSSProperties;
   }
 }
 
@@ -64,6 +66,7 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     title: true;
+    text: true;
   }
 }
 
@@ -111,7 +114,7 @@ export function App() {
     },
     typography: {
       title: {
-        fontSize: 72,
+        fontSize: '4rem',
         fontWeight: 'bold',
       },
       subtitle1: {
@@ -120,12 +123,24 @@ export function App() {
         color: 'var(--mui-palette-text-secondary)',
       },
       h1: {
-        fontSize: 56,
+        fontSize: '2.8rem',
         fontWeight: 'bold',
       },
       h2: {
-        fontSize: 42,
+        fontSize: '2.4rem',
         fontWeight: 'bold',
+      },
+      h3: {
+        fontSize: '2.1rem',
+      },
+      h4: {
+        fontSize: '1.8rem',
+      },
+      h5: {
+        fontSize: '1.6rem',
+      },
+      text: {
+        fontSize: '1.25rem',
       },
       body1: {
         fontSize: '1.1rem',

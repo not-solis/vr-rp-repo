@@ -1,13 +1,3 @@
-.markdown blockquote {
-  margin-left: 0px;
-  padding-left: 24px;
-  border-left: 4px solid var(--mui-palette-text-secondary);
-}
-
-.markdown p {
-  font: var(--mui-font-body2);
-}
-
 .disabled-text-interaction {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
