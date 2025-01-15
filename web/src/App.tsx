@@ -92,10 +92,11 @@ export function App() {
       MuiCard: {
         styleOverrides: {
           root: {
-            transition: '0.2s',
+            transition: '0.2s ease-out',
             '&:hover': {
               transform: 'scale(0.996)',
               borderColor: '#707176',
+              boxShadow: 'inset 0 0 40px 26px rgba(255, 255, 255, 0.02)',
             },
           },
         },
