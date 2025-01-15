@@ -22,6 +22,8 @@
   height: 100%;
   border-left: 2px solid var(--mui-palette-divider);
   transition: right 0.5s;
+  background-color: var(--mui-palette-background-default);
+  z-index: 10;
 }
 
 .project-sidebar #sidebar-toggle {
