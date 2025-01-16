@@ -95,6 +95,14 @@ export function App() {
       divider: '#44454a',
     },
     components: {
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: 'var(--mui-overlays-1)',
+            backgroundColor: 'var(--mui-palette-background-default)',
+          },
+        },
+      },
       MuiCard: {
         styleOverrides: {
           root: {
@@ -168,7 +176,9 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={{ userData, setUserData }}>
+        <AuthContext.Provider
+          value={{ userData, setUserData, isAuthenticated: !!userData }}
+        >
           <CookiesProvider>
             <Helmet>
               <meta property='og:url' content={window.location.href} />

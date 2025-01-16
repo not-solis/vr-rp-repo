@@ -10,10 +10,12 @@ export interface UserData {
 export interface AuthContextData {
   userData?: UserData;
   setUserData: (userData: UserData) => void;
+  isAuthenticated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextData>({
   setUserData: () => {},
+  isAuthenticated: false,
 });
 
 export const useAuth = () => {

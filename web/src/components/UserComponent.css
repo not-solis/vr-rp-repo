@@ -1,0 +1,32 @@
+#user-button {
+  border: 1.2px solid #8a8a8a;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+  padding: 8px;
+  transition: 0.06s;
+}
+
+#user-button:hover {
+  cursor: pointer;
+  border-color: #a5a5a5;
+}
+
+#user-button:active {
+  cursor: pointer;
+  border-color: #b0b0b0;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.toggle-arrow {
+  transition: 0.3s !important;
+}
+
+.toggle-open {
+  transform: rotate(-180deg);
+}
+
+.toggle-closed {
+  transform: rotate(0deg);
+}

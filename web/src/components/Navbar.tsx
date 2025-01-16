@@ -1,7 +1,7 @@
 import { Box, Link, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { LoginComponent } from './LoginComponent';
+import { UserComponent } from './UserComponent';
 import './Navbar.css';
 
 export const Navbar = () => {
@@ -48,7 +48,7 @@ export const Navbar = () => {
           <div>---</div> // Replace with burger menu
         )}
       </Box>
-      <LoginComponent />
+      <UserComponent />
     </Box>
   );
 };
