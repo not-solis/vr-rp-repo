@@ -37,6 +37,7 @@ export const RoleplayProjectCard = (props: {
     shortDescription,
     runtime,
     discordUrl,
+    otherLinks,
   } = project;
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export const RoleplayProjectCard = (props: {
     setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);
 
-  const isOwner = owners?.includes(userData?.username || '') ?? false;
+  const isOwner = owners?.some((owner) => owner.id === userData?.id) ?? false;
 
   const statusColors: Record<RoleplayStatus, string> = {
     [RoleplayStatus.Active]: theme.roleplayStatus.active,
@@ -85,6 +86,16 @@ export const RoleplayProjectCard = (props: {
                     iconPadding={8}
                   />
                 )}
+                {otherLinks &&
+                  otherLinks.map((link) => (
+                    <IconText
+                      key={link.url}
+                      text={link.label}
+                      icon={'link'}
+                      url={link.url}
+                      iconPadding={8}
+                    />
+                  ))}
               </div>
             </div>
 
@@ -119,7 +130,9 @@ export const RoleplayProjectCard = (props: {
               </Box>
 
               {owners && owners.length > 0 && (
-                <Typography variant='subtitle1'>{owners.join(', ')}</Typography>
+                <Typography variant='subtitle1'>
+                  {owners.map((owner) => owner.name).join(', ')}
+                </Typography>
               )}
 
               {tags && tags.length > 0 && (

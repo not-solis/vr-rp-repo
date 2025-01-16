@@ -20,10 +20,21 @@ export enum RoleplayApplicationProcess {
   EventSignup = 'Event Sign-up',
 }
 
+export interface RoleplayLink {
+  label: string;
+  url: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  discordId: string;
+}
+
 export interface RoleplayProject {
   id: string;
   name: string;
-  owners: string[];
+  owners: User[];
   lastUpdated: Date;
   imageUrl?: string;
   shortDescription: string;
@@ -38,7 +49,7 @@ export interface RoleplayProject {
   isMetaverse: boolean;
   isQuestCompatible: boolean;
   discordUrl?: string;
-  otherLinks: string[];
+  otherLinks: RoleplayLink[];
 }
 
 export const remapRoleplayProject = (project: any) => {
@@ -59,7 +70,7 @@ export const remapRoleplayProject = (project: any) => {
     hasSupportingCast: project.has_support_cast,
     isMetaverse: project.is_metaverse,
     isQuestCompatible: project.is_quest_compatible,
-    discordUrl: project.discord_link,
+    discordUrl: project.discord_url,
     otherLinks: project.other_links,
-  };
+  } as RoleplayProject;
 };

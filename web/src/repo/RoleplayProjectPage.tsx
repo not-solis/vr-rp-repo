@@ -12,14 +12,17 @@ import { useAuth } from '../context/AuthProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
+  RoleplayLink,
+  User,
 } from '../model/RoleplayProject';
 
 import './RoleplayProjectPage.css';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
-  const auth = useAuth();
+  const { userData } = useAuth();
   const { id } = useParams();
+
   const {
     data: project,
     error,
@@ -35,8 +38,46 @@ export const RoleplayProjectPage = () => {
         .then((res) => res.json())
         .then((json) => {
           const project = json.data;
-          return remapRoleplayProject(project) as RoleplayProject;
+          return remapRoleplayProject(project);
         }),
+  });
+
+  const {
+    data: owners,
+    error: ownersError,
+    isLoading: isOwnersLoading,
+  } = useQuery({
+    queryKey: ['projectOwners'],
+    queryFn: () =>
+      fetch(`http://localhost:3001/projects/${id}/owners`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => res.json())
+        .then<User[]>((json) =>
+          json.data.map((user: any) => ({
+            id: user.id,
+            name: user.name,
+            discordId: user.discord_id,
+          })),
+        ),
+  });
+
+  const {
+    data: otherLinks,
+    error: otherLinksError,
+    isLoading: isOtherLinksLoading,
+  } = useQuery({
+    queryKey: ['projectLinks'],
+    queryFn: () =>
+      fetch(`http://localhost:3001/projects/${id}/links`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => res.json())
+        .then<RoleplayLink[]>((json) => json.data),
   });
 
   if (error) {
@@ -112,7 +153,6 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
 
   const {
     name,
-    owners,
     tags,
     description,
     shortDescription,
@@ -124,7 +164,6 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
     hasSupportingCast,
     isQuestCompatible,
     discordUrl,
-    otherLinks,
   } = project;
 
   let descriptionElement;
@@ -150,6 +189,35 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
   }
 
   const toggleSidebar = () => setSidebarExpanded(!isSidebarExpanded);
+
+  const sidebarLinks = [];
+  if (discordUrl) {
+    sidebarLinks.push(
+      <IconText
+        key={'Discord'}
+        text={'Discord'}
+        tooltip={'Discord'}
+        tooltipPlacement='left'
+        icon={'discord'}
+        iconPrefix='fab'
+        url={discordUrl}
+      />,
+    );
+  }
+  if (!isOtherLinksLoading && !otherLinksError && otherLinks) {
+    otherLinks.forEach((link) =>
+      sidebarLinks.push(
+        <IconText
+          key={link.url}
+          text={link.label}
+          tooltip={link.label}
+          tooltipPlacement='left'
+          icon={'link'}
+          url={link.url}
+        />,
+      ),
+    );
+  }
 
   return (
     <div className='project-page'>
@@ -194,14 +262,17 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
               gap: 4,
             }}
           >
-            {owners && owners.length > 0 && (
-              <IconText
-                tooltip={'Owners'}
-                tooltipPlacement='left'
-                text={owners.join(', ')}
-                icon={'user'}
-              />
-            )}
+            {!ownersError &&
+              !isOwnersLoading &&
+              owners &&
+              owners.length > 0 && (
+                <IconText
+                  tooltip={'Owners'}
+                  tooltipPlacement='left'
+                  text={owners.map((o) => o.name).join(', ')}
+                  icon={'user'}
+                />
+              )}
             {setting && (
               <IconText
                 tooltip={'Setting'}
@@ -246,34 +317,26 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
             />
           </div>
 
-          {discordUrl && (
-            <IconText
-              text={'Discord'}
-              tooltip={'Discord'}
-              tooltipPlacement='left'
-              icon={'discord'}
-              iconPrefix='fab'
-              url={discordUrl}
-            />
+          {sidebarLinks.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: 4,
+              }}
+            >
+              {sidebarLinks}
+            </div>
           )}
 
-          {otherLinks &&
-            otherLinks.length > 0 &&
-            otherLinks.map((url) => (
-              <IconText // TODO: use link names
-                text={'Link'}
-                tooltip={'Link'}
-                tooltipPlacement='left'
-                icon={'link'}
-                url={url}
-              />
-            ))}
-
           {/* TODO: Add authenticated edit button */}
-          {auth.userData &&
-            auth.userData.username &&
+          {userData &&
+            userData.id &&
             owners &&
-            owners.includes(auth.userData.username) && <button>HIT ME</button>}
+            owners.some((owner) => owner.discordId === userData.id) && (
+              <button>HIT ME</button>
+            )}
 
           <div
             id='sidebar-toggle'
