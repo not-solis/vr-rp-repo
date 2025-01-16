@@ -1,4 +1,4 @@
-import { pool } from "./db-pool.js";
+import { pool } from './db-pool.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 

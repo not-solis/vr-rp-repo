@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import { getProjects, getProjectById } from '../model/project-model.js';
 import { getOwnersByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
@@ -49,4 +49,4 @@ projectRouter.get('/:id/links', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-export {projectRouter};
+export { projectRouter };

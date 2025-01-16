@@ -52,7 +52,7 @@ export interface RoleplayProject {
   otherLinks: RoleplayLink[];
 }
 
-export const remapRoleplayProject = (project: any) => {
+export const remapRoleplayProject = (project: any): RoleplayProject => {
   return {
     id: project.id,
     name: project.name,
@@ -72,5 +72,5 @@ export const remapRoleplayProject = (project: any) => {
     isQuestCompatible: project.is_quest_compatible,
     discordUrl: project.discord_url,
     otherLinks: project.other_links,
-  } as RoleplayProject;
+  };
 };
