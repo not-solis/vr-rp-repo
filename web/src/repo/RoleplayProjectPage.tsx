@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
+import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
 import { IconText } from '../components/IconText';
 import { TextTag } from '../components/TextTag';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
@@ -19,7 +20,7 @@ import {
 import './RoleplayProjectPage.css';
 
 export const RoleplayProjectPage = () => {
-  const [isSidebarExpanded, setSidebarExpanded] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const { userData } = useAuth();
   const { id } = useParams();
 
@@ -40,44 +41,6 @@ export const RoleplayProjectPage = () => {
           const project = json.data;
           return remapRoleplayProject(project);
         }),
-  });
-
-  const {
-    data: owners,
-    error: ownersError,
-    isLoading: isOwnersLoading,
-  } = useQuery({
-    queryKey: ['projectOwners'],
-    queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/owners`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<User[]>((json) =>
-          json.data.map((user: any) => ({
-            id: user.id,
-            name: user.name,
-            discordId: user.discord_id,
-          })),
-        ),
-  });
-
-  const {
-    data: otherLinks,
-    error: otherLinksError,
-    isLoading: isOtherLinksLoading,
-  } = useQuery({
-    queryKey: ['projectLinks'],
-    queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/links`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<RoleplayLink[]>((json) => json.data),
   });
 
   if (error) {
@@ -151,20 +114,7 @@ Sortem distinctas *sic* mox molles luridus scitis *aras Iuppiter* manum nunc
 cadit cervus vulnera adhuc virentem est dixit iaculo.
   `;
 
-  const {
-    name,
-    tags,
-    description,
-    shortDescription,
-    imageUrl,
-    setting,
-    entryProcess,
-    applicationProcess,
-    isMetaverse,
-    hasSupportingCast,
-    isQuestCompatible,
-    discordUrl,
-  } = project;
+  const { name, description, shortDescription, imageUrl } = project;
 
   let descriptionElement;
   if (description) {
@@ -188,37 +138,6 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
     );
   }
 
-  const toggleSidebar = () => setSidebarExpanded(!isSidebarExpanded);
-
-  const sidebarLinks = [];
-  if (discordUrl) {
-    sidebarLinks.push(
-      <IconText
-        key={'Discord'}
-        text={'Discord'}
-        tooltip={'Discord'}
-        tooltipPlacement='left'
-        icon={'discord'}
-        iconPrefix='fab'
-        url={discordUrl}
-      />,
-    );
-  }
-  if (!isOtherLinksLoading && !otherLinksError && otherLinks) {
-    otherLinks.forEach((link) =>
-      sidebarLinks.push(
-        <IconText
-          key={link.url}
-          text={link.label}
-          tooltip={link.label}
-          tooltipPlacement='left'
-          icon={'link'}
-          url={link.url}
-        />,
-      ),
-    );
-  }
-
   return (
     <div className='project-page'>
       <Helmet>
@@ -229,131 +148,15 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
         <meta property='og:image:alt' content={`${name} icon`} />
         <meta property='og:description' content={shortDescription} />
       </Helmet>
-      <div className={`project-info${isSidebarExpanded ? '' : ' closed'}`}>
+      <div className={`project-info${isSidebarOpen ? '' : ' closed'}`}>
         <Typography variant='title'>{project.name}</Typography>
         {descriptionElement}
       </div>
-      <div className={`project-sidebar${isSidebarExpanded ? '' : ' closed'}`}>
-        <div id='project-sidebar-content'>
-          {imageUrl && (
-            <CardMedia component='img' image={imageUrl} alt={`${name} icon`} />
-          )}
-
-          {tags && tags.length > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: 6,
-              }}
-            >
-              {tags.map((t) => (
-                <TextTag key={t} tag={t} />
-              ))}
-            </div>
-          )}
-
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: 4,
-            }}
-          >
-            {!ownersError &&
-              !isOwnersLoading &&
-              owners &&
-              owners.length > 0 && (
-                <IconText
-                  tooltip={'Owners'}
-                  tooltipPlacement='left'
-                  text={owners.map((o) => o.name).join(', ')}
-                  icon={'user'}
-                />
-              )}
-            {setting && (
-              <IconText
-                tooltip={'Setting'}
-                tooltipPlacement='left'
-                text={setting}
-                icon={'earth-americas'}
-              />
-            )}
-            <IconText
-              tooltip={'Metaverse'}
-              tooltipPlacement='left'
-              text={`${isMetaverse ? 'In' : 'Not in'} the Metaverse`}
-              icon={'globe'}
-            />
-            <IconText
-              tooltip={'Entry Process'}
-              tooltipPlacement='left'
-              text={entryProcess}
-              icon={'door-open'}
-            />
-            <IconText
-              tooltip={'Application Process'}
-              tooltipPlacement='left'
-              text={applicationProcess}
-              icon={'clipboard'}
-              iconPrefix='far'
-            />
-            <IconText
-              tooltip={'Supporting Cast'}
-              tooltipPlacement='left'
-              text={`Support cast positions ${
-                hasSupportingCast ? '' : 'un'
-              }available`}
-              icon={'handshake'}
-            />
-            <IconText
-              tooltip={'Quest Compatibility'}
-              tooltipPlacement='left'
-              text={`${isQuestCompatible ? '' : 'Not '}Quest compatible`}
-              icon={'meta'}
-              iconPrefix='fab'
-            />
-          </div>
-
-          {sidebarLinks.length > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 4,
-              }}
-            >
-              {sidebarLinks}
-            </div>
-          )}
-
-          {/* TODO: Add authenticated edit button */}
-          {userData &&
-            userData.id &&
-            owners &&
-            owners.some((owner) => owner.discordId === userData.id) && (
-              <button>HIT ME</button>
-            )}
-
-          <div
-            id='sidebar-toggle'
-            className='disabled-text-interaction'
-            onClick={toggleSidebar}
-          >
-            <FontAwesomeIcon
-              height={4}
-              fixedWidth={true}
-              style={{
-                fontSize: 30,
-              }}
-              icon={['fas', isSidebarExpanded ? 'angles-right' : 'angles-left']}
-            />
-          </div>
-        </div>
-      </div>
+      <RoleplayProjectSidebar
+        isOpen={isSidebarOpen}
+        toggleOpen={() => setSidebarOpen(!isSidebarOpen)}
+        project={project}
+      />
     </div>
   );
 };
