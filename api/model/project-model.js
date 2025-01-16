@@ -1,21 +1,11 @@
-import pg from 'pg';
-import dotenv from 'dotenv';
+import { pool } from "./db-pool.js";
 
-dotenv.config();
-
-const connectionDetails = {
-  user: process.env.POSTGRES_DB_USER,
-  host: process.env.POSTGRES_DB_HOST,
-  database: process.env.POSTGRES_DB_DATABASE,
-  password: process.env.POSTGRES_DB_PASSWORD,
-  port: process.env.POSTGRES_DB_PORT,
-};
-const pool = new pg.Pool(connectionDetails);
+const DEFAULT_QUERY_LIMIT = 1000;
 
 export const getProjects = async (
-  start,
-  limit,
-  sortBy,
+  start = 0,
+  limit = DEFAULT_QUERY_LIMIT,
+  sortBy = 'name',
   name = '',
   tags = [],
   asc = true,
@@ -28,7 +18,7 @@ export const getProjects = async (
       const addedQueryParams = [];
       const where = [];
       if (name) {
-        sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(name), 1, 20, 9, 50)`;
+        sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
         asc = true;
       }
 
@@ -42,11 +32,31 @@ export const getProjects = async (
         where.push(`status = 'Active'`);
       }
 
-      const queryString = `SELECT * FROM RoleplayProjects ${
-        where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''
-      }ORDER BY ${sortBy} ${
-        asc ? 'ASC' : 'DESC'
-      }, name ASC OFFSET $1 LIMIT $2;`;
+      const queryString = `
+      SELECT roleplay_projects.*,
+      array_agg(
+        json_build_object(
+          'id', users.user_id,
+          'name', users.name
+        )
+      ) FILTER (WHERE users.user_id IS NOT NULL) AS owners,
+      array_agg(
+        json_build_object(
+          'label', roleplay_links.label,
+          'url', roleplay_links.url
+        )
+      ) filter (where roleplay_links.url is not null) as other_links
+      FROM roleplay_projects
+        LEFT JOIN ownership ON roleplay_projects.id = ownership.project_id
+        LEFT JOIN users ON ownership.user_id = users.user_id
+        left join roleplay_links on roleplay_projects.id = roleplay_links.project_id
+      ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
+      GROUP BY roleplay_projects.id
+      ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'}
+      ${name || sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
+      OFFSET $1 LIMIT $2;
+      `;
+
       pool.query(
         queryString,
         queryParams.concat(addedQueryParams), // using limit + 1 to see if there are any remaining
@@ -81,7 +91,7 @@ export const getProjectById = async (id) => {
   try {
     return await new Promise((resolve, reject) => {
       pool.query(
-        'SELECT * FROM RoleplayProjects WHERE id=$1',
+        'SELECT * FROM roleplay_projects WHERE id=$1',
         [id],
         (error, results) => {
           if (error) {
