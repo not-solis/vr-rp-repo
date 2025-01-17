@@ -48,7 +48,7 @@ router.use(
 
 router.get('/', (request, response) => {
   try {
-    const token = request.cookies.userToken;
+    const { userToken: token } = request.cookies;
     if (!token) {
       console.log('No user token found.');
       response.json({ authenticated: false });
@@ -63,7 +63,7 @@ router.get('/', (request, response) => {
 
     // Reset token in cookie
     response.cookie('token', newToken, {
-      maxAge: TOKEN_EXPIRATION,
+      maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
     });
     response.json({ authenticated: true, user });
@@ -143,7 +143,7 @@ router.get('/discord', async (request, response) => {
 
     // Set cookie for the user
     response.cookie('userToken', token, {
-      maxAge: TOKEN_EXPIRATION,
+      maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
     });
 
