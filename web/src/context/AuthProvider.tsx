@@ -1,20 +1,15 @@
 import { createContext, useContext } from 'react';
 
-export interface UserData {
-  id?: string;
-  username?: string;
-  globalName?: string;
-  avatar?: string;
-}
+import { User } from '../model/User';
 
 export interface AuthContextData {
-  userData?: UserData;
-  setUserData: (userData: UserData) => void;
+  user?: User;
+  isAuthLoading: boolean;
   isAuthenticated: boolean;
 }
 
 export const AuthContext = createContext<AuthContextData>({
-  setUserData: () => {},
+  isAuthLoading: true,
   isAuthenticated: false,
 });
 

@@ -14,14 +14,13 @@ import {
   remapRoleplayProject,
   RoleplayProject,
   RoleplayLink,
-  User,
 } from '../model/RoleplayProject';
 
 import './RoleplayProjectPage.css';
 
 export const RoleplayProjectPage = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const { userData } = useAuth();
+  const { user } = useAuth();
   const { id } = useParams();
 
   const {

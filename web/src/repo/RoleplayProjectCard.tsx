@@ -24,7 +24,7 @@ export const RoleplayProjectCard = (props: {
   const [titleRect, setTitleRect] = useState<DOMRect>();
   const titleRef = useRef<HTMLSpanElement>(null);
   const theme = useTheme();
-  const { userData } = useAuth();
+  const { user } = useAuth();
   const { project, addTag } = props;
   const {
     id,
@@ -52,7 +52,7 @@ export const RoleplayProjectCard = (props: {
     setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);
 
-  const isOwner = owners?.some((owner) => owner.id === userData?.id) ?? false;
+  const isOwner = owners?.some((owner) => owner.id === user?.id) ?? false;
 
   const statusColors: Record<RoleplayStatus, string> = {
     [RoleplayStatus.Active]: theme.roleplayStatus.active,

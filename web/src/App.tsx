@@ -12,19 +12,23 @@ import {
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import {
+  QueryClientProvider,
+  QueryClient,
+  useQuery,
+} from '@tanstack/react-query';
+import { PropsWithChildren } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { Helmet } from 'react-helmet';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
-import { AuthContext, UserData } from './context/AuthProvider';
+import { AuthContext } from './context/AuthProvider';
+import { User } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 import './App.css';
 
-export const USER_DATA_COOKIE = 'user';
 const queryClient = new QueryClient();
 
 library.add(faDiscord);
@@ -79,7 +83,6 @@ declare module '@mui/material/Typography' {
 }
 
 export function App() {
-  const [userData, setUserData] = useState<UserData>({});
   const theme = createTheme({
     cssVariables: true,
     palette: {
@@ -173,12 +176,42 @@ export function App() {
     },
   });
 
+  const AuthWrapper = (props: PropsWithChildren) => {
+    const { data: user, isLoading: isAuthLoading } = useQuery({
+      queryKey: ['auth'],
+      queryFn: () => {
+        return fetch(`http://localhost:3001/auth/`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => res.json())
+          .then((json) => {
+            const { user } = json;
+            return {
+              id: user.id,
+              name: user.name,
+              imageUrl: user.image_url,
+              role: user.role,
+            } as User;
+          });
+      },
+      retry: false,
+    });
+
+    const isAuthenticated = !!user;
+    return (
+      <AuthContext.Provider value={{ user, isAuthLoading, isAuthenticated }}>
+        {props.children}
+      </AuthContext.Provider>
+    );
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider
-          value={{ userData, setUserData, isAuthenticated: !!userData }}
-        >
+        <AuthWrapper>
           <CookiesProvider>
             <Helmet>
               <meta property='og:url' content={window.location.href} />
@@ -218,7 +251,7 @@ export function App() {
               </div>
             </Box>
           </CookiesProvider>
-        </AuthContext.Provider>
+        </AuthWrapper>
       </QueryClientProvider>
     </ThemeProvider>
   );

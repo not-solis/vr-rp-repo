@@ -10,52 +10,41 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useCookies } from 'react-cookie';
+import { useState } from 'react';
 import OAuth2Login from 'react-simple-oauth2-login';
 
-import { USER_DATA_COOKIE } from '../App';
-import { useAuth, UserData } from '../context/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 import './UserComponent.css';
 
 export const UserComponent = () => {
+  const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
   const isMenuOpen = !!menuAnchorEl;
-  const { userData, setUserData } = useAuth();
   const theme = useTheme();
-  const [cookies, setCookie] = useCookies(['user']);
-  useEffect(() => {
-    if (cookies.user) {
-      setUserData(cookies.user);
-    }
-  });
 
-  const handleLogin = (userData: UserData) => {
-    setUserData(userData);
-    setCookie(USER_DATA_COOKIE, JSON.stringify(userData));
-  };
+  const {
+    REACT_APP_SERVER_BASE_URL,
+    REACT_APP_DISCORD_CLIENT_ID,
+    REACT_APP_DISCORD_REDIRECT_URL,
+  } = process.env;
+
+  if (isAuthLoading) {
+    return null;
+  }
 
   const handleLogout = () => {
-    setUserData({});
-    setCookie(USER_DATA_COOKIE, undefined, { expires: new Date() });
+    console.log(process.env);
+    fetch(`${REACT_APP_SERVER_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).then(() => window.location.reload());
     closeMenu();
   };
 
   const onAuthSuccess = (data: Record<string, any>) => {
-    fetch('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${data.access_token}` },
-    }).then((response) =>
-      response.json().then((json) => {
-        const { id, username, global_name, avatar } = json;
-        handleLogin({
-          id,
-          username,
-          globalName: global_name,
-          avatar,
-        });
-      }),
-    );
+    window.location.reload();
+    // setUser(data as User);
   };
 
   const onAuthFailure = (err: Error) => console.error(err);
@@ -67,7 +56,7 @@ export const UserComponent = () => {
     setMenuAnchorEl(undefined);
   };
 
-  return userData?.id ? (
+  return user ? (
     <>
       <div
         id='user-button'
@@ -76,13 +65,19 @@ export const UserComponent = () => {
         aria-expanded={isMenuOpen ? 'true' : undefined}
         onClick={openMenu}
       >
-        <Avatar style={{ width: 32, height: 32, marginRight: 8 }} />
+        <Avatar
+          alt={user.name}
+          src={user.imageUrl}
+          style={{ width: 32, height: 32, marginRight: 8 }}
+        >
+          {user.name.charAt(0)}
+        </Avatar>
         <Typography
           className='disabled-text-interaction'
           variant='body1'
           style={{ paddingRight: 16 }}
         >
-          {userData.username}
+          {user.name}
         </Typography>
         <ArrowDropDown
           className={`toggle-arrow toggle-${isMenuOpen ? 'open' : 'closed'}`}
@@ -112,7 +107,7 @@ export const UserComponent = () => {
             disabled={!isEditingName}
             variant='outlined'
             size='small'
-            value={userData.username}
+            value={user.name}
             style={{ width: 160, marginRight: 6 }}
             slotProps={{
               input: {
@@ -149,9 +144,10 @@ export const UserComponent = () => {
   ) : (
     <OAuth2Login
       authorizationUrl='https://discord.com/oauth2/authorize'
-      responseType='token'
-      clientId={process.env.REACT_APP_DISCORD_CLIENT_ID ?? ''}
-      redirectUri='http://localhost:3000/auth/discord'
+      responseType='code'
+      isCrossOrigin
+      clientId={REACT_APP_DISCORD_CLIENT_ID ?? ''}
+      redirectUri={REACT_APP_DISCORD_REDIRECT_URL ?? ''}
       scope='identify'
       buttonText='Login with Discord'
       onSuccess={onAuthSuccess}

@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { IconText } from '../components/IconText';
 import { TextTag } from '../components/TextTag';
 import { useAuth } from '../context/AuthProvider';
-import { RoleplayLink, RoleplayProject, User } from '../model/RoleplayProject';
+import { RoleplayLink, RoleplayProject } from '../model/RoleplayProject';
+import { User } from '../model/User';
 
 interface RoleplayProjectSidebarProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface RoleplayProjectSidebarProps {
 }
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
-  const { userData } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { isOpen, toggleOpen, project } = props;
   const {
     id,
@@ -192,12 +193,9 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
         )}
 
         {/* TODO: Add authenticated edit button */}
-        {userData &&
-          userData.id &&
-          owners &&
-          owners.some((owner) => owner.discordId === userData.id) && (
-            <button>HIT ME</button>
-          )}
+        {user && owners && owners.some((owner) => owner.id === user.id) && (
+          <button>HIT ME</button>
+        )}
 
         <div
           id='sidebar-toggle'

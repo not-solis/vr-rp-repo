@@ -21,17 +21,7 @@ export default [
       ],
       quotes: [2, 'single', { avoidEscape: true }],
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          args: 'after-used',
-          caughtErrors: 'all',
-          destructuredArrayIgnorePattern: '^_',
-          ignoreRestSiblings: false,
-          reportUsedIgnorePattern: false,
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
   eslintPluginPrettierRecommended,
