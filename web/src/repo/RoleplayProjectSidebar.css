@@ -1,0 +1,40 @@
+.project-sidebar {
+  position: absolute;
+  float: right;
+  top: 0;
+  right: 0;
+  width: var(--project-sidebar-width);
+  height: 100%;
+  border-left: 2px solid var(--mui-palette-divider);
+  transition: right 0.5s;
+  background-color: var(--mui-palette-background-default);
+  z-index: 10;
+}
+
+.project-sidebar #sidebar-toggle {
+  --toggle-width: 60px;
+  position: absolute;
+  top: -2px;
+  left: calc(var(--toggle-width) * -1 - 4px);
+  background-color: var(--mui-palette-background-paper);
+  width: var(--toggle-width);
+  height: 50px;
+  border-bottom-left-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--mui-palette-divider);
+}
+
+#project-sidebar-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.project-sidebar.closed {
+  right: calc(-2px - var(--project-sidebar-width));
+}

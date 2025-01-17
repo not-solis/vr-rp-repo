@@ -1,12 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CardMedia } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { RefObject } from 'react';
 
 import { IconText } from '../components/IconText';
 import { TextTag } from '../components/TextTag';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayLink, RoleplayProject } from '../model/RoleplayProject';
 import { User } from '../model/User';
+import './RoleplayProjectSidebar.css';
 
 interface RoleplayProjectSidebarProps {
   isOpen: boolean;

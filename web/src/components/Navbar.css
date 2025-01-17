@@ -5,7 +5,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: min(3vw, 2em) min(2vw, 40px);
+  padding: min(3vw, 1.5em) min(2vw, 40px);
   border-bottom: var(--mui-palette-divider) solid 2px;
   background-color: var(--mui-palette-background-default);
   z-index: 100;
