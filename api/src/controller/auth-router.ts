@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
 const {
-  JWT_SECRET = '',
+  JWT_SECRET,
   TOKEN_EXPIRATION = 36000,
   CLIENT_URL = 'http://localhost:3000',
 } = process.env;
@@ -16,19 +16,26 @@ router.use(
   cors({
     origin: [CLIENT_URL],
     credentials: true,
-  })
+  }),
 );
-router.post('/', (request, response, next) => {
+router.get('/', (request, response, next) => {
   try {
-    const { token } = request.cookies;
-    if (!token) {
-      return response.status(401);
+    if (!JWT_SECRET) {
+      response.status(500).send();
+      return;
     }
 
-    verify(token, JWT_TOKEN);
-    return next();
+    const { token } = request.cookies;
+    if (!token) {
+      response.status(401).send();
+      return;
+    }
+
+    verify(token, JWT_SECRET);
+    next();
   } catch (error) {
-    return response.status(401);
+    console.log(error);
+    response.status(401).send();
   }
 });
 
@@ -37,8 +44,12 @@ router.get('/discord', (request, response) => {
 });
 
 router.post('/token', (request, response) => {
-  const token = sign(request.body, JWT_TOKEN);
-  return response.status(200).json({ success: true, token });
+  if (!JWT_SECRET) {
+    response.status(500).send();
+    return;
+  }
+  const token = sign(request.body, JWT_SECRET);
+  response.status(200).json({ success: true, token });
 });
 
 export { router as authRouter };

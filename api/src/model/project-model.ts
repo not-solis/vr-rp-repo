@@ -1,4 +1,4 @@
-import { pool } from './db-pool.js';
+import { pool } from './db-pool';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 
@@ -7,15 +7,15 @@ export const getProjects = async (
   limit = DEFAULT_QUERY_LIMIT,
   sortBy = 'name',
   name = '',
-  tags = [],
+  tags: string[] = [],
   asc = true,
-  activeOnly = false
+  activeOnly = false,
 ) => {
   try {
     // TODO: implement proper filters
     return await new Promise((resolve, reject) => {
-      const queryParams = [start, limit + 1];
-      const addedQueryParams = [];
+      const queryParams: (string | number)[] = [start, limit + 1];
+      const addedQueryParams: (string | number)[] = [];
       const where = [];
       if (name) {
         sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
@@ -29,7 +29,7 @@ export const getProjects = async (
       }
 
       if (activeOnly) {
-        where.push(`status = 'Active'`);
+        where.push("status = 'Active'");
       }
 
       const queryString = `
@@ -65,8 +65,8 @@ export const getProjects = async (
             reject(error);
           }
 
-          if (results?.rows) {
-            const { rows, rowCount } = results;
+          const { rows, rowCount } = results;
+          if (rows && rowCount !== null) {
             if (rowCount > limit) {
               rows.pop();
             }
@@ -78,7 +78,7 @@ export const getProjects = async (
           } else {
             reject(new Error('No results found.'));
           }
-        }
+        },
       );
     });
   } catch (err) {
@@ -87,7 +87,7 @@ export const getProjects = async (
   }
 };
 
-export const getProjectById = async (id) => {
+export const getProjectById = async (id: string) => {
   try {
     return await new Promise((resolve, reject) => {
       pool.query(
@@ -105,7 +105,7 @@ export const getProjectById = async (id) => {
           } else {
             reject(new Error('No results found.'));
           }
-        }
+        },
       );
     });
   } catch (err) {

@@ -1,14 +1,14 @@
-import pg from 'pg';
+import { Pool, PoolConfig } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectionDetails = {
+const connectionDetails: PoolConfig = {
   user: process.env.POSTGRES_DB_USER,
   host: process.env.POSTGRES_DB_HOST,
   database: process.env.POSTGRES_DB_DATABASE,
   password: process.env.POSTGRES_DB_PASSWORD,
-  port: process.env.POSTGRES_DB_PORT,
+  port: parseInt(process.env.POSTGRES_DB_PORT!) ?? 5432,
 };
 
-export const pool = new pg.Pool(connectionDetails);
+export const pool = new Pool(connectionDetails);

@@ -1,6 +1,6 @@
-import { pool } from './db-pool.js';
+import { pool } from './db-pool';
 
-export const getRoleplayLinksByProjectId = async (id) => {
+export const getRoleplayLinksByProjectId = async (id: string) => {
   try {
     return await new Promise((resolve, reject) => {
       pool.query(
@@ -25,7 +25,7 @@ export const getRoleplayLinksByProjectId = async (id) => {
           } else {
             reject(new Error('No results found.'));
           }
-        }
+        },
       );
     });
   } catch (err) {

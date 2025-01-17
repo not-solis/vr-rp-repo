@@ -1,20 +1,23 @@
 import { Router } from 'express';
-import { getProjects, getProjectById } from '../model/project-model.js';
-import { getOwnersByProjectId } from '../model/owners-model.js';
-import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
+import { getProjects, getProjectById } from '../model/project-model';
+import { getOwnersByProjectId } from '../model/owners-model';
+import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
 
+const MAX_QUERY = 1000;
 const router = Router();
 
 router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;
   getProjects(
-    start && parseInt(start),
-    limit && parseInt(limit),
-    sortBy,
-    name,
-    tags ? tags.split('|') : [],
+    parseInt(start as string) ?? 0,
+    parseInt(limit as string) ?? MAX_QUERY,
+    sortBy as string,
+    name as string,
+    Array.isArray(tags)
+      ? (tags as string[])
+      : ((tags as string)?.split('|') ?? []),
     asc !== 'false',
-    active === 'true'
+    active === 'true',
   )
     .then((response) => {
       res.status(200).send(response);
