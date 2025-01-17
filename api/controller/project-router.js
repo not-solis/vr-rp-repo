@@ -3,9 +3,9 @@ import { getProjects, getProjectById } from '../model/project-model.js';
 import { getOwnersByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 
-const projectRouter = Router();
+const router = Router();
 
-projectRouter.get('/', (req, res) => {
+router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;
   getProjects(
     start && parseInt(start),
@@ -22,7 +22,7 @@ projectRouter.get('/', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-projectRouter.get('/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   const { id } = req.params;
   getProjectById(id)
     .then((response) => {
@@ -31,7 +31,7 @@ projectRouter.get('/:id', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-projectRouter.get('/:id/owners', (req, res) => {
+router.get('/:id/owners', (req, res) => {
   const { id } = req.params;
   getOwnersByProjectId(id)
     .then((response) => {
@@ -40,7 +40,7 @@ projectRouter.get('/:id/owners', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-projectRouter.get('/:id/links', (req, res) => {
+router.get('/:id/links', (req, res) => {
   const { id } = req.params;
   getRoleplayLinksByProjectId(id)
     .then((response) => {
@@ -49,4 +49,4 @@ projectRouter.get('/:id/links', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-export { projectRouter };
+export { router as projectRouter };
