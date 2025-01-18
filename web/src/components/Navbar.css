@@ -6,8 +6,8 @@
   align-items: center;
   justify-content: space-between;
   padding: min(3vw, 1.5em) min(2vw, 40px);
-  border-bottom: var(--mui-palette-divider) solid 2px;
-  background-color: var(--mui-palette-background-default);
+  background-color: var(--mui-palette-background-dark);
+  box-shadow: var(--mui-shadows-5);
   z-index: 100;
 }
 
@@ -36,7 +36,11 @@
   transition: 0.3s;
 }
 
+.main-menu .selected {
+  color: #babc6f;
+}
+
 .main-menu a:hover {
-  color: #babc6f; /* TODO: find a better color */
+  filter: brightness(150%);
   cursor: pointer;
 }

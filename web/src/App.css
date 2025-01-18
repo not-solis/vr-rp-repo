@@ -7,6 +7,11 @@
   user-select: none;
 }
 
+.interactable {
+  cursor: pointer;
+  transition: 0.08s;
+}
+
 .interactable:hover {
   transform: scale(1.03);
 }

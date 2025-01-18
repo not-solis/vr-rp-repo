@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 
 import { TextTag } from '../components/TextTag';
+import './RepoFilters.css';
 
 interface FilterProps {
   nameFilter: string;
@@ -41,17 +42,8 @@ export const RepoFilters = (props: FilterProps) => {
   };
 
   return (
-    <Box>
-      <FormGroup
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 16,
-          padding: 16,
-          borderBottom: '1.4px solid var(--mui-palette-divider)',
-        }}
-      >
+    <Box id='filter-bar'>
+      <FormGroup id='repo-filters'>
         <TextField
           label='Name'
           variant='outlined'

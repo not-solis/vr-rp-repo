@@ -23,7 +23,7 @@ export const Navbar = () => {
   }, []);
 
   return (
-    <Box className='nav'>
+    <nav className='nav'>
       <a
         href='/'
         style={{ color: theme.palette.text.primary, textDecoration: 'none' }}
@@ -32,23 +32,28 @@ export const Navbar = () => {
       </a>
       <Box className='main-menu'>
         {windowDimensions.width > 1100 ? (
-          ['Repo', 'Blog', 'Resources', 'About Us'].map((t) => (
-            <Link
-              key={t}
-              href={`/${t.toLowerCase().replace(' ', '-')}`}
-              component='a'
-              variant='h6'
-              color='textSecondary'
-              underline='none'
-            >
-              {t}
-            </Link>
-          ))
+          ['Repo', 'Blog', 'Resources', 'About Us'].map((t) => {
+            const hrefPath = `/${t.toLowerCase().replace(' ', '-')}`;
+            const currentPath = new URL(window.location.href).pathname;
+            return (
+              <Link
+                key={t}
+                className={hrefPath === currentPath ? 'selected' : ''}
+                href={hrefPath}
+                component='a'
+                variant='h6'
+                color='textSecondary'
+                underline='none'
+              >
+                {t}
+              </Link>
+            );
+          })
         ) : (
           <div>---</div> // Replace with burger menu
         )}
       </Box>
       <UserComponent />
-    </Box>
+    </nav>
   );
 };

@@ -67,10 +67,13 @@ declare module '@mui/material/styles' {
     text: React.CSSProperties;
   }
 
-  // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
     title?: React.CSSProperties;
     text?: React.CSSProperties;
+  }
+
+  interface TypeBackground {
+    dark: string;
   }
 }
 
@@ -89,6 +92,7 @@ export function App() {
       mode: 'dark',
       background: {
         default: '#1f2023',
+        dark: '#191a1d',
         paper: '#2e3034',
       },
       text: {

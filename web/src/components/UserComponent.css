@@ -6,6 +6,7 @@
   margin-right: 12px;
   padding: 8px;
   transition: 0.06s;
+  background-color: var(--mui-palette-background-default);
 }
 
 #user-button:hover {
@@ -15,8 +16,7 @@
 
 #user-button:active {
   cursor: pointer;
-  border-color: #b0b0b0;
-  background-color: rgba(255, 255, 255, 0.03);
+  filter: brightness(115%);
 }
 
 .toggle-arrow {

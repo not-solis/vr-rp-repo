@@ -208,7 +208,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
             height={4}
             fixedWidth={true}
             style={{
-              fontSize: 30,
+              fontSize: 22,
             }}
             icon={['fas', isOpen ? 'angles-right' : 'angles-left']}
           />

@@ -1,0 +1,16 @@
+#filter-bar {
+  box-shadow: var(--mui-shadows-4);
+  z-index: 10;
+}
+
+#repo-filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 32px;
+  /* width: fit-content; */
+  /* margin: 16px; */
+  /* border: 1.2px solid var(--mui-palette-divider); */
+  /* border-radius: 4px; */
+}
