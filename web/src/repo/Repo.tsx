@@ -91,7 +91,7 @@ export const Repo = () => {
   }
 
   return (
-    <Box className='project-container'>
+    <Box id='repo-page'>
       <Helmet>
         <title>{TITLE}</title>
         <meta title={TITLE} />
@@ -110,19 +110,22 @@ export const Repo = () => {
         showActiveOnly={showActiveOnly}
         setShowActiveOnly={setShowActiveOnly}
       />
-      <InfiniteScroll
-        className='repo-search-results'
-        dataLength={projects?.length ?? 0}
-        next={() => !isFetching && fetchNextPage()}
-        hasMore={hasNextPage}
-        loader={
-          isFetchingNextPage ? <h4>Loading...</h4> : <h4>End of the line</h4>
-        } // TODO: use nicer loader
-      >
-        {projects?.map((p) => (
-          <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
-        ))}
-      </InfiniteScroll>
+      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
+        <InfiniteScroll
+          scrollableTarget='repo-scroll-box'
+          className='repo-search-results'
+          dataLength={projects?.length ?? 0}
+          next={() => !isFetching && fetchNextPage()}
+          hasMore={hasNextPage}
+          loader={
+            isFetchingNextPage ? <h4>Loading...</h4> : <h4>End of the line</h4>
+          } // TODO: use nicer loader
+        >
+          {projects?.map((p) => (
+            <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
+          ))}
+        </InfiniteScroll>
+      </div>
     </Box>
   );
 };

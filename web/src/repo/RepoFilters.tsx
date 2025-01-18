@@ -47,7 +47,9 @@ export const RepoFilters = (props: FilterProps) => {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: '16px',
+          gap: 16,
+          padding: 16,
+          borderBottom: '1.4px solid var(--mui-palette-divider)',
         }}
       >
         <TextField

@@ -1,13 +1,17 @@
-.project-container {
-  padding: min(10px, 0.8vw) 0;
-  margin: 0 min(20px, 1vw);
+#repo-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .repo-search-results {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.4%;
+  gap: calc(8px + 0.5vw) 1.4vw;
   width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
 }
 
 .interactable {
@@ -16,8 +20,8 @@
 }
 
 @media (max-width: 720px) {
-  .project-container {
-    margin-left: 0;
-    margin-right: 0;
+  .repo-search-results {
+    padding-left: 0;
+    padding-right: 0;
   }
 }

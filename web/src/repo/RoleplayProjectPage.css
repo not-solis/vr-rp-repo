@@ -3,17 +3,35 @@
   inherits: false;
 }
 
-.project-page {
+#project-page {
+  height: 100%;
   position: relative;
-  --project-sidebar-width: min(500px, 20vw + 160px);
+  overflow-x: hidden;
+  --project-sidebar-width: min(500px, 16vw + 160px);
 }
 
-.project-info {
-  padding: 30px 50px;
-  margin-right: var(--project-sidebar-width);
-  transition: margin-right 0.5s;
+#project-info-container {
+  height: 100%;
+  padding: min(30px, 3vw) min(50px, 5vw);
+  box-sizing: border-box;
 }
 
-.project-info.closed {
-  margin-right: 0;
+#project-info {
+  height: 100%;
+  margin: 0;
+  min-width: 300px;
+  transition: margin 0.5s;
+}
+
+@media (min-width: 800px) {
+  #project-info {
+    margin-right: var(--project-sidebar-width);
+    min-width: 300px;
+    transition: margin 0.5s;
+  }
+
+  #project-info.closed {
+    margin-right: calc(var(--project-sidebar-width) * 0.85);
+    margin-left: calc(var(--project-sidebar-width) * 0.15);
+  }
 }

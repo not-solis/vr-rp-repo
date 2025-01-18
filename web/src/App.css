@@ -16,3 +16,22 @@
   filter: brightness(90%);
   box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
 }
+
+#app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-y {
+  overflow-y: scroll;
+}
+
+.hidden-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -2,7 +2,6 @@
   --min-card-width: 500px;
   border-radius: 20px !important;
   border-width: 1.5px !important;
-  margin: max(0.5vw, 8px) 0;
   overflow: hidden;
   font-size: clamp(0.7em, 1vw, 1em);
   min-width: var(--min-card-width);

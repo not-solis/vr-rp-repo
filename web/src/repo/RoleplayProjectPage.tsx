@@ -15,11 +15,14 @@ import {
   RoleplayProject,
   RoleplayLink,
 } from '../model/RoleplayProject';
-
 import './RoleplayProjectPage.css';
 
+const SIDEBAR_START_OPEN_WIDTH = 800;
+
 export const RoleplayProjectPage = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(
+    window.screen.width > SIDEBAR_START_OPEN_WIDTH,
+  );
   const { user } = useAuth();
   const { id } = useParams();
 
@@ -138,7 +141,7 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
   }
 
   return (
-    <div className='project-page'>
+    <div id='project-page'>
       <Helmet>
         <title>{name}</title>
         <meta title={name} />
@@ -147,10 +150,16 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
         <meta property='og:image:alt' content={`${name} icon`} />
         <meta property='og:description' content={shortDescription} />
       </Helmet>
-      <div className={`project-info${isSidebarOpen ? '' : ' closed'}`}>
-        <Typography variant='title'>{project.name}</Typography>
-        {descriptionElement}
+      <div
+        id='project-info-container'
+        className='scrollable-y hidden-scrollbar'
+      >
+        <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
+          <Typography variant='title'>{project.name}</Typography>
+          {descriptionElement}
+        </div>
       </div>
+
       <RoleplayProjectSidebar
         isOpen={isSidebarOpen}
         toggleOpen={() => setSidebarOpen(!isSidebarOpen)}

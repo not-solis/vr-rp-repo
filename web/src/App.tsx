@@ -216,17 +216,9 @@ export function App() {
             <Helmet>
               <meta property='og:url' content={window.location.href} />
             </Helmet>
-            <Box
-              style={{
-                color: theme.palette.text.primary,
-                backgroundColor: theme.palette.background.default,
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
+            <Box id='app-container'>
               <Navbar />
-              <div style={{ flexGrow: 1 }}>
+              <div style={{ flexGrow: 1, minHeight: 0 }}>
                 <BrowserRouter>
                   <Routes>
                     <Route path='/' element={<div>HOME</div>} />
