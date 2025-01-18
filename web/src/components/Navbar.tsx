@@ -38,7 +38,7 @@ export const Navbar = () => {
             return (
               <Link
                 key={t}
-                className={hrefPath === currentPath ? 'selected' : ''}
+                className={currentPath.startsWith(hrefPath) ? 'selected' : ''}
                 href={hrefPath}
                 component='a'
                 variant='h6'
