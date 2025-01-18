@@ -62,7 +62,7 @@ router.get('/', (request, response) => {
     });
 
     // Reset token in cookie
-    response.cookie('token', newToken, {
+    response.cookie('userToken', newToken, {
       maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
     });
