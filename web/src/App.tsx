@@ -120,7 +120,8 @@ export function App() {
             transition: '0.1s ease-out',
             '&:hover': {
               borderColor: '#707176',
-              boxShadow: 'inset 0 0 40px 26px rgba(255, 255, 255, 0.02)',
+              boxShadow:
+                'inset 0 0 40px 26px rgba(255, 255, 255, 0.02), var(--mui-shadows-4)',
             },
           },
         },
