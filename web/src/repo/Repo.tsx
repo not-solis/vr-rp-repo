@@ -10,6 +10,7 @@ import { RoleplayProjectCard } from './RoleplayProjectCard';
 import {
   remapRoleplayProject,
   RoleplayProject,
+  RoleplayStatus,
 } from '../model/RoleplayProject';
 
 const PAGE_SIZE = 50;

@@ -9,7 +9,8 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
-import { TextTag } from '../components/TextTag';
+import { BlurrableTextField } from '../components/BlurrableTextField';
+import { TagTextField } from '../components/TagTextField';
 import './RepoFilters.css';
 
 interface FilterProps {
@@ -35,7 +36,6 @@ export const RepoFilters = (props: FilterProps) => {
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
   const [tempTag, setTempTag] = useState('');
-  // const [status, setStatus] = useState(filters.status);
 
   const applyFilters = () => {
     setNameFilter(name);
@@ -44,7 +44,7 @@ export const RepoFilters = (props: FilterProps) => {
   return (
     <Box id='filter-bar'>
       <FormGroup id='repo-filters'>
-        <TextField
+        <BlurrableTextField
           label='Name'
           variant='outlined'
           onChange={(e) => setName(e.target.value)}
@@ -54,47 +54,40 @@ export const RepoFilters = (props: FilterProps) => {
           value={name}
           size='small'
         />
-        <TextField
+        <TagTextField
           label='Tags'
           variant='outlined'
           onChange={(e) => setTempTag(e.target.value)}
           onBlur={() => {
             if (tempTag) {
-              addTagFilter(tempTag.toLowerCase());
+              addTagFilter(tempTag.toLowerCase().trim());
               setTempTag('');
             }
           }}
           value={tempTag}
           style={{ minWidth: 500, textOverflow: 'inherit' }}
           size='small'
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      gap: 6,
-                    }}
-                  >
-                    {tagFilters &&
-                      tagFilters.length > 0 &&
-                      tagFilters.map((t) => (
-                        <TextTag
-                          tag={t}
-                          variant='body1'
-                          interactive
-                          onClick={() => removeTagFilter(t)}
-                          style={{ paddingTop: 0, paddingBottom: 0 }}
-                        />
-                      ))}
-                  </div>
-                </InputAdornment>
-              ),
-            },
-          }}
+          tags={tagFilters}
+          onTagClick={(t) => () => removeTagFilter(t)}
         />
+
+        {/* <FormControl style={{ minWidth: '80px' }}>
+          <InputLabel id='status-label'>Status</InputLabel>
+          <Select
+            labelId='status-label'
+            value={status ?? 0}
+            label='Status'
+            size='small'
+            onChange={(e) => setStatus(e.target.value as RoleplayStatus)}
+          >
+            <MenuItem value={RoleplayStatus.Unknown}>Any</MenuItem>
+            <MenuItem value={RoleplayStatus.Active}>Active</MenuItem>
+            <MenuItem value={RoleplayStatus.Inactive}>Inactive</MenuItem>
+            <MenuItem value={RoleplayStatus.Upcoming}>Upcoming</MenuItem>
+            <MenuItem value={RoleplayStatus.Hiatus}>Hiatus</MenuItem>
+          </Select>
+        </FormControl> */}
+
         <FormControlLabel
           control={
             <Checkbox
@@ -110,25 +103,6 @@ export const RepoFilters = (props: FilterProps) => {
             },
           }}
         />
-
-        {/* <FormControl style={{ minWidth: '80px' }}>
-          <InputLabel id='status-label'>Status</InputLabel>
-          <Select
-            labelId='status-label'
-            value={status ?? 0}
-            label='Status'
-            autoWidth
-            onChange={(e) =>
-              setStatus((e.target.value as RoleplayStatus) || undefined)
-            }
-          >
-            <MenuItem value={0}>Any</MenuItem>
-            <MenuItem value={RoleplayStatus.Active}>Active</MenuItem>
-            <MenuItem value={RoleplayStatus.Inactive}>Inactive</MenuItem>
-            <MenuItem value={RoleplayStatus.Upcoming}>Upcoming</MenuItem>
-            <MenuItem value={RoleplayStatus.Hiatus}>Hiatus</MenuItem>
-          </Select>
-        </FormControl> */}
 
         {/* <Button
           type='submit'
