@@ -100,9 +100,13 @@ export function App() {
     components: {
       MuiMenu: {
         styleOverrides: {
+          root: {
+            display: 'contents',
+          },
           paper: {
             backgroundImage: 'var(--mui-overlays-1)',
             backgroundColor: 'var(--mui-palette-background-default)',
+            zIndex: 4000,
           },
         },
       },
