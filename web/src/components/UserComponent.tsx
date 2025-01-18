@@ -123,6 +123,11 @@ export const UserComponent = () => {
         MenuListProps={{
           'aria-labelledby': 'user-button',
         }}
+        slotProps={{
+          root: {
+            style: { display: 'contents' },
+          },
+        }}
       >
         <li style={{ padding: '6px 12px' }}>
           <TextField
