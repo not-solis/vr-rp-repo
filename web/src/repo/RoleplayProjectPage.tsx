@@ -37,10 +37,15 @@ import './RoleplayProjectPage.css';
 
 const SIDEBAR_START_OPEN_WIDTH = 800;
 
-export const RoleplayProjectPage = () => {
-  const [isEditing, setEditing] = useState(false);
+interface RoleplayProjectPageProps {
+  isNew?: boolean;
+}
+
+export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
+  const { isNew } = props;
+  const [isEditing, setEditing] = useState(isNew);
   const [isPreviewDescription, setPreviewDescription] = useState(false);
-  const [editProject, setEditProject] = useState<RoleplayProject>(
+  const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
     {} as RoleplayProject,
   );
   const [isSidebarOpen, setSidebarOpen] = useState(
@@ -49,11 +54,17 @@ export const RoleplayProjectPage = () => {
   const { user, isAuthenticated } = useAuth();
   const { id } = useParams();
 
+  if (isNew && !isEditing) {
+    // No empty new page.
+    window.location.href = '/repo';
+  }
+
   const {
     data: projectData,
     error,
     isLoading,
   } = useQuery({
+    enabled: !isNew,
     queryKey: ['projects'],
     queryFn: () =>
       fetch(`http://localhost:3001/projects/${id}`, {
@@ -69,6 +80,7 @@ export const RoleplayProjectPage = () => {
   });
 
   const { data: owners, isLoading: ownersLoading } = useQuery({
+    enabled: !isNew,
     queryKey: ['projectOwners'],
     queryFn: () =>
       fetch(`http://localhost:3001/projects/${id}/owners`, {
@@ -87,6 +99,7 @@ export const RoleplayProjectPage = () => {
   });
 
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
+    enabled: !isNew,
     queryKey: ['projectLinks'],
     queryFn: () =>
       fetch(`http://localhost:3001/projects/${id}/links`, {
@@ -102,13 +115,13 @@ export const RoleplayProjectPage = () => {
     return <div>Error loading page.</div>;
   }
 
-  if (isLoading) {
+  if (isLoading && !isNew) {
     return <div>Loading...</div>;
   }
 
-  if (!projectData) {
+  if (!projectData && !isNew) {
     // ID is invalid
-    window.location.href = '/';
+    window.location.href = '/repo';
     return null;
   }
 
@@ -219,18 +232,24 @@ export const RoleplayProjectPage = () => {
     setPreviewDescription(false);
   };
 
+  const saveProject = () => {
+    cancelEdit();
+  };
+
+  const metaName = isNew ? 'New RP Project' : projectData?.name;
+  const metaDescription = isNew
+    ? 'Create a new roleplay project in the Repo'
+    : projectData?.shortDescription;
+
   return (
     <div id='project-page'>
       <Helmet>
-        <title>{projectData.name}</title>
-        <meta title={projectData.name} />
-        <meta property='og:title' content={projectData.name} />
-        <meta property='og:image' content={projectData.imageUrl} />
-        <meta property='og:image:alt' content={`${projectData.name} icon`} />
-        <meta
-          property='og:description'
-          content={projectData.shortDescription}
-        />
+        <title>{metaName}</title>
+        <meta title={metaName} />
+        <meta property='og:title' content={metaName} />
+        <meta property='og:image' content={projectData?.imageUrl} />
+        <meta property='og:image:alt' content={`${metaName} icon`} />
+        <meta property='og:description' content={metaDescription} />
       </Helmet>
       <div
         id='project-info-container'
@@ -239,7 +258,8 @@ export const RoleplayProjectPage = () => {
         <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
           {isEditing ? (
             <TextField
-              label='Title'
+              required
+              label='Name'
               value={name}
               onChange={(e) =>
                 setEditProject({ ...project, name: e.currentTarget.value })
@@ -336,7 +356,7 @@ export const RoleplayProjectPage = () => {
         isOpen={isSidebarOpen}
         isEditing={isEditing}
         toggleOpen={() => setSidebarOpen(!isSidebarOpen)}
-        project={project}
+        project={project as RoleplayProject}
         setEditProject={setEditProject}
       />
     </div>

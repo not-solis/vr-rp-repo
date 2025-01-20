@@ -152,6 +152,10 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     );
   });
 
+  const metaverseText = `${isMetaverse ? 'In' : 'Not in'} the Metaverse`;
+  const suppCastText = `Supporting Cast positions ${hasSupportingCast ? '' : 'not '}available`;
+  const questCompatibleText = `${isQuestCompatible ? '' : 'Not '}Quest compatible`;
+
   return (
     <div className={`project-sidebar ${isOpen ? '' : ' closed'}`}>
       <div
@@ -293,7 +297,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
             <IconText
               tooltip='Metaverse'
               tooltipPlacement='left'
-              text={`${isMetaverse ? 'In' : 'Not in'} the Metaverse`}
+              text={metaverseText}
               icon={'globe'}
               component={
                 isEditing ? (
@@ -311,7 +315,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                         style={{ padding: 0, paddingRight: 8 }}
                       />
                     }
-                    label='Metaverse'
+                    label={metaverseText}
                     style={{ margin: 0, paddingTop: 4 }}
                   />
                 ) : undefined
@@ -320,9 +324,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
             <IconText
               tooltip={'Supporting Cast'}
               tooltipPlacement='left'
-              text={`Support cast positions ${
-                hasSupportingCast ? '' : 'un'
-              }available`}
+              text={suppCastText}
               icon={'handshake'}
               component={
                 isEditing ? (
@@ -340,7 +342,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                         style={{ padding: 0, paddingRight: 8 }}
                       />
                     }
-                    label='Supporting Cast Available'
+                    label={suppCastText}
                     style={{ margin: 0, paddingTop: 4 }}
                   />
                 ) : undefined
@@ -349,7 +351,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
             <IconText
               tooltip={'Quest Compatibility'}
               tooltipPlacement='left'
-              text={`${isQuestCompatible ? '' : 'Not '}Quest compatible`}
+              text={questCompatibleText}
               icon={'meta'}
               iconPrefix='fab'
               component={
@@ -368,7 +370,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                         style={{ padding: 0, paddingRight: 8 }}
                       />
                     }
-                    label='Quest Compatible'
+                    label={questCompatibleText}
                     style={{ margin: 0, paddingTop: 4 }}
                   />
                 ) : undefined

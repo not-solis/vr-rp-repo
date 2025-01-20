@@ -1,10 +1,14 @@
+import { Add } from '@mui/icons-material';
 import {
   Box,
   Checkbox,
   FormControlLabel,
   FormGroup,
+  IconButton,
   InputAdornment,
+  Link,
   TextField,
+  Typography,
   useTheme,
 } from '@mui/material';
 import { useState } from 'react';
@@ -95,6 +99,23 @@ export const RepoFilters = (props: FilterProps) => {
             },
           }}
         />
+
+        <Link
+          href='/repo/new'
+          style={{ marginLeft: 'auto', textDecoration: 'none' }}
+        >
+          <IconButton
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              borderRadius: 8,
+            }}
+          >
+            <Add />
+            <Typography variant='body1'>Add New</Typography>
+          </IconButton>
+        </Link>
 
         {/* <Button
           type='submit'

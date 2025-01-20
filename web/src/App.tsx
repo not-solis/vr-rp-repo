@@ -237,6 +237,10 @@ export function App() {
                   <Routes>
                     <Route path='/' element={<div>HOME</div>} />
                     <Route path='/repo' element={<Repo />} />
+                    <Route
+                      path='/repo/new'
+                      element={<RoleplayProjectPage isNew />}
+                    />
                     <Route path='/repo/:id' element={<RoleplayProjectPage />} />
                     <Route
                       path='/blog'
