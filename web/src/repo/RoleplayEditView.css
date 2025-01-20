@@ -1,0 +1,22 @@
+#edit-view {
+  display: inline-grid;
+  grid-auto-rows: 38.5px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  row-gap: 24px;
+  column-gap: 24px;
+  padding: min(48px, 4vw);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#edit-view-submit {
+  color: var(--mui-palette-text-primary);
+  border-color: var(--mui-palette-text-secondary);
+}
+
+#edit-close-button {
+  --close-button-distance: min(12px, 0.6vw);
+  position: absolute;
+  top: var(--close-button-distance);
+  right: var(--close-button-distance);
+}

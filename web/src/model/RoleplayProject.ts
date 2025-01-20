@@ -8,7 +8,6 @@ export enum RoleplayStatus {
 }
 
 export enum RoleplayEntryProcess {
-  Unknown = 'Unknown',
   Open = 'Open',
   Vouch = 'Vouch',
   Vetting = 'Vetting',
@@ -17,7 +16,6 @@ export enum RoleplayEntryProcess {
 }
 
 export enum RoleplayApplicationProcess {
-  Unknown = 'Unknown',
   NoApplication = 'None',
   PlayerApplication = 'Player App',
   CharacterSheet = 'Character Sheet',

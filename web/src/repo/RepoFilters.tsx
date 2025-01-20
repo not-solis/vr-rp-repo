@@ -35,7 +35,6 @@ export const RepoFilters = (props: FilterProps) => {
   } = props;
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
-  const [tempTag, setTempTag] = useState('');
 
   const applyFilters = () => {
     setNameFilter(name);
@@ -57,18 +56,11 @@ export const RepoFilters = (props: FilterProps) => {
         <TagTextField
           label='Tags'
           variant='outlined'
-          onChange={(e) => setTempTag(e.target.value)}
-          onBlur={() => {
-            if (tempTag) {
-              addTagFilter(tempTag.toLowerCase().trim());
-              setTempTag('');
-            }
-          }}
-          value={tempTag}
-          style={{ minWidth: 500, textOverflow: 'inherit' }}
+          addTag={addTagFilter}
+          style={{ width: 500 }}
           size='small'
           tags={tagFilters}
-          onTagClick={(t) => () => removeTagFilter(t)}
+          onTagClick={removeTagFilter}
         />
 
         {/* <FormControl style={{ minWidth: '80px' }}>

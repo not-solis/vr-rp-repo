@@ -85,10 +85,30 @@ export const Repo = () => {
 
   const projects = pageData?.pages.map((p) => p.data).flat();
 
+  let results = null;
   if (isFetching && (projects?.length ?? 0) === 0) {
-    return <div>Loading repo...</div>;
+    results = <div>Loading repo...</div>;
   } else if (error) {
-    return <div>Error loading repo, please try again.</div>;
+    results = <div>Error loading repo, please try again.</div>;
+  } else {
+    results = (
+      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
+        <InfiniteScroll
+          scrollableTarget='repo-scroll-box'
+          className='repo-search-results'
+          dataLength={projects?.length ?? 0}
+          next={() => !isFetching && fetchNextPage()}
+          hasMore={hasNextPage}
+          loader={
+            isFetchingNextPage ? <h4>Loading...</h4> : <h4>End of the line</h4>
+          } // TODO: use nicer loader
+        >
+          {projects?.map((p) => (
+            <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
+          ))}
+        </InfiniteScroll>
+      </div>
+    );
   }
 
   return (
@@ -111,22 +131,7 @@ export const Repo = () => {
         showActiveOnly={showActiveOnly}
         setShowActiveOnly={setShowActiveOnly}
       />
-      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
-        <InfiniteScroll
-          scrollableTarget='repo-scroll-box'
-          className='repo-search-results'
-          dataLength={projects?.length ?? 0}
-          next={() => !isFetching && fetchNextPage()}
-          hasMore={hasNextPage}
-          loader={
-            isFetchingNextPage ? <h4>Loading...</h4> : <h4>End of the line</h4>
-          } // TODO: use nicer loader
-        >
-          {projects?.map((p) => (
-            <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
-          ))}
-        </InfiniteScroll>
-      </div>
+      {results}
     </Box>
   );
 };

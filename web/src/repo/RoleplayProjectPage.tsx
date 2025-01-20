@@ -1,13 +1,29 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CardMedia, Typography, useTheme } from '@mui/material';
+import {
+  Cancel,
+  Edit,
+  Save,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material';
+import {
+  Button,
+  CardMedia,
+  IconButton,
+  TextField,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
+import { RoleplayEditView } from './RoleplayEditView';
 import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
 import { IconText } from '../components/IconText';
-import { TextTag } from '../components/TextTag';
+import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { useAuth } from '../context/AuthProvider';
 import {
@@ -15,19 +31,26 @@ import {
   RoleplayProject,
   RoleplayLink,
 } from '../model/RoleplayProject';
+import { User, UserRole } from '../model/User';
+
 import './RoleplayProjectPage.css';
 
 const SIDEBAR_START_OPEN_WIDTH = 800;
 
 export const RoleplayProjectPage = () => {
+  const [isEditing, setEditing] = useState(false);
+  const [isPreviewDescription, setPreviewDescription] = useState(false);
+  const [editProject, setEditProject] = useState<RoleplayProject>(
+    {} as RoleplayProject,
+  );
   const [isSidebarOpen, setSidebarOpen] = useState(
     window.screen.width > SIDEBAR_START_OPEN_WIDTH,
   );
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { id } = useParams();
 
   const {
-    data: project,
+    data: projectData,
     error,
     isLoading,
   } = useQuery({
@@ -45,6 +68,36 @@ export const RoleplayProjectPage = () => {
         }),
   });
 
+  const { data: owners, isLoading: ownersLoading } = useQuery({
+    queryKey: ['projectOwners'],
+    queryFn: () =>
+      fetch(`http://localhost:3001/projects/${id}/owners`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => res.json())
+        .then<User[]>((json) =>
+          json.data.map((user: any) => ({
+            id: user.id,
+            name: user.name,
+            discordId: user.discord_id,
+          })),
+        ),
+  });
+
+  const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
+    queryKey: ['projectLinks'],
+    queryFn: () =>
+      fetch(`http://localhost:3001/projects/${id}/links`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => res.json())
+        .then<RoleplayLink[]>((json) => json.data),
+  });
+
   if (error) {
     return <div>Error loading page.</div>;
   }
@@ -53,73 +106,89 @@ export const RoleplayProjectPage = () => {
     return <div>Loading...</div>;
   }
 
-  if (!project) {
+  if (!projectData) {
     // ID is invalid
     window.location.href = '/';
     return null;
   }
 
+  const project = isEditing
+    ? editProject
+    : { ...projectData, owners: owners ?? [], otherLinks: otherLinks ?? [] };
+
+  const canEdit =
+    user?.role == UserRole.Admin ||
+    (owners && owners.some((owner) => owner.id === user?.id));
+
   // TODO: DELETE
   project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif';
-  project.description = `
-  # Vertit auras ille
 
-## Vana nitidissima fugit portat
+  const { name, description, shortDescription } = project;
 
-Lorem markdownum mihi. Post nunc pater, puerum Cnosia iamque, dei suus ritu,
-mixtaeque aries. *Elin est*, et abesse e auctor sanguine fossas. Una virtus
-vires; cum discedit defectos, [tueri](http://www.quasfuerat.net/ferrum.php) dum!
-Infitianda honoratos longe: **iura**: posse fuit ab siquid est, lateri sequitur
-et nisi.
-
-Inbutum faciente, Clytii tu infelix ordine et positus fertur conpositas dedit
-palmas numina! Dicta verba, pecudesque *nunc*: poenam patriaque notam, frater
-gaudet, ira cum redeamus? Si dicta materiam iungit; nondum non ne domosque
-fessos cum rudente poteram, morte. Sua matrem recusat numina precari
-[ululatibus](http://dabaturmoly.com/pertimui.aspx) recumbis
-
-### Gloria subit neque
-
-Catenis meritis aliisque natantia dubitet certamine terribili in muros sine.
-Fugit finierat mea cetera reddit crescere **Pario** sub velant quorum, illo.
-
-> Nunc tellus, sub nostros inplicuit cineres Talia contenta et altis: et. Dantur
-dabat gradu sibi promptu Nise, nec, *a supplex sine*, satis facti.
-
-- Abdita nec nec conpescuit lintea utque
-- Adoratis ornabant simul
-- In primi fastigia nitidum currum iusto capiunt
-- Vestes quidve
-
-## Moveant inpatiens natus
-
-Dabat Oechalia congerie volucres dant caede repellite et certe, proles neque
-Bacchus coniunx citus num lecto illo mille. Torvis umeros. Mora alvum erat piae
-petit: urbem, opus ille oblivia corpora *Propoetides* aura edidicisse iam nec;
-**ubi**.
-
-- Quibus Pyramus fatigat vultu silentia Caenis incinxit
-- Macareus ubi eventu stimulis inpune auxiliaris cetera
-- Partim volucres
-- Saturnia turba
-- Flammaeque satis
-- Non at victima visa mille nostri coepit
-
-## Redditur vincendo
-
-Vestis qua videant parva si tale ut Asopidos numina: dixit deos impetus in quae.
-Prosunt pependit an vulnera nervis.
-
-Tendunt suos parari poscor hominis meorum traherent erat des multiplicique
-petebar teneros. Genus profana spolieris, ille coepit solverat et duxit stupuit!
-Sortem distinctas *sic* mox molles luridus scitis *aras Iuppiter* manum nunc
-cadit cervus vulnera adhuc virentem est dixit iaculo.
-  `;
-
-  const { name, description, shortDescription, imageUrl } = project;
+  const previewButton = (
+    <IconButton
+      style={{ position: 'absolute', top: 5, right: 8 }}
+      onClick={() => setPreviewDescription(!isPreviewDescription)}
+    >
+      {isPreviewDescription ? <VisibilityOff /> : <Visibility />}
+    </IconButton>
+  );
 
   let descriptionElement;
-  if (description) {
+  if (isEditing) {
+    descriptionElement = (
+      <>
+        <TextField
+          label='Short Description'
+          value={shortDescription}
+          multiline
+          minRows={2}
+          onChange={(e) =>
+            setEditProject({
+              ...project,
+              shortDescription: e.currentTarget.value.substring(0, 512),
+            })
+          }
+          style={{ width: 600, maxWidth: 'calc(100% - 240px)' }}
+          helperText='Max length: 512 characters'
+        />
+        {isPreviewDescription ? (
+          <Typography
+            variant='text'
+            style={{
+              position: 'relative',
+              border: '1px solid var(--mui-palette-divider)',
+              borderRadius: 4,
+              minHeight: 50,
+              paddingLeft: 12,
+            }}
+          >
+            <ThemedMarkdown>{description}</ThemedMarkdown>
+            {previewButton}
+          </Typography>
+        ) : (
+          <TextField
+            label='Description'
+            value={description}
+            multiline
+            minRows={8}
+            fullWidth
+            onChange={(e) =>
+              setEditProject({
+                ...project,
+                description: e.currentTarget.value,
+              })
+            }
+            slotProps={{
+              input: {
+                endAdornment: previewButton,
+              },
+            }}
+          />
+        )}
+      </>
+    );
+  } else if (description) {
     descriptionElement = (
       <Typography variant='text'>
         <ThemedMarkdown>{description}</ThemedMarkdown>
@@ -140,30 +209,135 @@ cadit cervus vulnera adhuc virentem est dixit iaculo.
     );
   }
 
+  const startEdit = () => {
+    setEditing(true);
+    setEditProject(structuredClone(project));
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    setPreviewDescription(false);
+  };
+
   return (
     <div id='project-page'>
       <Helmet>
-        <title>{name}</title>
-        <meta title={name} />
-        <meta property='og:title' content={name} />
-        <meta property='og:image' content={imageUrl} />
-        <meta property='og:image:alt' content={`${name} icon`} />
-        <meta property='og:description' content={shortDescription} />
+        <title>{projectData.name}</title>
+        <meta title={projectData.name} />
+        <meta property='og:title' content={projectData.name} />
+        <meta property='og:image' content={projectData.imageUrl} />
+        <meta property='og:image:alt' content={`${projectData.name} icon`} />
+        <meta
+          property='og:description'
+          content={projectData.shortDescription}
+        />
       </Helmet>
       <div
         id='project-info-container'
         className='scrollable-y hidden-scrollbar'
       >
         <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
-          <Typography variant='title'>{project.name}</Typography>
+          {isEditing ? (
+            <TextField
+              label='Title'
+              value={name}
+              onChange={(e) =>
+                setEditProject({ ...project, name: e.currentTarget.value })
+              }
+              style={{ width: 'calc(100% - 240px)' }}
+              sx={{
+                '.MuiInputLabel-shrink': {
+                  fontSize: '1.6rem !important',
+                  lineHeight: '1.1em !important',
+                },
+                '.MuiOutlinedInput-root': {
+                  fieldset: {
+                    fontSize: '1.6rem',
+                  },
+                },
+              }}
+              slotProps={{
+                input: {
+                  style: { font: 'var(--mui-font-h1)' },
+                },
+                inputLabel: {
+                  style: {
+                    font: 'var(--mui-font-h1)',
+                    lineHeight: 1.55,
+                  },
+                },
+              }}
+            />
+          ) : (
+            <Typography variant='title'>{name}</Typography>
+          )}
           {descriptionElement}
+          {!isLoading &&
+            !ownersLoading &&
+            !otherLinksLoading &&
+            canEdit &&
+            (isEditing ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  display: 'flex',
+                  gap: 8,
+                }}
+              >
+                <IconButton
+                  style={{
+                    borderRadius: 8,
+                  }}
+                  onClick={() => {
+                    console.log('Save', project);
+                    cancelEdit();
+                  }}
+                >
+                  <Save style={{ paddingRight: 8 }} />
+                  <Typography>Save</Typography>
+                </IconButton>
+                <IconButton
+                  style={{
+                    borderRadius: 8,
+                  }}
+                  onClick={cancelEdit}
+                >
+                  <Cancel style={{ paddingRight: 8 }} />
+                  <Typography>Cancel</Typography>
+                </IconButton>
+              </div>
+            ) : (
+              <IconButton
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  borderRadius: 8,
+                }}
+                onClick={startEdit}
+              >
+                <Edit style={{ paddingRight: 8 }} />
+                <Typography>Edit</Typography>
+              </IconButton>
+            ))}
         </div>
       </div>
 
+      {/* <RoleplayEditView
+        isNew={true}
+        close={() => setEditing(false)}
+        isOpen={isEditing}
+        project={project}
+      /> */}
+
       <RoleplayProjectSidebar
         isOpen={isSidebarOpen}
+        isEditing={isEditing}
         toggleOpen={() => setSidebarOpen(!isSidebarOpen)}
         project={project}
+        setEditProject={setEditProject}
       />
     </div>
   );

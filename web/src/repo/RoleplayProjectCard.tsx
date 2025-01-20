@@ -11,7 +11,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import { IconText } from '../components/IconText';
-import { TextTag } from '../components/TextTag';
+import { TagChip } from '../components/TagChip';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProject, RoleplayStatus } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
@@ -121,8 +121,8 @@ export const RoleplayProjectCard = (props: {
                     {isOwner && ' (OWNED)'}
                   </Typography>
                 </Tooltip>
-                <TextTag
-                  tag={status}
+                <TagChip
+                  label={status}
                   style={{
                     backgroundColor: statusColors[status],
                   }}
@@ -136,12 +136,11 @@ export const RoleplayProjectCard = (props: {
               )}
 
               {tags && tags.length > 0 && (
-                <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {tags.map((tag) => (
-                    <TextTag
+                    <TagChip
                       key={tag}
-                      tag={tag}
-                      interactive
+                      label={tag}
                       onClick={(e: any) => {
                         e.preventDefault();
                         addTag(tag);

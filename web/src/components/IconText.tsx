@@ -1,9 +1,11 @@
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, Tooltip, Typography } from '@mui/material';
+import { Link, TextFieldProps, Tooltip, Typography } from '@mui/material';
+
+import { BlurrableTextField } from './BlurrableTextField';
 
 interface IconTextProps {
-  text: string;
+  text?: string;
   url?: string;
   tooltip?: string;
   tooltipPlacement?:
@@ -22,6 +24,8 @@ interface IconTextProps {
   icon?: IconName;
   iconPrefix?: IconPrefix;
   iconPadding?: number | string;
+  containerStyle?: React.CSSProperties;
+  component?: JSX.Element;
 }
 
 export const IconText = (props: IconTextProps) => {
@@ -33,32 +37,36 @@ export const IconText = (props: IconTextProps) => {
     icon,
     iconPrefix,
     iconPadding,
+    containerStyle = {},
+    component,
   } = props;
-  let linkElement = (
-    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+
+  let textElement = (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: component ? 'center' : 'flex-start',
+        ...containerStyle,
+      }}
+    >
       {icon && (
         <FontAwesomeIcon
           height={4}
           fixedWidth={true}
-          style={{ fontSize: 16, paddingTop: 4 }}
+          style={{
+            fontSize: 16,
+            paddingTop: 4,
+            paddingRight: icon ? (iconPadding ?? 12) : 0,
+          }}
           icon={[iconPrefix ?? 'fas', icon]}
         />
       )}
-      <Typography
-        variant='body1'
-        style={{ paddingLeft: icon ? (iconPadding ?? 12) : 0 }}
-      >
-        {text}
-      </Typography>
+      {component || (text && <Typography variant='body1'>{text}</Typography>)}
     </div>
   );
 
-  if (url) {
-    linkElement = <Link href={url}>{linkElement}</Link>;
-  }
-
   if (tooltip) {
-    linkElement = (
+    textElement = (
       <Tooltip
         title={tooltip}
         placement={tooltipPlacement ?? 'top'}
@@ -70,9 +78,13 @@ export const IconText = (props: IconTextProps) => {
           },
         }}
       >
-        {linkElement}
+        {textElement}
       </Tooltip>
     );
   }
-  return linkElement;
+
+  if (url) {
+    textElement = <Link href={url}>{textElement}</Link>;
+  }
+  return textElement;
 };

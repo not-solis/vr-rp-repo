@@ -102,6 +102,14 @@ export function App() {
       divider: '#44454a',
     },
     components: {
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            backgroundImage: 'var(--mui-overlays-1)',
+            backgroundColor: 'var(--mui-palette-background-default)',
+          },
+        },
+      },
       MuiMenu: {
         styleOverrides: {
           paper: {
@@ -118,7 +126,7 @@ export function App() {
             '&:hover': {
               borderColor: '#707176',
               boxShadow:
-                'inset 0 0 40px 26px rgba(255, 255, 255, 0.02), var(--mui-shadows-4)',
+                'inset 0 0 40px 26px rgba(255, 255, 255, 0.02), var(--mui-shadows-6)',
             },
           },
         },

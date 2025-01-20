@@ -5,7 +5,6 @@
   right: 0;
   width: var(--project-sidebar-width);
   height: 100%;
-  /* border-left: 2px solid var(--mui-palette-divider); */
   box-shadow:
     -2px 0px 4px -1px rgba(0, 0, 0, 0.2),
     -4px 0px 5px 0px rgba(0, 0, 0, 0.14),
@@ -18,8 +17,8 @@
 .project-sidebar #sidebar-toggle {
   --toggle-width: 42px;
   position: absolute;
-  top: 40px;
-  left: calc(var(--toggle-width) * -1 - 0.6px);
+  top: 100px;
+  left: calc(var(--toggle-width) * -1);
   background-color: var(--mui-palette-background-dark);
   width: var(--toggle-width);
   height: 36px;
@@ -29,7 +28,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  /* border: 2px solid var(--mui-palette-divider); */
   box-shadow:
     -1px 1px 4px -1px rgba(0, 0, 0, 0.2),
     -3px 3px 5px 0px rgba(0, 0, 0, 0.14);

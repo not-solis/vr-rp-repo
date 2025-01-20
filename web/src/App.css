@@ -9,7 +9,7 @@
 
 .interactable {
   cursor: pointer;
-  transition: 0.08s;
+  transition: 0.08s !important;
 }
 
 .interactable:hover {

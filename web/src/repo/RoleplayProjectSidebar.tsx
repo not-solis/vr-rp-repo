@@ -1,26 +1,46 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CardMedia } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import { RefObject } from 'react';
+import { Add, Delete } from '@mui/icons-material';
+import {
+  CardMedia,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Typography,
+} from '@mui/material';
 
+import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
-import { TextTag } from '../components/TextTag';
+import { StringEnumSelector } from '../components/StringEnumSelector';
+import { TagChip } from '../components/TagChip';
+import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
-import { RoleplayLink, RoleplayProject } from '../model/RoleplayProject';
-import { User } from '../model/User';
+import {
+  RoleplayApplicationProcess,
+  RoleplayEntryProcess,
+  RoleplayLink,
+  RoleplayProject,
+} from '../model/RoleplayProject';
 import './RoleplayProjectSidebar.css';
 
 interface RoleplayProjectSidebarProps {
   isOpen: boolean;
+  isEditing?: boolean;
   toggleOpen: () => void;
   project: RoleplayProject;
+  setEditProject: (project: RoleplayProject) => void;
 }
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { user, isAuthenticated } = useAuth();
-  const { isOpen, toggleOpen, project } = props;
   const {
-    id,
+    isOpen,
+    isEditing = false,
+    toggleOpen,
+    project,
+    setEditProject,
+  } = props;
+  const {
+    owners,
     imageUrl,
     tags,
     setting,
@@ -30,189 +50,376 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     hasSupportingCast,
     isQuestCompatible,
     discordUrl,
+    otherLinks,
   } = project;
 
-  const {
-    data: owners,
-    error: ownersError,
-    isLoading: isOwnersLoading,
-  } = useQuery({
-    queryKey: ['projectOwners'],
-    queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/owners`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<User[]>((json) =>
-          json.data.map((user: any) => ({
-            id: user.id,
-            name: user.name,
-            discordId: user.discord_id,
-          })),
-        ),
-  });
-
-  const {
-    data: otherLinks,
-    error: otherLinksError,
-    isLoading: isOtherLinksLoading,
-  } = useQuery({
-    queryKey: ['projectLinks'],
-    queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/links`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<RoleplayLink[]>((json) => json.data),
-  });
-
   const sidebarLinks = [];
-  if (discordUrl) {
+  if (isEditing || discordUrl) {
     sidebarLinks.push(
       <IconText
-        key={'Discord'}
-        text={'Discord'}
-        tooltip={'Discord'}
+        key='Discord'
+        text='Discord'
+        tooltip='Discord'
         tooltipPlacement='left'
-        icon={'discord'}
+        icon='discord'
         iconPrefix='fab'
-        url={discordUrl}
+        url={isEditing ? '' : discordUrl}
+        containerStyle={{ width: '100%' }}
+        component={
+          isEditing ? (
+            <BlurrableTextField
+              label='Discord URL'
+              variant='standard'
+              size='small'
+              value={discordUrl ?? ''}
+              type='url'
+              onChange={(e) =>
+                setEditProject({ ...project, discordUrl: e.target.value })
+              }
+              style={{ width: '74%' }}
+            />
+          ) : undefined
+        }
       />,
     );
   }
-  if (!isOtherLinksLoading && !otherLinksError && otherLinks) {
-    otherLinks.forEach((link) =>
-      sidebarLinks.push(
-        <IconText
-          key={link.url}
-          text={link.label}
-          tooltip={link.label}
-          tooltipPlacement='left'
-          icon={'link'}
-          url={link.url}
-        />,
-      ),
+  otherLinks?.forEach((link, i) => {
+    const { label = '', url = '' } = link;
+    sidebarLinks.push(
+      <IconText
+        key={i}
+        text={label}
+        tooltip={isEditing ? '' : label}
+        tooltipPlacement='left'
+        icon='link'
+        url={isEditing ? '' : url}
+        containerStyle={{ width: '95%' }}
+        component={
+          isEditing ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  width: '100%',
+                }}
+              >
+                <BlurrableTextField
+                  label='Label'
+                  variant='standard'
+                  size='small'
+                  value={label}
+                  onChange={(e) => {
+                    otherLinks[i].label = e.target.value;
+                    setEditProject({ ...project, otherLinks: otherLinks });
+                  }}
+                  style={{ width: '60%' }}
+                />
+                <BlurrableTextField
+                  label='URL'
+                  variant='standard'
+                  size='small'
+                  value={url}
+                  type='url'
+                  onChange={(e) => {
+                    otherLinks[i].url = e.target.value;
+                    setEditProject({ ...project, otherLinks: otherLinks });
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <IconButton
+                size='large'
+                onClick={() => {
+                  otherLinks.splice(i, 1);
+                  setEditProject({ ...project, otherLinks: otherLinks });
+                }}
+              >
+                <Delete style={{ fontSize: 24 }} />
+              </IconButton>
+            </div>
+          ) : undefined
+        }
+      />,
     );
-  }
+  });
 
   return (
-    <div className={`project-sidebar${isOpen ? '' : ' closed'}`}>
-      <div id='project-sidebar-content'>
-        {imageUrl && (
-          <CardMedia component='img' image={imageUrl} alt={`${name} icon`} />
-        )}
-
-        {tags && tags.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: 6,
-            }}
-          >
-            {tags.map((t) => (
-              <TextTag key={t} tag={t} />
-            ))}
-          </div>
-        )}
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: 4,
-          }}
-        >
-          {!ownersError && !isOwnersLoading && owners && owners.length > 0 && (
-            <IconText
-              tooltip={'Owners'}
-              tooltipPlacement='left'
-              text={owners.map((o) => o.name).join(', ')}
-              icon={'user'}
-            />
+    <div className={`project-sidebar ${isOpen ? '' : ' closed'}`}>
+      <div
+        className='scrollable-y hidden-scrollbar'
+        style={{ width: '100%', height: '100%' }}
+      >
+        <div id='project-sidebar-content'>
+          {imageUrl && (
+            <CardMedia component='img' image={imageUrl} alt={`${name} icon`} />
           )}
-          {setting && (
-            <IconText
-              tooltip={'Setting'}
-              tooltipPlacement='left'
-              text={setting}
-              icon={'earth-americas'}
-            />
-          )}
-          <IconText
-            tooltip={'Metaverse'}
-            tooltipPlacement='left'
-            text={`${isMetaverse ? 'In' : 'Not in'} the Metaverse`}
-            icon={'globe'}
-          />
-          <IconText
-            tooltip={'Entry Process'}
-            tooltipPlacement='left'
-            text={entryProcess}
-            icon={'door-open'}
-          />
-          <IconText
-            tooltip={'Application Process'}
-            tooltipPlacement='left'
-            text={applicationProcess}
-            icon={'clipboard'}
-            iconPrefix='far'
-          />
-          <IconText
-            tooltip={'Supporting Cast'}
-            tooltipPlacement='left'
-            text={`Support cast positions ${
-              hasSupportingCast ? '' : 'un'
-            }available`}
-            icon={'handshake'}
-          />
-          <IconText
-            tooltip={'Quest Compatibility'}
-            tooltipPlacement='left'
-            text={`${isQuestCompatible ? '' : 'Not '}Quest compatible`}
-            icon={'meta'}
-            iconPrefix='fab'
-          />
-        </div>
 
-        {sidebarLinks.length > 0 && (
+          {isEditing ? (
+            <TagTextField
+              tags={tags}
+              label='Tags'
+              variant='outlined'
+              fullWidth
+              addTag={(tag) => {
+                if (!tags.includes(tag)) {
+                  setEditProject({ ...project, tags: [...tags, tag] });
+                }
+              }}
+              style={{ width: '100%' }}
+              size='small'
+              onTagClick={(tag) =>
+                setEditProject({
+                  ...project,
+                  tags: tags.filter((t) => t !== tag),
+                })
+              }
+            />
+          ) : (
+            tags &&
+            tags.length > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: 6,
+                }}
+              >
+                {tags.map((t) => (
+                  <TagChip key={t} label={t} />
+                ))}
+              </div>
+            )
+          )}
+
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: 4,
+              gap: isEditing ? 12 : 4,
+              width: '100%',
             }}
           >
-            {sidebarLinks}
+            {owners && owners.length > 0 && (
+              <IconText
+                tooltip={'Owners'}
+                tooltipPlacement='left'
+                text={owners.map((o) => o.name).join(', ')}
+                icon={'user'}
+              />
+            )}
+            <IconText
+              tooltip='Setting'
+              tooltipPlacement='left'
+              text={setting}
+              icon={'earth-americas'}
+              containerStyle={{ width: '95%' }}
+              component={
+                isEditing ? (
+                  <BlurrableTextField
+                    label='Setting'
+                    variant='standard'
+                    size='small'
+                    value={setting}
+                    multiline
+                    onChange={(e) =>
+                      setEditProject({ ...project, setting: e.target.value })
+                    }
+                    style={{ width: '100%' }}
+                  />
+                ) : undefined
+              }
+            />
+            <IconText
+              tooltip={'Entry Process'}
+              tooltipPlacement='left'
+              text={entryProcess}
+              icon={'door-open'}
+              component={
+                isEditing ? (
+                  <StringEnumSelector
+                    enumType={RoleplayEntryProcess}
+                    label='Entry Process'
+                    value={entryProcess}
+                    size='small'
+                    variant='standard'
+                    onChange={(e) =>
+                      setEditProject({
+                        ...project,
+                        entryProcess: e.target.value as RoleplayEntryProcess,
+                      })
+                    }
+                    slotProps={{ root: { style: { minWidth: 69 } } }}
+                  />
+                ) : undefined
+              }
+            />
+            <IconText
+              tooltip={'Application Process'}
+              tooltipPlacement='left'
+              text={applicationProcess}
+              icon={'clipboard'}
+              iconPrefix='far'
+              component={
+                isEditing ? (
+                  <StringEnumSelector
+                    enumType={RoleplayApplicationProcess}
+                    label='Application Process'
+                    value={applicationProcess}
+                    size='small'
+                    variant='standard'
+                    onChange={(e) =>
+                      setEditProject({
+                        ...project,
+                        applicationProcess: e.target
+                          .value as RoleplayApplicationProcess,
+                      })
+                    }
+                    slotProps={{ root: { style: { minWidth: 69 } } }}
+                  />
+                ) : undefined
+              }
+            />
+            <IconText
+              tooltip='Metaverse'
+              tooltipPlacement='left'
+              text={`${isMetaverse ? 'In' : 'Not in'} the Metaverse`}
+              icon={'globe'}
+              component={
+                isEditing ? (
+                  <FormControlLabel
+                    value={isMetaverse}
+                    control={
+                      <Checkbox
+                        checked={isMetaverse}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            isMetaverse: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label='Metaverse'
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
+                ) : undefined
+              }
+            />
+            <IconText
+              tooltip={'Supporting Cast'}
+              tooltipPlacement='left'
+              text={`Support cast positions ${
+                hasSupportingCast ? '' : 'un'
+              }available`}
+              icon={'handshake'}
+              component={
+                isEditing ? (
+                  <FormControlLabel
+                    value={hasSupportingCast}
+                    control={
+                      <Checkbox
+                        checked={hasSupportingCast}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            hasSupportingCast: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label='Supporting Cast Available'
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
+                ) : undefined
+              }
+            />
+            <IconText
+              tooltip={'Quest Compatibility'}
+              tooltipPlacement='left'
+              text={`${isQuestCompatible ? '' : 'Not '}Quest compatible`}
+              icon={'meta'}
+              iconPrefix='fab'
+              component={
+                isEditing ? (
+                  <FormControlLabel
+                    value={isQuestCompatible}
+                    control={
+                      <Checkbox
+                        checked={isQuestCompatible}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            isQuestCompatible: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label='Quest Compatible'
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
+                ) : undefined
+              }
+            />
           </div>
-        )}
 
-        {/* TODO: Add authenticated edit button */}
-        {user && owners && owners.some((owner) => owner.id === user.id) && (
-          <button>HIT ME</button>
-        )}
+          {sidebarLinks.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: isEditing ? 12 : 4,
+                width: '100%',
+              }}
+            >
+              {sidebarLinks}
+            </div>
+          )}
 
-        <div
-          id='sidebar-toggle'
-          className='disabled-text-interaction'
-          onClick={toggleOpen}
-        >
-          <FontAwesomeIcon
-            height={4}
-            fixedWidth={true}
-            style={{
-              fontSize: 22,
-            }}
-            icon={['fas', isOpen ? 'angles-right' : 'angles-left']}
-          />
+          {isEditing && (
+            <IconButton
+              size='large'
+              onClick={() => {
+                otherLinks.push({} as RoleplayLink);
+                setEditProject({ ...project, otherLinks: otherLinks });
+              }}
+              style={{ borderRadius: 10, padding: 8 }}
+            >
+              <Add style={{ fontSize: 24 }} />{' '}
+              <Typography style={{ paddingLeft: 8, paddingRight: 4 }}>
+                Add other link
+              </Typography>
+            </IconButton>
+          )}
         </div>
+      </div>
+      <div
+        id='sidebar-toggle'
+        className='disabled-text-interaction'
+        onClick={toggleOpen}
+      >
+        <FontAwesomeIcon
+          height={4}
+          fixedWidth={true}
+          style={{
+            fontSize: 22,
+          }}
+          icon={['fas', isOpen ? 'angles-right' : 'angles-left']}
+        />
       </div>
     </div>
   );

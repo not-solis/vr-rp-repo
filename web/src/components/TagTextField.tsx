@@ -1,45 +1,48 @@
-import { InputAdornment, TextFieldProps } from '@mui/material';
+import { Autocomplete, TextField, TextFieldProps } from '@mui/material';
 
-import { BlurrableTextField } from './BlurrableTextField';
-import { TextTag } from './TextTag';
+import { TagChip } from './TagChip';
 
 export const TagTextField = (
   props: {
     tags: string[];
-    onTagClick: (tag: string) => () => void;
+    addTag: (tag: string) => void;
+    onTagClick: (tag: string) => void;
+    setTags?: (tags: string[]) => void;
+    fullWidth?: boolean;
   } & TextFieldProps,
 ) => {
-  const { tags = [], onTagClick } = props;
+  const { tags = [], addTag, onTagClick, fullWidth, ...restProps } = props;
   return (
-    <BlurrableTextField
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position='start'>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: 6,
-                }}
-              >
-                {tags.length > 0 &&
-                  tags.map((t) => (
-                    <TextTag
-                      key={t}
-                      tag={t}
-                      variant='body1'
-                      interactive
-                      onClick={onTagClick(t)}
-                      style={{ paddingTop: 0, paddingBottom: 0 }}
-                    />
-                  ))}
-              </div>
-            </InputAdornment>
-          ),
-        },
+    <Autocomplete
+      clearIcon={false}
+      options={[]}
+      fullWidth={fullWidth}
+      multiple
+      value={tags}
+      freeSolo
+      onChange={(event, values, reason) => {
+        if (reason === 'createOption') {
+          addTag(values[values.length - 1]);
+        }
       }}
-      {...props}
+      renderTags={(values, props) => {
+        return values.map((t, index) => {
+          const tagProps = props({ index });
+          const { key, className, ...restProps } = tagProps;
+          return (
+            <TagChip
+              key={key}
+              label={t}
+              {...restProps}
+              className={className + ' tag interactable'}
+              style={{ height: 24 }}
+              onClick={() => onTagClick(t)}
+              onDelete={undefined}
+            />
+          );
+        });
+      }}
+      renderInput={(params) => <TextField {...params} {...restProps} />}
     />
   );
 };
