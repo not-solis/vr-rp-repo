@@ -54,7 +54,7 @@ export const RoleplayProjectCard = (props: {
 
   const isOwner = owners?.some((owner) => owner.id === user?.id) ?? false;
 
-  const statusColors: Record<RoleplayStatus, string> = {
+  const statusColors: Record<string, string> = {
     [RoleplayStatus.Active]: theme.roleplayStatus.active,
     [RoleplayStatus.Inactive]: theme.roleplayStatus.inactive,
     [RoleplayStatus.Upcoming]: theme.roleplayStatus.upcoming,
@@ -124,7 +124,8 @@ export const RoleplayProjectCard = (props: {
                 <TagChip
                   label={status}
                   style={{
-                    backgroundColor: statusColors[status],
+                    backgroundColor:
+                      statusColors[status ?? RoleplayStatus.Inactive],
                   }}
                 />
               </Box>

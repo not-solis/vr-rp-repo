@@ -14,9 +14,11 @@ import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import { useAuth } from '../context/AuthProvider';
+import { useEnv } from '../context/EnvProvider';
 import './UserComponent.css';
 
 export const UserComponent = () => {
+  const { serverBaseUrl, discordClientId, discordRedirectUrl } = useEnv();
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
@@ -25,19 +27,13 @@ export const UserComponent = () => {
   const isMenuOpen = !!menuAnchorEl;
   const theme = useTheme();
 
-  const {
-    REACT_APP_SERVER_BASE_URL,
-    REACT_APP_DISCORD_CLIENT_ID,
-    REACT_APP_DISCORD_REDIRECT_URL,
-  } = process.env;
-
   if (isAuthLoading) {
     return null;
   }
 
   const handleLogout = () => {
     console.log(process.env);
-    fetch(`${REACT_APP_SERVER_BASE_URL}/auth/logout`, {
+    fetch(`${serverBaseUrl}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     }).then(() => window.location.reload());
@@ -173,8 +169,8 @@ export const UserComponent = () => {
       authorizationUrl='https://discord.com/oauth2/authorize'
       responseType='code'
       isCrossOrigin
-      clientId={REACT_APP_DISCORD_CLIENT_ID ?? ''}
-      redirectUri={REACT_APP_DISCORD_REDIRECT_URL ?? ''}
+      clientId={discordClientId ?? ''}
+      redirectUri={discordRedirectUrl ?? ''}
       scope='identify'
       buttonText='Login with Discord'
       onSuccess={onAuthSuccess}

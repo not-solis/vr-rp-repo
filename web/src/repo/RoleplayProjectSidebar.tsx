@@ -1,10 +1,11 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, Upload } from '@mui/icons-material';
 import {
   CardMedia,
   Checkbox,
   FormControlLabel,
   IconButton,
+  styled,
   Typography,
 } from '@mui/material';
 
@@ -30,6 +31,18 @@ interface RoleplayProjectSidebarProps {
   setEditProject: (project: RoleplayProject) => void;
 }
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { user, isAuthenticated } = useAuth();
   const {
@@ -40,9 +53,9 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     setEditProject,
   } = props;
   const {
-    owners,
+    owners = [],
     imageUrl,
-    tags,
+    tags = [],
     setting,
     isMetaverse,
     entryProcess,
@@ -50,7 +63,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     hasSupportingCast,
     isQuestCompatible,
     discordUrl,
-    otherLinks,
+    otherLinks = [],
   } = project;
 
   const sidebarLinks = [];
@@ -165,6 +178,35 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
         <div id='project-sidebar-content'>
           {imageUrl && (
             <CardMedia component='img' image={imageUrl} alt={`${name} icon`} />
+          )}
+          {isEditing && (
+            <IconButton
+              style={{
+                alignSelf: 'flex-end',
+                borderRadius: 8,
+                display: 'flex',
+                gap: 4,
+              }}
+              role={undefined}
+              component='label'
+            >
+              <Typography>Upload Image</Typography>
+              <Upload />
+              <VisuallyHiddenInput
+                type='file'
+                accept='image/*'
+                onChange={(event) => {
+                  const { files } = event.currentTarget;
+                  if (files && files.length > 0) {
+                    const file = files[0];
+                    setEditProject({
+                      ...project,
+                      imageUrl: URL.createObjectURL(file),
+                    });
+                  }
+                }}
+              />
+            </IconButton>
           )}
 
           {isEditing ? (

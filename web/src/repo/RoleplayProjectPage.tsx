@@ -26,6 +26,7 @@ import { IconText } from '../components/IconText';
 import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { useAuth } from '../context/AuthProvider';
+import { useEnv } from '../context/EnvProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -43,6 +44,7 @@ interface RoleplayProjectPageProps {
 
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew } = props;
+  const { serverBaseUrl } = useEnv();
   const [isEditing, setEditing] = useState(isNew);
   const [isPreviewDescription, setPreviewDescription] = useState(false);
   const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
@@ -67,7 +69,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['projects'],
     queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}`, {
+      fetch(`${serverBaseUrl}/projects/${id}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -83,7 +85,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['projectOwners'],
     queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/owners`, {
+      fetch(`${serverBaseUrl}/projects/${id}/owners`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -102,7 +104,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['projectLinks'],
     queryFn: () =>
-      fetch(`http://localhost:3001/projects/${id}/links`, {
+      fetch(`${serverBaseUrl}/projects/${id}/links`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -132,9 +134,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const canEdit =
     user?.role == UserRole.Admin ||
     (owners && owners.some((owner) => owner.id === user?.id));
-
-  // TODO: DELETE
-  project.imageUrl = 'https://media1.tenor.com/m/QQiopAKBLyUAAAAd/miber.gif';
 
   const { name, description, shortDescription } = project;
 

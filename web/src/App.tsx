@@ -24,10 +24,31 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
+import { EnvContext } from './context/EnvProvider';
 import { User } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 import './App.css';
+
+const {
+  REACT_APP_SERVER_BASE_URL,
+  REACT_APP_DISCORD_REDIRECT_URL,
+  REACT_APP_DISCORD_CLIENT_ID,
+} = process.env;
+
+if (!REACT_APP_SERVER_BASE_URL) {
+  throw new Error('Server URL not configured.');
+} else if (!REACT_APP_DISCORD_REDIRECT_URL) {
+  throw new Error('Discord redirect URL not configured.');
+} else if (!REACT_APP_DISCORD_CLIENT_ID) {
+  throw new Error('Discord client ID not configured.');
+}
+
+const env = {
+  serverBaseUrl: REACT_APP_SERVER_BASE_URL,
+  discordRedirectUrl: REACT_APP_DISCORD_REDIRECT_URL,
+  discordClientId: REACT_APP_DISCORD_CLIENT_ID,
+};
 
 const queryClient = new QueryClient();
 
@@ -194,7 +215,7 @@ export function App() {
     const { data: user, isLoading: isAuthLoading } = useQuery({
       queryKey: ['auth'],
       queryFn: () => {
-        return fetch(`http://localhost:3001/auth/`, {
+        return fetch(`${env.serverBaseUrl}/auth`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
@@ -223,46 +244,54 @@ export function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <AuthWrapper>
-          <CookiesProvider>
-            <Helmet>
-              <meta property='og:url' content={window.location.href} />
-            </Helmet>
-            <Box id='app-container'>
-              <Navbar />
-              <div style={{ flexGrow: 1, minHeight: 0 }}>
-                <BrowserRouter>
-                  <Routes>
-                    <Route path='/' element={<div>HOME</div>} />
-                    <Route path='/repo' element={<Repo />} />
-                    <Route
-                      path='/repo/new'
-                      element={<RoleplayProjectPage isNew />}
-                    />
-                    <Route path='/repo/:id' element={<RoleplayProjectPage />} />
-                    <Route
-                      path='/blog'
-                      element={<div>Where the blog go</div>}
-                    />
-                    <Route
-                      path='/resources'
-                      element={<div>Avatars, worlds, and docs, oh my!</div>}
-                    />
-                    <Route path='/about-us' element={<div>Memememememe</div>} />
-                    <Route path='/auth/*' element={<div>you did it!</div>} />
-                    <Route
-                      path='*'
-                      element={<Navigate to='/' replace={true} />}
-                    />
-                  </Routes>
-                </BrowserRouter>
-              </div>
-            </Box>
-          </CookiesProvider>
-        </AuthWrapper>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <EnvContext.Provider value={env}>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <AuthWrapper>
+            <CookiesProvider>
+              <Helmet>
+                <meta property='og:url' content={window.location.href} />
+              </Helmet>
+              <Box id='app-container'>
+                <Navbar />
+                <div style={{ flexGrow: 1, minHeight: 0 }}>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path='/' element={<div>HOME</div>} />
+                      <Route path='/repo' element={<Repo />} />
+                      <Route
+                        path='/repo/new'
+                        element={<RoleplayProjectPage isNew />}
+                      />
+                      <Route
+                        path='/repo/:id'
+                        element={<RoleplayProjectPage />}
+                      />
+                      <Route
+                        path='/blog'
+                        element={<div>Where the blog go</div>}
+                      />
+                      <Route
+                        path='/resources'
+                        element={<div>Avatars, worlds, and docs, oh my!</div>}
+                      />
+                      <Route
+                        path='/about-us'
+                        element={<div>Memememememe</div>}
+                      />
+                      <Route path='/auth/*' element={<div>you did it!</div>} />
+                      <Route
+                        path='*'
+                        element={<Navigate to='/' replace={true} />}
+                      />
+                    </Routes>
+                  </BrowserRouter>
+                </div>
+              </Box>
+            </CookiesProvider>
+          </AuthWrapper>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </EnvContext.Provider>
   );
 }

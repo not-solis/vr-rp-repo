@@ -30,22 +30,22 @@ export interface RoleplayLink {
 export interface RoleplayProject {
   id: string;
   name: string;
-  owners: User[];
+  owners?: User[];
   lastUpdated: Date;
   imageUrl?: string;
-  shortDescription: string;
+  shortDescription?: string;
   description?: string;
   setting?: string;
-  tags: string[];
-  runtime: Date[];
-  status: RoleplayStatus;
-  entryProcess: RoleplayEntryProcess;
-  applicationProcess: RoleplayApplicationProcess;
-  hasSupportingCast: boolean;
-  isMetaverse: boolean;
-  isQuestCompatible: boolean;
+  tags?: string[];
+  runtime?: Date[];
+  status?: string;
+  entryProcess?: string;
+  applicationProcess?: string;
+  hasSupportingCast?: boolean;
+  isMetaverse?: boolean;
+  isQuestCompatible?: boolean;
   discordUrl?: string;
-  otherLinks: RoleplayLink[];
+  otherLinks?: RoleplayLink[];
 }
 
 export const remapRoleplayProject = (project: any): RoleplayProject => {

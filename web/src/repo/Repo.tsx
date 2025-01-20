@@ -7,6 +7,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { RepoFilters } from './RepoFilters';
 import { RoleplayProjectCard } from './RoleplayProjectCard';
+import { useEnv } from '../context/EnvProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -24,7 +25,7 @@ interface ProjectQueryResponse {
 const TITLE = 'The VR Roleplay Repo';
 
 export const Repo = () => {
-  const theme = useTheme();
+  const { serverBaseUrl } = useEnv();
   const [nameFilter, setNameFilter] = useState<string>('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [showActiveOnly, setShowActiveOnly] = useState(true);
@@ -38,7 +39,7 @@ export const Repo = () => {
   } = useInfiniteQuery({
     queryKey: ['projects', nameFilter, tagFilters, showActiveOnly],
     queryFn: async ({ pageParam }) => {
-      const url = new URL('/projects', 'http://localhost:3001'); // TODO: set base url from env
+      const url = new URL('/projects', serverBaseUrl);
       url.searchParams.append('start', `${pageParam}`);
       url.searchParams.append('limit', `${PAGE_SIZE}`);
       url.searchParams.append('sortBy', 'last_updated');
