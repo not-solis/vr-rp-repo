@@ -54,15 +54,15 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   } = props;
   const {
     owners = [],
-    imageUrl,
+    imageUrl = '',
     tags = [],
-    setting,
-    isMetaverse,
-    entryProcess,
-    applicationProcess,
-    hasSupportingCast,
-    isQuestCompatible,
-    discordUrl,
+    setting = '',
+    isMetaverse = false,
+    entryProcess = '',
+    applicationProcess = '',
+    hasSupportingCast = false,
+    isQuestCompatible = false,
+    discordUrl = '',
     otherLinks = [],
   } = project;
 
@@ -165,9 +165,18 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     );
   });
 
-  const metaverseText = `${isMetaverse ? 'In' : 'Not in'} the Metaverse`;
-  const suppCastText = `Supporting Cast positions ${hasSupportingCast ? '' : 'not '}available`;
-  const questCompatibleText = `${isQuestCompatible ? '' : 'Not '}Quest compatible`;
+  const metaverseText =
+    isMetaverse != null || isEditing
+      ? `${isMetaverse ? 'In' : 'Not in'} the Metaverse`
+      : '';
+  const suppCastText =
+    hasSupportingCast != null || isEditing
+      ? `Supporting Cast positions ${hasSupportingCast ? '' : 'not '}available`
+      : '';
+  const questCompatibleText =
+    isQuestCompatible != null || isEditing
+      ? `${isQuestCompatible ? '' : 'Not '}Quest compatible`
+      : '';
 
   return (
     <div className={`project-sidebar ${isOpen ? '' : ' closed'}`}>
@@ -211,7 +220,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
 
           {isEditing ? (
             <TagTextField
-              tags={tags}
+              tags={tags || []}
               label='Tags'
               variant='outlined'
               fullWidth
@@ -264,6 +273,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 icon={'user'}
               />
             )}
+
             <IconText
               tooltip='Setting'
               tooltipPlacement='left'
@@ -286,6 +296,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ) : undefined
               }
             />
+
             <IconText
               tooltip={'Entry Process'}
               tooltipPlacement='left'
@@ -310,6 +321,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ) : undefined
               }
             />
+
             <IconText
               tooltip={'Application Process'}
               tooltipPlacement='left'
@@ -336,6 +348,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ) : undefined
               }
             />
+
             <IconText
               tooltip='Metaverse'
               tooltipPlacement='left'
@@ -363,6 +376,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ) : undefined
               }
             />
+
             <IconText
               tooltip={'Supporting Cast'}
               tooltipPlacement='left'
@@ -390,6 +404,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ) : undefined
               }
             />
+
             <IconText
               tooltip={'Quest Compatibility'}
               tooltipPlacement='left'

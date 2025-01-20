@@ -1,6 +1,47 @@
-import { pool } from './db-pool';
+import { PoolClient } from 'pg';
+import { makeTransaction, pool } from './db-pool';
+import { User } from './users-model';
 
 const DEFAULT_QUERY_LIMIT = 1000;
+
+interface RoleplayLink {
+  label: string;
+  url: string;
+}
+
+export interface RoleplayProject {
+  id: string;
+  name: string;
+  owners?: User[];
+  lastUpdated: Date;
+  imageUrl?: string;
+  shortDescription?: string;
+  description?: string;
+  setting?: string;
+  tags?: string[];
+  runtime?: Date[];
+  status?: string;
+  entryProcess?: string;
+  applicationProcess?: string;
+  hasSupportingCast?: boolean;
+  isMetaverse?: boolean;
+  isQuestCompatible?: boolean;
+  discordUrl?: string;
+  otherLinks?: RoleplayLink[];
+}
+
+export const validateProject = (
+  project: RoleplayProject,
+): Record<string, string> => {
+  const { name } = project;
+  const validationErrors: Record<string, string> = {};
+
+  if (!name) {
+    validationErrors.name = 'No name provided';
+  }
+
+  return validationErrors;
+};
 
 export const getProjects = async (
   start = 0,
@@ -113,3 +154,126 @@ export const getProjectById = async (id: string) => {
     throw new Error('Internal server error.');
   }
 };
+
+export const createProject = async (user: User, project: RoleplayProject) => {
+  const {
+    name,
+    shortDescription,
+    description,
+    setting,
+    tags,
+    status,
+    entryProcess,
+    applicationProcess,
+    hasSupportingCast,
+    isMetaverse,
+    isQuestCompatible,
+    discordUrl,
+    imageUrl,
+    otherLinks = [],
+  } = project;
+  try {
+    return await new Promise((resolve, reject) => {
+      makeTransaction((client: PoolClient) => {
+        client.query(
+          `
+          INSERT INTO roleplay_projects
+          (name,
+          short_description,
+          description,
+          setting,
+          tags,
+          status,
+          entry_process,
+          application_process,
+          has_support_cast,
+          is_metaverse,
+          is_quest_compatible,
+          discord_url,
+          image_url)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          RETURNING id;
+          `,
+          [
+            name,
+            shortDescription,
+            description,
+            setting,
+            tags,
+            status,
+            entryProcess,
+            applicationProcess,
+            hasSupportingCast,
+            isMetaverse,
+            isQuestCompatible,
+            discordUrl,
+            imageUrl,
+          ],
+          (error, results) => {
+            if (error) {
+              reject(error);
+            }
+
+            if (!results.rowCount) {
+              reject(new Error('Create project failed.'));
+            }
+
+            const newProject = results.rows[0];
+            const projectId = newProject.id;
+
+            client.query(
+              `
+              INSERT INTO ownership
+              (user_id, project_id) VALUES ($1, $2)
+              `,
+              [user.user_id, projectId],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                }
+
+                if (!results || results.rowCount === 0) {
+                  reject(new Error('Error saving links'));
+                }
+              },
+            );
+
+            if (otherLinks.length > 0) {
+              client.query(
+                `
+                INSERT INTO roleplay_links (label, url, project_id)
+                SELECT
+                  (rp_link->>'label')::varchar as label,
+                  (rp_link->>'url')::varchar as url,
+                  $2 as project_id
+                FROM UNNEST($1::json[]) as rp_link;
+                `,
+                [otherLinks, projectId],
+                (error, results) => {
+                  if (error) {
+                    reject(error);
+                  }
+
+                  if (!results || results.rowCount === 0) {
+                    reject(new Error('Error saving links'));
+                  }
+                },
+              );
+            }
+
+            resolve({ id: projectId });
+          },
+        );
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    throw new Error('Internal server error.');
+  }
+  // Save project
+  // Update links
+  // Update owners
+  // TODO: update runtimes
+};
+
+export const updateProject = async (project: RoleplayProject) => {};

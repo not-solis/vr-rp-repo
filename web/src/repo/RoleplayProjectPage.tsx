@@ -135,7 +135,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     user?.role == UserRole.Admin ||
     (owners && owners.some((owner) => owner.id === user?.id));
 
-  const { name, description, shortDescription } = project;
+  const { name = '', description = '', shortDescription = '' } = project;
 
   const previewButton = (
     <IconButton
@@ -232,7 +232,29 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const saveProject = () => {
-    cancelEdit();
+    if (isNew) {
+      fetch(`${serverBaseUrl}/projects`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify(project),
+        credentials: 'include',
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            // Signal save successful
+            // Redirect to id page
+            res.json().then((json) => (window.location.href = json.id));
+          } else {
+            res.json().then((json) => {
+              // Handle validation errors
+              console.log(json);
+            });
+          }
+        })
+        .catch((e) => console.error(e));
+    }
   };
 
   const metaName = isNew ? 'New RP Project' : projectData?.name;
@@ -309,10 +331,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                   style={{
                     borderRadius: 8,
                   }}
-                  onClick={() => {
-                    console.log('Save', project);
-                    cancelEdit();
-                  }}
+                  onClick={saveProject}
                 >
                   <Save style={{ paddingRight: 8 }} />
                   <Typography>Save</Typography>

@@ -1,4 +1,4 @@
-import pg, { PoolConfig } from 'pg';
+import pg, { PoolClient, PoolConfig } from 'pg';
 import dotenv from 'dotenv';
 const { Pool } = pg;
 
@@ -13,3 +13,20 @@ const connectionDetails: PoolConfig = {
 };
 
 export const pool = new Pool(connectionDetails);
+export const makeTransaction = (transaction: (client: PoolClient) => void) => {
+  let client: PoolClient;
+  pool
+    .connect()
+    .then(async (poolClient) => {
+      client = poolClient;
+      await client.query('BEGIN');
+      return client;
+    })
+    .then(transaction)
+    .then(async () => await client.query('COMMIT'))
+    .catch((e) => console.error(e))
+    .finally(async () => {
+      await client?.query('ROLLBACK');
+      client?.release();
+    });
+};

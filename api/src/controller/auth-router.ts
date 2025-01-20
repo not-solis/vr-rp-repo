@@ -36,6 +36,12 @@ export const auth: RequestHandler = (request, response, next) => {
   }
 };
 
+export const getAuthUser = (request: any): User => {
+  const { userToken: token } = request.cookies;
+  const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
+  return jwtToken.user as User;
+};
+
 const router = Router();
 
 router.use(cookieParser());

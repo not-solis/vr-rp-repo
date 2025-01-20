@@ -22,7 +22,7 @@ interface IconTextProps {
   icon?: IconName;
   iconPrefix?: IconPrefix;
   iconPadding?: number | string;
-  component?: JSX.Element;
+  component?: React.ReactElement;
 }
 
 export const IconTextField = (props: IconTextProps & TextFieldProps) => {

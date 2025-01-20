@@ -41,6 +41,10 @@ export const IconText = (props: IconTextProps) => {
     component,
   } = props;
 
+  if (!text && !component) {
+    return null;
+  }
+
   let textElement = (
     <div
       style={{
