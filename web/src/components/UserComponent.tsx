@@ -11,6 +11,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import { useAuth } from '../context/AuthProvider';
@@ -25,6 +26,7 @@ export const UserComponent = () => {
   const buttonRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const isMenuOpen = !!menuAnchorEl;
+  const navigate = useNavigate();
   const theme = useTheme();
 
   if (isAuthLoading) {
@@ -32,16 +34,15 @@ export const UserComponent = () => {
   }
 
   const handleLogout = () => {
-    console.log(process.env);
     fetch(`${serverBaseUrl}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
-    }).then(() => window.location.reload());
+    }).then(() => navigate(0));
     closeMenu();
   };
 
   const onAuthSuccess = (data: Record<string, any>) => {
-    window.location.reload();
+    navigate(0);
     // setUser(data as User);
   };
 

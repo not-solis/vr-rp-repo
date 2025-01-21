@@ -18,7 +18,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { RoleplayEditView } from './RoleplayEditView';
 import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
@@ -27,6 +27,7 @@ import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
+import { useSnackbar } from '../context/SnackbarProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -43,7 +44,7 @@ interface RoleplayProjectPageProps {
 }
 
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
-  const { isNew } = props;
+  const { isNew = false } = props;
   const { serverBaseUrl } = useEnv();
   const [isEditing, setEditing] = useState(isNew);
   const [isPreviewDescription, setPreviewDescription] = useState(false);
@@ -54,11 +55,13 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     window.screen.width > SIDEBAR_START_OPEN_WIDTH,
   );
   const { user, isAuthenticated } = useAuth();
+  const { createSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const { id } = useParams();
 
   if (isNew && !isEditing) {
     // No empty new page.
-    window.location.href = '/repo';
+    navigate('/repo');
   }
 
   const {
@@ -123,7 +126,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   if (!projectData && !isNew) {
     // ID is invalid
-    window.location.href = '/repo';
+    navigate('/repo');
     return null;
   }
 
@@ -243,13 +246,22 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       })
         .then((res) => {
           if (res.status === 200) {
-            // Signal save successful
-            // Redirect to id page
-            res.json().then((json) => (window.location.href = json.id));
+            res.json().then((json) => {
+              setEditing(false);
+              navigate(`/repo/${json.id}`);
+              createSnackbar({
+                title: 'Success',
+                content: 'Project successfully saved!',
+                severity: 'success',
+              });
+            });
           } else {
             res.json().then((json) => {
-              // Handle validation errors
-              console.log(json);
+              createSnackbar({
+                title: 'Validation Error',
+                content: json.errors as string[],
+                severity: 'error',
+              });
             });
           }
         })

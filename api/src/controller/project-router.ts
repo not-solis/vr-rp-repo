@@ -5,6 +5,7 @@ import {
   createProject,
   RoleplayProject,
   updateProject,
+  validateProject,
 } from '../model/project-model';
 import { getOwnersByProjectId } from '../model/owners-model';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
@@ -72,6 +73,11 @@ router.get('/:id/links', (req, res) => {
 
 router.post('/', auth, (req, res) => {
   const project = req.body as RoleplayProject;
+  const validationErrors = validateProject(project);
+  if (validationErrors.length > 0) {
+    res.status(400).json({ errors: validationErrors });
+    return;
+  }
   const user = getAuthUser(req);
   createProject(user, project)
     .then((response) => {
