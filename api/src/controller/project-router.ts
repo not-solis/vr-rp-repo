@@ -1,11 +1,10 @@
-import { Router } from 'express';
+import { RequestHandler, Router } from 'express';
 import {
   getProjects,
   getProjectById,
   createProject,
   RoleplayProject,
   updateProject,
-  validateProject,
 } from '../model/project-model';
 import { getOwnersByProjectId } from '../model/owners-model';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
@@ -16,6 +15,58 @@ import cors from 'cors';
 const { CLIENT_URL = 'http://localhost:3000' } = process.env;
 
 const MAX_QUERY = 1000;
+
+const validateProject: RequestHandler = (req, res, next) => {
+  const project = req.body as RoleplayProject;
+  const { name, shortDescription, discordUrl, otherLinks } = project;
+  const validationErrors: string[] = [];
+
+  if (!name) {
+    validationErrors.push('No name provided.');
+  }
+  if (shortDescription && shortDescription.length > 512) {
+    validationErrors.push('Short description max length is 512 characters.');
+  }
+  if (
+    discordUrl &&
+    (!URL.canParse(discordUrl) ||
+      !URL.parse(discordUrl)?.hostname?.includes('discord'))
+  ) {
+    validationErrors.push('Invalid discord server URL provided.');
+  }
+  otherLinks?.forEach((link, i) => {
+    if (!link.label) {
+      validationErrors.push(`No label provided for link ${i + 1}.`);
+    }
+    if (!link.url) {
+      validationErrors.push(`No URL provided for link ${i + 1}.`);
+    } else if (!URL.canParse(link.url)) {
+      validationErrors.push(`Invalid URL provided for link ${i + 1}.`);
+    }
+  });
+
+  if (validationErrors.length > 0) {
+    res.status(400).json({ errors: validationErrors });
+  } else {
+    next();
+  }
+};
+
+const checkOwnership: RequestHandler = (req, res, next) => {
+  const project = req.body as RoleplayProject;
+  const user = getAuthUser(req);
+  const { owners = [] } = project;
+
+  // TODO: proper owners auth w/query!
+  if (!owners.some((owner) => user.user_id === owner.user_id)) {
+    res
+      .status(401)
+      .send({ errors: ['User is not authorized to modify this project'] });
+  }
+
+  next();
+};
+
 const router = Router();
 router.use(cookieParser());
 router.use(
@@ -71,13 +122,8 @@ router.get('/:id/links', (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-router.post('/', auth, (req, res) => {
+router.post('/:id', auth, validateProject, (req, res) => {
   const project = req.body as RoleplayProject;
-  const validationErrors = validateProject(project);
-  if (validationErrors.length > 0) {
-    res.status(400).json({ errors: validationErrors });
-    return;
-  }
   const user = getAuthUser(req);
   createProject(user, project)
     .then((response) => {
@@ -86,18 +132,7 @@ router.post('/', auth, (req, res) => {
     .catch((error) => res.status(500).send(error));
 });
 
-router.patch('/', auth, (req, res) => {
-  const project = req.body as RoleplayProject;
-  const user = getAuthUser(req);
-  const { owners = [] } = project;
-
-  // TODO: proper owners auth w/query!
-  if (!owners.some((owner) => user.user_id === owner.user_id)) {
-    res
-      .status(401)
-      .send({ message: 'User is not authorized to modify this project' });
-  }
-
+router.patch('/:id', auth, validateProject, checkOwnership, (req, res) => {
   updateProject(req.body as RoleplayProject)
     .then((response) => {
       res.status(200).send(response);

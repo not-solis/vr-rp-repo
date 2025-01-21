@@ -237,7 +237,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const saveProject = () => {
     if (isNew) {
-      fetch(`${serverBaseUrl}/projects`, {
+      fetch(`${serverBaseUrl}/projects/${id}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -255,6 +255,34 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 content: 'Project successfully saved!',
                 severity: 'success',
               });
+            });
+          } else {
+            res.json().then((json) => {
+              createSnackbar({
+                title: 'Validation Error',
+                content: json.errors as string[],
+                severity: 'error',
+              });
+            });
+          }
+        })
+        .catch((e) => console.error(e));
+    } else {
+      fetch(`${serverBaseUrl}/projects/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+        body: JSON.stringify(project),
+        credentials: 'include',
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            setEditing(false);
+            createSnackbar({
+              title: 'Success',
+              content: 'Project successfully saved!',
+              severity: 'success',
             });
           } else {
             res.json().then((json) => {

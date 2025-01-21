@@ -30,37 +30,6 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
-export const validateProject = (project: RoleplayProject): string[] => {
-  const { name, shortDescription, discordUrl, otherLinks } = project;
-  const validationErrors: string[] = [];
-
-  if (!name) {
-    validationErrors.push('No name provided.');
-  }
-  if (shortDescription && shortDescription.length > 512) {
-    validationErrors.push('Short description max length is 512 characters.');
-  }
-  if (
-    discordUrl &&
-    (!URL.canParse(discordUrl) ||
-      !URL.parse(discordUrl)?.hostname?.includes('discord'))
-  ) {
-    validationErrors.push('Invalid discord server URL provided.');
-  }
-  otherLinks?.forEach((link, i) => {
-    if (!link.label) {
-      validationErrors.push(`No label provided for link ${i + 1}.`);
-    }
-    if (!link.url) {
-      validationErrors.push(`No URL provided for link ${i + 1}.`);
-    } else if (!URL.canParse(link.url)) {
-      validationErrors.push(`Invalid URL provided for link ${i + 1}.`);
-    }
-  });
-
-  return validationErrors;
-};
-
 export const getProjects = async (
   start = 0,
   limit = DEFAULT_QUERY_LIMIT,
@@ -288,9 +257,6 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     console.error(err);
     throw new Error('Internal server error.');
   }
-  // Save project
-  // Update links
-  // Update owners
   // TODO: update runtimes
 };
 
