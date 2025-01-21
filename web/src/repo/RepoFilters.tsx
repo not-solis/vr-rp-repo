@@ -15,6 +15,7 @@ import { useState } from 'react';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
+import { useAuth } from '../context/AuthProvider';
 import './RepoFilters.css';
 
 interface FilterProps {
@@ -39,10 +40,7 @@ export const RepoFilters = (props: FilterProps) => {
   } = props;
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
-
-  const applyFilters = () => {
-    setNameFilter(name);
-  };
+  const { isAuthenticated } = useAuth();
 
   return (
     <Box id='filter-bar'>
@@ -67,23 +65,6 @@ export const RepoFilters = (props: FilterProps) => {
           onTagClick={removeTagFilter}
         />
 
-        {/* <FormControl style={{ minWidth: '80px' }}>
-          <InputLabel id='status-label'>Status</InputLabel>
-          <Select
-            labelId='status-label'
-            value={status ?? 0}
-            label='Status'
-            size='small'
-            onChange={(e) => setStatus(e.target.value as RoleplayStatus)}
-          >
-            <MenuItem value={RoleplayStatus.Unknown}>Any</MenuItem>
-            <MenuItem value={RoleplayStatus.Active}>Active</MenuItem>
-            <MenuItem value={RoleplayStatus.Inactive}>Inactive</MenuItem>
-            <MenuItem value={RoleplayStatus.Upcoming}>Upcoming</MenuItem>
-            <MenuItem value={RoleplayStatus.Hiatus}>Hiatus</MenuItem>
-          </Select>
-        </FormControl> */}
-
         <FormControlLabel
           control={
             <Checkbox
@@ -100,34 +81,24 @@ export const RepoFilters = (props: FilterProps) => {
           }}
         />
 
-        <Link
-          href='/repo/new'
-          style={{ marginLeft: 'auto', textDecoration: 'none' }}
-        >
-          <IconButton
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 8,
-            }}
+        {isAuthenticated && (
+          <Link
+            href='/repo/new'
+            style={{ marginLeft: 'auto', textDecoration: 'none' }}
           >
-            <Add />
-            <Typography variant='body1'>Add New</Typography>
-          </IconButton>
-        </Link>
-
-        {/* <Button
-          type='submit'
-          style={{
-            backgroundColor: 'blue',
-            color: theme.palette.text.primary,
-          }}
-          variant='contained'
-          onClick={applyFilters}
-        >
-          Apply Filters
-        </Button> */}
+            <IconButton
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                borderRadius: 8,
+              }}
+            >
+              <Add />
+              <Typography variant='body1'>Add New</Typography>
+            </IconButton>
+          </Link>
+        )}
       </FormGroup>
     </Box>
   );
