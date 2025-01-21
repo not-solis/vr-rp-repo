@@ -10,6 +10,7 @@ import {
   Button,
   CardMedia,
   IconButton,
+  LinearProgress,
   TextField,
   Tooltip,
   Typography,
@@ -121,7 +122,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   }
 
   if (isLoading && !isNew) {
-    return <div>Loading...</div>;
+    return <LinearProgress />;
   }
 
   if (!projectData && !isNew) {

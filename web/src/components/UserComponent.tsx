@@ -3,6 +3,7 @@ import { ArrowDropDown, Close, Edit, Logout, Save } from '@mui/icons-material';
 import {
   Avatar,
   Button,
+  CircularProgress,
   IconButton,
   Menu,
   MenuItem,
@@ -30,7 +31,7 @@ export const UserComponent = () => {
   const theme = useTheme();
 
   if (isAuthLoading) {
-    return null;
+    return <CircularProgress />;
   }
 
   const handleLogout = () => {

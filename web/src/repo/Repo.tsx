@@ -1,5 +1,5 @@
 import './Repo.css';
-import { Box, useTheme } from '@mui/material';
+import { Box, CircularProgress, LinearProgress, useTheme } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
@@ -86,12 +86,10 @@ export const Repo = () => {
 
   const projects = pageData?.pages.map((p) => p.data).flat();
 
-  let results = null;
-  if (isFetching && (projects?.length ?? 0) === 0) {
-    results = <div>Loading repo...</div>;
-  } else if (error) {
+  let results;
+  if (error) {
     results = <div>Error loading repo, please try again.</div>;
-  } else {
+  } else if (!isFetching && projects && projects.length > 0) {
     results = (
       <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
         <InfiniteScroll
@@ -101,8 +99,8 @@ export const Repo = () => {
           next={() => !isFetching && fetchNextPage()}
           hasMore={hasNextPage}
           loader={
-            isFetchingNextPage ? <h4>Loading...</h4> : <h4>End of the line</h4>
-          } // TODO: use nicer loader
+            isFetchingNextPage ? <CircularProgress /> : <h4>End of the line</h4>
+          }
         >
           {projects?.map((p) => (
             <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
@@ -132,6 +130,7 @@ export const Repo = () => {
         showActiveOnly={showActiveOnly}
         setShowActiveOnly={setShowActiveOnly}
       />
+      {isFetching && <LinearProgress />}
       {results}
     </Box>
   );
