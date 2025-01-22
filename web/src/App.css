@@ -54,3 +54,8 @@ a.no-underline:hover,
 a.no-underline:active {
   text-decoration: none;
 }
+
+.full-height {
+  box-sizing: border-box;
+  height: 100%;
+}

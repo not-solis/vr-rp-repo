@@ -20,7 +20,11 @@
 }
 
 #card-link {
-  height: 100%;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  padding: 16px 16px 24px 12px;
+  margin: -16px -16px -24px -12px;
 }
 
 #card-link,

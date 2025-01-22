@@ -89,7 +89,7 @@ export const Repo = () => {
   let results;
   if (error) {
     results = <div>Error loading repo, please try again.</div>;
-  } else if (!isFetching && projects && projects.length > 0) {
+  } else if (projects && projects.length > 0) {
     results = (
       <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
         <InfiniteScroll

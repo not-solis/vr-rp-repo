@@ -63,42 +63,42 @@ export const RoleplayProjectCard = (props: {
 
   return (
     <Card variant='outlined' className='project-card'>
-      <Link id='card-link' to={`/repo/${id}`} className='no-underline'>
-        <CardContent>
-          <Box className='project-card-content'>
-            <div>
-              <Box className='project-image'>
-                {imageUrl && (
-                  <CardMedia
-                    component='img'
-                    image={imageUrl}
-                    alt={`${name} icon`}
-                  />
-                )}
-              </Box>
-              <div className='project-image-footer'>
-                {discordUrl && (
+      <CardContent className='full-height'>
+        <Box className='project-card-content full-height'>
+          <div>
+            <Box className='project-image'>
+              {imageUrl && (
+                <CardMedia
+                  component='img'
+                  image={imageUrl}
+                  alt={`${name} icon`}
+                />
+              )}
+            </Box>
+            <div className='project-image-footer'>
+              {discordUrl && (
+                <IconText
+                  text='Discord'
+                  url={discordUrl}
+                  iconPrefix='fab'
+                  icon='discord'
+                  iconPadding={8}
+                />
+              )}
+              {otherLinks &&
+                otherLinks.map((link) => (
                   <IconText
-                    text='Discord'
-                    url={discordUrl}
-                    iconPrefix='fab'
-                    icon='discord'
+                    key={link.url}
+                    text={link.label}
+                    icon={'link'}
+                    url={link.url}
                     iconPadding={8}
                   />
-                )}
-                {otherLinks &&
-                  otherLinks.map((link) => (
-                    <IconText
-                      key={link.url}
-                      text={link.label}
-                      icon={'link'}
-                      url={link.url}
-                      iconPadding={8}
-                    />
-                  ))}
-              </div>
+                ))}
             </div>
+          </div>
 
+          <Link id='card-link' to={`/repo/${id}`} className='no-underline'>
             <Box className='project-overview'>
               <Box className='project-header'>
                 <Tooltip
@@ -162,9 +162,9 @@ export const RoleplayProjectCard = (props: {
                 <p>LAST UPDATED: {lastUpdated?.toISOString()}</p>
               )}
             </Box>
-          </Box>
-        </CardContent>
-      </Link>
+          </Link>
+        </Box>
+      </CardContent>
     </Card>
   );
 };
