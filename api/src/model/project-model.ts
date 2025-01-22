@@ -1,6 +1,6 @@
 import { PoolClient } from 'pg';
 import { makeTransaction, pool } from './db-pool';
-import { User } from './users-model';
+import { User, UserRole } from './users-model';
 import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model';
 
 const DEFAULT_QUERY_LIMIT = 1000;
@@ -155,28 +155,29 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     imageUrl,
     otherLinks = [],
   } = project;
-  try {
-    return await new Promise((resolve, reject) => {
-      makeTransaction((client: PoolClient) => {
-        client.query(
+  const { user_id, role } = user;
+  return await new Promise((resolve, reject) => {
+    makeTransaction((client: PoolClient) => {
+      client
+        .query(
           `
-          INSERT INTO roleplay_projects
-          (name,
-          short_description,
-          description,
-          setting,
-          tags,
-          status,
-          entry_process,
-          application_process,
-          has_support_cast,
-          is_metaverse,
-          is_quest_compatible,
-          discord_url,
-          image_url)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-          RETURNING id;
-          `,
+            INSERT INTO roleplay_projects
+            (name,
+            short_description,
+            description,
+            setting,
+            tags,
+            status,
+            entry_process,
+            application_process,
+            has_support_cast,
+            is_metaverse,
+            is_quest_compatible,
+            discord_url,
+            image_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING id;
+            `,
           [
             name,
             shortDescription,
@@ -192,67 +193,63 @@ export const createProject = async (user: User, project: RoleplayProject) => {
             discordUrl,
             imageUrl,
           ],
-          (error, results) => {
-            if (error) {
-              reject(error);
-            }
+        )
+        .then((results) => {
+          if (!results?.rowCount) {
+            reject(new Error('Create project failed.'));
+          }
 
-            if (!results.rowCount) {
-              reject(new Error('Create project failed.'));
-            }
+          const newProject = results.rows[0];
+          const projectId = newProject.id;
 
-            const newProject = results.rows[0];
-            const projectId = newProject.id;
-
-            client.query(
-              `
-              INSERT INTO ownership
-              (user_id, project_id) VALUES ($1, $2)
-              `,
-              [user.user_id, projectId],
-              (error, results) => {
-                if (error) {
-                  reject(error);
-                }
-
-                if (!results || results.rowCount === 0) {
-                  reject(new Error('Error saving links'));
-                }
-              },
+          const queries = [];
+          if (role === UserRole.User) {
+            queries.push(
+              client
+                .query(
+                  `
+                    INSERT INTO ownership
+                    (user_id, project_id) VALUES ($1, $2)
+                    `,
+                  [user_id, projectId],
+                )
+                .then((results) => {
+                  if (!results.rowCount) {
+                    return Promise.reject(new Error('Error saving ownership.'));
+                  }
+                })
+                .catch(console.error),
             );
+          }
 
-            if (otherLinks.length > 0) {
-              client.query(
+          if (otherLinks.length > 0) {
+            client
+              .query(
                 `
-                INSERT INTO roleplay_links (label, url, project_id)
-                SELECT
-                  (rp_link->>'label')::varchar as label,
-                  (rp_link->>'url')::varchar as url,
-                  $2 as project_id
-                FROM UNNEST($1::json[]) as rp_link;
-                `,
+                  INSERT INTO roleplay_links (label, url, project_id)
+                  SELECT
+                    (rp_link->>'label')::varchar as label,
+                    (rp_link->>'url')::varchar as url,
+                    $2 as project_id
+                  FROM UNNEST($1::json[]) as rp_link;
+                  `,
                 [otherLinks, projectId],
-                (error, results) => {
-                  if (error) {
-                    reject(error);
-                  }
+              )
+              .then((results) => {
+                if (!results.rowCount) {
+                  return Promise.reject(new Error('Error saving links'));
+                }
+              })
+              .catch(console.error);
+          }
 
-                  if (!results || results.rowCount === 0) {
-                    reject(new Error('Error saving links'));
-                  }
-                },
-              );
-            }
-
-            resolve({ id: projectId });
-          },
-        );
-      });
-    });
-  } catch (err) {
-    console.error(err);
-    throw new Error('Internal server error.');
-  }
+          return Promise.all(queries)
+            .then(() => resolve({ id: projectId }))
+            .catch(reject);
+        })
+        .catch(reject);
+    }, reject);
+  });
   // TODO: update runtimes
 };
 
@@ -273,10 +270,10 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
     imageUrl,
     otherLinks = [],
   } = project;
-  try {
-    return await new Promise((resolve, reject) => {
-      makeTransaction((client: PoolClient) => {
-        client.query(
+  return await new Promise((resolve, reject) => {
+    makeTransaction((client: PoolClient) => {
+      client
+        .query(
           `
           UPDATE roleplay_projects
           SET
@@ -312,22 +309,15 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             imageUrl,
             id,
           ],
-          (error, results) => {
-            if (error) {
-              reject(error);
-            }
+        )
+        .then((results) => {
+          if (!results?.rowCount) {
+            return Promise.reject(new Error('Update project failed.'));
+          }
 
-            if (!results?.rowCount) {
-              reject(new Error('Update project failed.'));
-            }
-
-            updateRoleplayLinks(id, otherLinks).then(resolve).catch(reject);
-          },
-        );
-      });
-    });
-  } catch (err) {
-    console.error(err);
-    throw new Error('Internal server error.');
-  }
+          updateRoleplayLinks(id, otherLinks).then(resolve).catch(reject);
+        })
+        .catch(reject);
+    }, reject);
+  });
 };

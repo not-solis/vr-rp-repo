@@ -13,7 +13,10 @@ const connectionDetails: PoolConfig = {
 };
 
 export const pool = new Pool(connectionDetails);
-export const makeTransaction = (transaction: (client: PoolClient) => void) => {
+export const makeTransaction = (
+  transaction: (client: PoolClient) => void,
+  onError: (err: any) => void,
+) => {
   let client: PoolClient;
   pool
     .connect()
@@ -24,7 +27,8 @@ export const makeTransaction = (transaction: (client: PoolClient) => void) => {
     })
     .then(transaction)
     .then(async () => await client.query('COMMIT'))
-    .catch((e) => console.error(e))
+    .catch(console.error)
+    .catch(onError)
     .finally(async () => {
       await client?.query('ROLLBACK');
       client?.release();
