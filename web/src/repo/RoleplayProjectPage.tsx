@@ -16,7 +16,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -34,6 +34,7 @@ import {
   RoleplayProject,
   RoleplayLink,
 } from '../model/RoleplayProject';
+import { ResponseData } from '../model/ServerResponse';
 import { User, UserRole } from '../model/User';
 
 import './RoleplayProjectPage.css';
@@ -59,11 +60,18 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { createSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { id } = useParams();
+  const queryClient = useQueryClient();
 
   if (isNew && !isEditing) {
     // No empty new page.
     navigate('/repo');
   }
+
+  const refetchProject = () => {
+    queryClient.refetchQueries({
+      queryKey: ['project'],
+    });
+  };
 
   const {
     data: projectData,
@@ -71,7 +79,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     isLoading,
   } = useQuery({
     enabled: !isNew,
-    queryKey: ['projects'],
+    queryKey: ['project'],
     queryFn: () =>
       fetch(`${serverBaseUrl}/projects/${id}`, {
         headers: {
@@ -87,7 +95,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const { data: owners, isLoading: ownersLoading } = useQuery({
     enabled: !isNew,
-    queryKey: ['projectOwners'],
+    queryKey: ['project', 'owners'],
     queryFn: () =>
       fetch(`${serverBaseUrl}/projects/${id}/owners`, {
         headers: {
@@ -106,15 +114,16 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
     enabled: !isNew,
-    queryKey: ['projectLinks'],
-    queryFn: () =>
-      fetch(`${serverBaseUrl}/projects/${id}/links`, {
+    queryKey: ['project', 'links'],
+    queryFn: () => {
+      return fetch(`${serverBaseUrl}/projects/${id}/links`, {
         headers: {
           'Content-Type': 'application/json',
         },
       })
-        .then((res) => res.json())
-        .then<RoleplayLink[]>((json) => json.data),
+        .then<ResponseData<RoleplayLink[]>>((res) => res.json())
+        .then((json) => json.data);
+    },
   });
 
   if (error) {
@@ -237,7 +246,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const saveProject = () => {
     if (isNew) {
-      fetch(`${serverBaseUrl}/projects/${id}`, {
+      fetch(`${serverBaseUrl}/projects`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -254,13 +263,14 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 title: 'Success',
                 content: 'Project successfully saved!',
                 severity: 'success',
+                autoHideDuration: 3000,
               });
             });
           } else {
-            res.json().then((json) => {
+            res.json().then((json: ResponseData<unknown>) => {
               createSnackbar({
                 title: 'Validation Error',
-                content: json.errors as string[],
+                content: json.errors ?? [],
                 severity: 'error',
               });
             });
@@ -278,17 +288,19 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       })
         .then((res) => {
           if (res.status === 200) {
+            refetchProject();
             setEditing(false);
             createSnackbar({
               title: 'Success',
               content: 'Project successfully saved!',
               severity: 'success',
+              autoHideDuration: 3000,
             });
           } else {
-            res.json().then((json) => {
+            res.json().then((json: ResponseData<unknown>) => {
               createSnackbar({
                 title: 'Validation Error',
-                content: json.errors as string[],
+                content: json.errors ?? [],
                 severity: 'error',
               });
             });

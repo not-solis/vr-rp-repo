@@ -320,8 +320,9 @@ export function App() {
                   <Snackbar
                     open={snackbarOpen}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    autoHideDuration={10000}
+                    autoHideDuration={snackbarProps?.autoHideDuration ?? 6000}
                     onClose={onSnackbarClose}
+                    disableWindowBlurListener
                     ClickAwayListenerProps={{ onClickAway: () => null }}
                   >
                     <Alert

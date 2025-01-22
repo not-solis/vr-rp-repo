@@ -1,13 +1,9 @@
 import { PoolClient } from 'pg';
 import { makeTransaction, pool } from './db-pool';
 import { User } from './users-model';
+import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model';
 
 const DEFAULT_QUERY_LIMIT = 1000;
-
-interface RoleplayLink {
-  label: string;
-  url: string;
-}
 
 export interface RoleplayProject {
   id: string;
@@ -260,4 +256,78 @@ export const createProject = async (user: User, project: RoleplayProject) => {
   // TODO: update runtimes
 };
 
-export const updateProject = async (project: RoleplayProject) => {};
+export const updateProject = async (id: string, project: RoleplayProject) => {
+  const {
+    name,
+    shortDescription,
+    description,
+    setting,
+    tags,
+    status,
+    entryProcess,
+    applicationProcess,
+    hasSupportingCast,
+    isMetaverse,
+    isQuestCompatible,
+    discordUrl,
+    imageUrl,
+    otherLinks = [],
+  } = project;
+  try {
+    return await new Promise((resolve, reject) => {
+      makeTransaction((client: PoolClient) => {
+        client.query(
+          `
+          UPDATE roleplay_projects
+          SET
+          name=$1,
+          short_description=$2,
+          description=$3,
+          setting=$4,
+          tags=$5,
+          status=$6,
+          entry_process=$7,
+          application_process=$8,
+          has_support_cast=$9,
+          is_metaverse=$10,
+          is_quest_compatible=$11,
+          discord_url=$12,
+          image_url=$13
+          WHERE id=$14
+          RETURNING id;
+          `,
+          [
+            name,
+            shortDescription,
+            description,
+            setting,
+            tags,
+            status,
+            entryProcess,
+            applicationProcess,
+            hasSupportingCast,
+            isMetaverse,
+            isQuestCompatible,
+            discordUrl,
+            imageUrl,
+            id,
+          ],
+          (error, results) => {
+            if (error) {
+              reject(error);
+            }
+
+            if (!results?.rowCount) {
+              reject(new Error('Update project failed.'));
+            }
+
+            updateRoleplayLinks(id, otherLinks).then(resolve).catch(reject);
+          },
+        );
+      });
+    });
+  } catch (err) {
+    console.error(err);
+    throw new Error('Internal server error.');
+  }
+};

@@ -5,6 +5,7 @@ export interface SnackbarProps {
   title: string;
   content: string | string[];
   severity: AlertColor;
+  autoHideDuration?: number;
   onClose?: () => void;
 }
 

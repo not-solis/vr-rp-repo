@@ -3,6 +3,12 @@ import mung from 'express-mung';
 import { projectRouter } from './controller/project-router';
 import { authRouter } from './controller/auth-router';
 
+export interface ResponseData<T> {
+  success: boolean;
+  errors?: string[];
+  data?: T;
+}
+
 const app = express();
 const PORT = 3001;
 
