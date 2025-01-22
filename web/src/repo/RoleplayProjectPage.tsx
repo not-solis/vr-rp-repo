@@ -7,6 +7,8 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 import {
+  Alert,
+  AlertTitle,
   Button,
   CardMedia,
   Dialog,
@@ -14,8 +16,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Grow,
   IconButton,
   LinearProgress,
+  Stack,
   TextField,
   Tooltip,
   Typography,
@@ -68,6 +72,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const [isEditing, setEditing] = useState(isNew);
   const [isPreviewDescription, setPreviewDescription] = useState(false);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [isOwnershipDialogOpen, setOwnershipDialogOpen] = useState(false);
+  const [isAdminInfoAlertOpen, setAdminInfoAlertOpen] = useState(false);
   const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
     {} as RoleplayProject,
   );
@@ -107,7 +113,11 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         .then((res) => res.json())
         .then((json) => {
           const project = json.data;
-          return remapRoleplayProject(project);
+          const remappedProject = remapRoleplayProject(project);
+          if (!remappedProject.owner) {
+            setAdminInfoAlertOpen(true);
+          }
+          return remappedProject;
         })
         .then(clearNulls),
   });
@@ -338,6 +348,36 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     }
   };
 
+  const requestOwnership = () => {
+    fetch(`${serverBaseUrl}/projects/${id}/owner`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify(project),
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          createSnackbar({
+            title: 'Success',
+            content: 'Request submitted!',
+            severity: 'success',
+            autoHideDuration: 3000,
+          });
+        } else {
+          res.json().then((json: ResponseData<unknown>) => {
+            createSnackbar({
+              title: 'Error',
+              content: json.errors ?? [],
+              severity: 'error',
+            });
+          });
+        }
+      })
+      .then(() => setOwnershipDialogOpen(false));
+  };
+
   const metaName = isNew ? 'New RP Project' : projectData?.name;
   const metaDescription = isNew
     ? 'Create a new roleplay project in the Repo'
@@ -358,6 +398,25 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         className='scrollable-y hidden-scrollbar'
       >
         <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
+          <Grow in={isAdminInfoAlertOpen} unmountOnExit>
+            <Alert
+              onClose={() => setAdminInfoAlertOpen(false)}
+              severity='info'
+              style={{ width: 'calc(100% - 240px)' }}
+            >
+              <AlertTitle>Note:</AlertTitle>
+              <Stack spacing={0.8}>
+                <Typography variant='body1'>
+                  This project was added to the Repo by a Myriad admin. Some
+                  information may be either missing or inaccurate.
+                </Typography>
+                <Typography variant='body1'>
+                  If you are an admin of this project, you can request ownership
+                  in the project info sidebar.
+                </Typography>
+              </Stack>
+            </Alert>
+          </Grow>
           {isEditing ? (
             <TextField
               required
@@ -456,6 +515,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         toggleOpen={() => setSidebarOpen(!isSidebarOpen)}
         project={project as RoleplayProject}
         setEditProject={setEditProject}
+        openOwnershipDialog={() => setOwnershipDialogOpen(true)}
       />
 
       <Dialog
@@ -465,10 +525,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         aria-labelledby='save-roleplay-dialog-title'
         aria-describedby='save-roleplay-dialog-description'
       >
+        <DialogTitle id='save-roleplay-dialog-title'>Confirm save?</DialogTitle>
         <DialogContent>
-          <DialogTitle id='save-roleplay-dialog-title'>
-            Confirm save?
-          </DialogTitle>
           <DialogContentText id='save-roleplay-dialog-description'>
             You will be saved as the owner of this project. You will be able to
             make edits later if you want.
@@ -487,6 +545,30 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             autoFocus
           >
             Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        id='request-ownership-dialog'
+        open={isOwnershipDialogOpen}
+        onClose={() => setOwnershipDialogOpen(false)}
+        aria-labelledby='request-ownership-dialog-title'
+        aria-describedby='request-ownership-dialog-description'
+      >
+        <DialogTitle id='request-ownership-dialog-title'>
+          Request ownership of {name}?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='request-ownership-dialog-description'>
+            {`The owner is a representative of project admin. Make sure you're authorized to represent the project before submitting a request.`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color='plain' onClick={() => setOwnershipDialogOpen(false)}>
+            No
+          </Button>
+          <Button color='plain' onClick={requestOwnership} autoFocus>
+            Yes
           </Button>
         </DialogActions>
       </Dialog>

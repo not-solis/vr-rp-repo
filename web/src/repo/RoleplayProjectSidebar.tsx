@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Add, Delete, Upload } from '@mui/icons-material';
 import {
+  Button,
   CardMedia,
   Checkbox,
   FormControlLabel,
@@ -29,6 +30,7 @@ interface RoleplayProjectSidebarProps {
   toggleOpen: () => void;
   project: RoleplayProject;
   setEditProject: (project: RoleplayProject) => void;
+  openOwnershipDialog: () => void;
 }
 
 const VisuallyHiddenInput = styled('input')({
@@ -51,6 +53,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     toggleOpen,
     project,
     setEditProject,
+    openOwnershipDialog,
   } = props;
   const {
     owner,
@@ -265,13 +268,24 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               width: '100%',
             }}
           >
-            {owner && (
+            {owner ? (
               <IconText
                 tooltip={'Owner'}
                 tooltipPlacement='left'
                 text={owner.name}
                 icon={'user'}
               />
+            ) : (
+              isAuthenticated && (
+                <Button
+                  color='plain'
+                  variant='outlined'
+                  onClick={openOwnershipDialog}
+                  style={{ borderRadius: 6 }}
+                >
+                  Request Ownership
+                </Button>
+              )
             )}
 
             <IconText

@@ -6,7 +6,7 @@ import {
   RoleplayProject,
   updateProject,
 } from '../model/project-model';
-import { getOwnerByProjectId } from '../model/owners-model';
+import { createOwnership, getOwnerByProjectId } from '../model/owners-model';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
 import { auth, getAuthUser } from './auth-router';
 import cookieParser from 'cookie-parser';
@@ -143,9 +143,10 @@ router.get('/:id', (req, res) => {
     );
 });
 
-router.get('/:id/owners', (req, res) => {
+router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
-  getOwnerByProjectId(id)
+  const user = getAuthUser(req);
+  createOwnership(id, user)
     .then((response) => {
       res.status(200).send(response);
     })

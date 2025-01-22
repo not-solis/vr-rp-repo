@@ -70,11 +70,9 @@ export const updateRoleplayLinks = async (
               )
               .then((results) => {
                 if (!results) {
-                  return Promise.reject(new Error('Failed links update'));
+                  throw new Error('Failed links update');
                 } else if (results.rowCount !== addedLinks.length) {
-                  return Promise.reject(
-                    new Error('Unexpected number of records affected'),
-                  );
+                  throw new Error('Unexpected number of records affected');
                 } else {
                   return {};
                 }
@@ -102,11 +100,9 @@ export const updateRoleplayLinks = async (
               )
               .then((results) => {
                 if (!results) {
-                  return Promise.reject(new Error('Failed links update'));
+                  throw new Error('Failed links update');
                 } else if (results.rowCount !== removedLinks.length) {
-                  return Promise.reject(
-                    new Error('Unexpected number of records affected'),
-                  );
+                  throw new Error('Unexpected number of records affected');
                 } else {
                   return {};
                 }

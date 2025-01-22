@@ -178,7 +178,8 @@ export function App() {
         secondary: '#adadad',
       },
       plain: {
-        main: '#efefef',
+        main: '#e0e0e0',
+        contrastText: 'black',
       },
       divider: '#44454a',
     },

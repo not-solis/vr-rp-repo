@@ -2,6 +2,7 @@ import { PoolClient } from 'pg';
 import { makeTransaction, pool } from './db-pool';
 import { User, UserRole } from './users-model';
 import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model';
+import { createOwnership } from './owners-model';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 
@@ -56,14 +57,9 @@ export const getProjects = async (
 
   const queryString = `
       SELECT roleplay_projects.*,
-      CASE
-        WHEN users.user_id IS NOT NULL
-        THEN json_build_object(
-          'id', users.user_id,
-          'name', users.name
-        )
-        ELSE null
-      END AS owner,
+      users.user_id as owner_id,
+      users.name as owner_name,
+      users.role as owner_role,
       array_agg(
         json_build_object(
           'label', roleplay_links.label,
@@ -71,7 +67,8 @@ export const getProjects = async (
         )
       ) filter (where roleplay_links.url is not null) as other_links
       FROM roleplay_projects
-        LEFT JOIN users ON roleplay_projects.owner = users.user_id
+        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND NOT ownership.pending)
+        LEFT JOIN users on users.user_id = ownership.user_id
         LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
       GROUP BY roleplay_projects.id, users.user_id
@@ -108,9 +105,15 @@ export const getProjectById = async (id: string) => {
     .query(
       `
       SELECT
-        roleplay_projects.*
+        roleplay_projects.*,
+        users.user_id as owner_id,
+        users.name as owner_name,
+        users.role as owner_role
       FROM roleplay_projects
-      WHERE id=$1
+        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND NOT ownership.pending)
+        LEFT JOIN users on users.user_id = ownership.user_id
+      WHERE roleplay_projects.id=$1
+      ;
       `,
       [id],
     )
@@ -195,22 +198,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
 
           const queries = [];
           if (role === UserRole.User) {
-            queries.push(
-              client
-                .query(
-                  `
-                    INSERT INTO ownership
-                    (user_id, project_id) VALUES ($1, $2)
-                    `,
-                  [user_id, projectId],
-                )
-                .then((results) => {
-                  if (!results.rowCount) {
-                    return Promise.reject(new Error('Error saving ownership.'));
-                  }
-                })
-                .catch(console.error),
-            );
+            queries.push(createOwnership(projectId, user, false));
           }
 
           if (otherLinks.length > 0) {
@@ -228,7 +216,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
               )
               .then((results) => {
                 if (!results.rowCount) {
-                  return Promise.reject(new Error('Error saving links'));
+                  throw new Error('Error saving links');
                 }
               })
               .catch(console.error);
@@ -303,7 +291,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
         )
         .then((results) => {
           if (!results?.rowCount) {
-            return Promise.reject(new Error('Update project failed.'));
+            throw new Error('Update project failed.');
           }
 
           updateRoleplayLinks(id, otherLinks).then(resolve).catch(reject);
