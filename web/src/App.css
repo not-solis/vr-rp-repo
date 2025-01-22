@@ -40,3 +40,17 @@
 .hidden-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+a.colorless,
+a.colorless:visited,
+a.colorless:hover,
+a.colorless:active {
+  color: inherit;
+}
+
+a.no-underline,
+a.no-underline:visited,
+a.no-underline:hover,
+a.no-underline:active {
+  text-decoration: none;
+}

@@ -1,10 +1,12 @@
-import { Box, Link, useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 import { UserComponent } from './UserComponent';
 import './Navbar.css';
 
 export const Navbar = () => {
+  const { pathname } = useLocation();
   const theme = useTheme();
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
@@ -24,28 +26,31 @@ export const Navbar = () => {
 
   return (
     <nav className='nav'>
-      <a
-        href='/'
-        style={{ color: theme.palette.text.primary, textDecoration: 'none' }}
+      <Link
+        to='/'
+        className='no-underline'
+        style={{ color: theme.palette.text.primary }}
       >
         <header>VR Roleplay Myriad</header>
-      </a>
+      </Link>
       <Box className='main-menu'>
         {windowDimensions.width > 1100 ? (
-          ['Repo', 'Blog', 'Resources', 'About Us'].map((t) => {
+          ['Repo', 'Community', 'Resources', 'About Us'].map((t) => {
             const hrefPath = `/${t.toLowerCase().replace(' ', '-')}`;
-            const currentPath = new URL(window.location.href).pathname;
             return (
               <Link
                 key={t}
-                className={currentPath.startsWith(hrefPath) ? 'selected' : ''}
-                href={hrefPath}
-                component='a'
-                variant='h6'
-                color='textSecondary'
-                underline='none'
+                className={`colorless no-underline${pathname.startsWith(hrefPath) ? ' selected' : ''}`}
+                to={hrefPath}
+                style={{
+                  color: pathname.startsWith(hrefPath)
+                    ? '#babc6f'
+                    : theme.palette.text.secondary,
+                }}
               >
-                {t}
+                <Typography variant='h5' fontWeight='bold'>
+                  {t}
+                </Typography>
               </Link>
             );
           })

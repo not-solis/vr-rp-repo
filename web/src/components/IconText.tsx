@@ -1,6 +1,7 @@
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, TextFieldProps, Tooltip, Typography } from '@mui/material';
+import { TextFieldProps, Tooltip, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 import { BlurrableTextField } from './BlurrableTextField';
 
@@ -88,7 +89,7 @@ export const IconText = (props: IconTextProps) => {
   }
 
   if (url) {
-    textElement = <Link href={url}>{textElement}</Link>;
+    textElement = <Link to={url}>{textElement}</Link>;
   }
   return textElement;
 };

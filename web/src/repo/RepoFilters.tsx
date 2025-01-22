@@ -6,12 +6,12 @@ import {
   FormGroup,
   IconButton,
   InputAdornment,
-  Link,
   TextField,
   Typography,
   useTheme,
 } from '@mui/material';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
@@ -83,7 +83,7 @@ export const RepoFilters = (props: FilterProps) => {
 
         {isAuthenticated && (
           <Link
-            href='/repo/new'
+            to='/repo/new'
             style={{ marginLeft: 'auto', textDecoration: 'none' }}
           >
             <IconButton

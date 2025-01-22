@@ -3,12 +3,12 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Link,
   Tooltip,
   Typography,
   useTheme,
 } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { IconText } from '../components/IconText';
 import { TagChip } from '../components/TagChip';
@@ -63,7 +63,7 @@ export const RoleplayProjectCard = (props: {
 
   return (
     <Card variant='outlined' className='project-card'>
-      <Link id='card-link' href={`/repo/${id}`} underline='none'>
+      <Link id='card-link' to={`/repo/${id}`} className='no-underline'>
         <CardContent>
           <Box className='project-card-content'>
             <div>
