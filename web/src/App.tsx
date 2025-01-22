@@ -184,6 +184,22 @@ export function App() {
       divider: '#44454a',
     },
     components: {
+      MuiDialogTitle: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'var(--mui-palette-background-dark)',
+            boxShadow: 'var(--mui-shadows-5)',
+          },
+        },
+      },
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            paddingTop: '16px !important',
+            paddingBottom: 4,
+          },
+        },
+      },
       MuiDialog: {
         styleOverrides: {
           paper: {

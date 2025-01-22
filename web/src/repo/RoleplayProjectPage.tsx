@@ -539,7 +539,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id='request-ownership-dialog-description'>
-            {`The owner is a representative of project admin. Make sure you're authorized to represent the project before submitting a request.`}
+            This request will be reviewed by a Myriad admin. Make sure you're
+            authorized to represent the project before submitting a request.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
