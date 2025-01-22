@@ -55,38 +55,32 @@ export const IconText = (props: IconTextProps) => {
       }}
     >
       {icon && (
-        <FontAwesomeIcon
-          height={4}
-          fixedWidth={true}
-          style={{
-            fontSize: 16,
-            paddingTop: 4,
-            paddingRight: icon ? (iconPadding ?? 12) : 0,
+        <Tooltip
+          title={tooltip}
+          placement={tooltipPlacement ?? 'top'}
+          enterDelay={150}
+          leaveDelay={100}
+          slotProps={{
+            popper: {
+              modifiers: [{ name: 'offset', options: { offset: [0, -6] } }],
+            },
           }}
-          icon={[iconPrefix ?? 'fas', icon]}
-        />
+        >
+          <FontAwesomeIcon
+            height={4}
+            fixedWidth={true}
+            style={{
+              fontSize: 16,
+              paddingTop: 4,
+              paddingRight: icon ? (iconPadding ?? 12) : 0,
+            }}
+            icon={[iconPrefix ?? 'fas', icon]}
+          />
+        </Tooltip>
       )}
       {component || (text && <Typography variant='body1'>{text}</Typography>)}
     </div>
   );
-
-  if (tooltip) {
-    textElement = (
-      <Tooltip
-        title={tooltip}
-        placement={tooltipPlacement ?? 'top'}
-        enterDelay={150}
-        leaveDelay={100}
-        slotProps={{
-          popper: {
-            modifiers: [{ name: 'offset', options: { offset: [0, -6] } }],
-          },
-        }}
-      >
-        {textElement}
-      </Tooltip>
-    );
-  }
 
   if (url) {
     textElement = <Link to={url}>{textElement}</Link>;
