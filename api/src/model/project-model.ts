@@ -8,7 +8,7 @@ const DEFAULT_QUERY_LIMIT = 1000;
 export interface RoleplayProject {
   id: string;
   name: string;
-  owners?: User[];
+  owner?: User;
   lastUpdated: Date;
   imageUrl?: string;
   shortDescription?: string;
@@ -35,35 +35,35 @@ export const getProjects = async (
   asc = true,
   activeOnly = false,
 ) => {
-  try {
-    // TODO: implement proper filters
-    return await new Promise((resolve, reject) => {
-      const queryParams: (string | number)[] = [start, limit + 1];
-      const addedQueryParams: (string | number)[] = [];
-      const where = [];
-      if (name) {
-        sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
-        asc = true;
-      }
+  // using limit + 1 to see if there are any remaining
+  const queryParams: (string | number)[] = [start, limit + 1];
+  const addedQueryParams: (string | number)[] = [];
+  const where = [];
+  if (name) {
+    sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
+    asc = true;
+  }
 
-      const hasTags = tags && tags.length > 0;
-      if (hasTags) {
-        addedQueryParams.push(`{${tags.map((t) => `"${t}"`).join(',')}}`);
-        where.push(`tags @> $${addedQueryParams.length + queryParams.length}`);
-      }
+  const hasTags = tags && tags.length > 0;
+  if (hasTags) {
+    addedQueryParams.push(`{${tags.map((t) => `"${t}"`).join(',')}}`);
+    where.push(`tags @> $${addedQueryParams.length + queryParams.length}`);
+  }
 
-      if (activeOnly) {
-        where.push("status = 'Active'");
-      }
+  if (activeOnly) {
+    where.push("status = 'Active'");
+  }
 
-      const queryString = `
+  const queryString = `
       SELECT roleplay_projects.*,
-      array_agg(
-        json_build_object(
+      CASE
+        WHEN users.user_id IS NOT NULL
+        THEN json_build_object(
           'id', users.user_id,
           'name', users.name
         )
-      ) FILTER (WHERE users.user_id IS NOT NULL) AS owners,
+        ELSE null
+      END AS owner,
       array_agg(
         json_build_object(
           'label', roleplay_links.label,
@@ -71,71 +71,62 @@ export const getProjects = async (
         )
       ) filter (where roleplay_links.url is not null) as other_links
       FROM roleplay_projects
-        LEFT JOIN ownership ON roleplay_projects.id = ownership.project_id
-        LEFT JOIN users ON ownership.user_id = users.user_id
-        left join roleplay_links on roleplay_projects.id = roleplay_links.project_id
+        LEFT JOIN users ON roleplay_projects.owner = users.user_id
+        LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
-      GROUP BY roleplay_projects.id
+      GROUP BY roleplay_projects.id, users.user_id
       ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'}
       ${name || sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
       OFFSET $1 LIMIT $2;
       `;
 
-      pool.query(
-        queryString,
-        queryParams.concat(addedQueryParams), // using limit + 1 to see if there are any remaining
-        (error, results) => {
-          if (error) {
-            reject(error);
-          }
-
-          const { rows, rowCount } = results;
-          if (rows && rowCount !== null) {
-            if (rowCount > limit) {
-              rows.pop();
-            }
-            resolve({
-              hasNext: rowCount > limit,
-              data: rows,
-              nextCursor: start + limit,
-            });
-          } else {
-            reject(new Error('No results found.'));
-          }
-        },
-      );
+  return await pool
+    .query(queryString, queryParams.concat(addedQueryParams))
+    .then((results) => {
+      const { rows, rowCount } = results;
+      if (rows && rowCount !== null) {
+        if (rowCount > limit) {
+          rows.pop();
+        }
+        return {
+          hasNext: rowCount > limit,
+          data: rows,
+          nextCursor: start + limit,
+        };
+      } else {
+        throw new Error('No results found.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
     });
-  } catch (err) {
-    console.error(err);
-    throw new Error('Internal server error.');
-  }
 };
 
 export const getProjectById = async (id: string) => {
-  try {
-    return await new Promise((resolve, reject) => {
-      pool.query(
-        'SELECT * FROM roleplay_projects WHERE id=$1',
-        [id],
-        (error, results) => {
-          if (error) {
-            reject(error);
-          }
-
-          if (results?.rows) {
-            resolve({
-              data: results.rows[0],
-            });
-          } else {
-            reject(new Error('No results found.'));
-          }
-        },
-      );
+  return await pool
+    .query(
+      `
+      SELECT
+        roleplay_projects.*
+      FROM roleplay_projects
+      WHERE id=$1
+      `,
+      [id],
+    )
+    .then((results) => {
+      if (results?.rows) {
+        return {
+          data: results.rows[0],
+        };
+      } else {
+        throw new Error('No results found.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
     });
-  } catch (err) {
-    console.error(err);
-    throw new Error('Internal server error.');
-  }
 };
 
 export const createProject = async (user: User, project: RoleplayProject) => {
@@ -161,23 +152,23 @@ export const createProject = async (user: User, project: RoleplayProject) => {
       client
         .query(
           `
-            INSERT INTO roleplay_projects
-            (name,
-            short_description,
-            description,
-            setting,
-            tags,
-            status,
-            entry_process,
-            application_process,
-            has_support_cast,
-            is_metaverse,
-            is_quest_compatible,
-            discord_url,
-            image_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-            RETURNING id;
-            `,
+          INSERT INTO roleplay_projects
+          (name,
+          short_description,
+          description,
+          setting,
+          tags,
+          status,
+          entry_process,
+          application_process,
+          has_support_cast,
+          is_metaverse,
+          is_quest_compatible,
+          discord_url,
+          image_url)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          RETURNING id;
+          `,
           [
             name,
             shortDescription,

@@ -6,7 +6,7 @@ import {
   RoleplayProject,
   updateProject,
 } from '../model/project-model';
-import { getOwnersByProjectId } from '../model/owners-model';
+import { getOwnerByProjectId } from '../model/owners-model';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
 import { auth, getAuthUser } from './auth-router';
 import cookieParser from 'cookie-parser';
@@ -82,7 +82,7 @@ const checkOwnership: RequestHandler = (
 ) => {
   const project = req.body as RoleplayProject;
   const user = getAuthUser(req);
-  getOwnersByProjectId(project.id)
+  getOwnerByProjectId(project.id)
     .then((results: any) => results.data as any[])
     .then((owners) => {
       if (owners.some((owner) => owner.id === user.user_id)) {
@@ -145,7 +145,7 @@ router.get('/:id', (req, res) => {
 
 router.get('/:id/owners', (req, res) => {
   const { id } = req.params;
-  getOwnersByProjectId(id)
+  getOwnerByProjectId(id)
     .then((response) => {
       res.status(200).send(response);
     })

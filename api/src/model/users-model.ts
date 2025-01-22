@@ -11,6 +11,7 @@ export interface User {
   name: string;
   image_url?: string;
   role: UserRole;
+  discord_id?: string;
 }
 
 export const getUserByDiscordId = async (

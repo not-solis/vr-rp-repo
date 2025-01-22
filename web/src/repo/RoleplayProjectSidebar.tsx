@@ -53,7 +53,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     setEditProject,
   } = props;
   const {
-    owners = [],
+    owner,
     imageUrl = '',
     tags = [],
     setting = '',
@@ -265,11 +265,11 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               width: '100%',
             }}
           >
-            {owners && owners.length > 0 && (
+            {owner && (
               <IconText
-                tooltip={'Owners'}
+                tooltip={'Owner'}
                 tooltipPlacement='left'
-                text={owners.map((o) => o.name).join(', ')}
+                text={owner.name}
                 icon={'user'}
               />
             )}

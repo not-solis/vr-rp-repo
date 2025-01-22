@@ -30,7 +30,7 @@ export const RoleplayProjectCard = (props: {
     id,
     name,
     lastUpdated,
-    owners,
+    owner,
     imageUrl,
     status,
     tags,
@@ -51,8 +51,6 @@ export const RoleplayProjectCard = (props: {
     );
     setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);
-
-  const isOwner = owners?.some((owner) => owner.id === user?.id) ?? false;
 
   const statusColors: Record<string, string> = {
     [RoleplayStatus.Active]: theme.roleplayStatus.active,
@@ -118,7 +116,6 @@ export const RoleplayProjectCard = (props: {
                 >
                   <Typography ref={titleRef} variant='h4'>
                     {name}
-                    {isOwner && ' (OWNED)'}
                   </Typography>
                 </Tooltip>
                 <TagChip
@@ -130,10 +127,8 @@ export const RoleplayProjectCard = (props: {
                 />
               </Box>
 
-              {owners && owners.length > 0 && (
-                <Typography variant='subtitle1'>
-                  {owners.map((owner) => owner.name).join(', ')}
-                </Typography>
+              {owner && (
+                <Typography variant='subtitle1'>{owner.name}</Typography>
               )}
 
               {tags && tags.length > 0 && (

@@ -30,7 +30,7 @@ export interface RoleplayLink {
 export interface RoleplayProject {
   id: string;
   name: string;
-  owners?: User[];
+  owner?: User;
   lastUpdated: Date;
   imageUrl?: string;
   shortDescription?: string;
@@ -52,7 +52,13 @@ export const remapRoleplayProject = (project: any): RoleplayProject => {
   return {
     id: project.id,
     name: project.name,
-    owners: project.owners,
+    owner: project.owner_id
+      ? {
+          id: project.owner_id,
+          name: project.owner_name,
+          role: project.owner_role,
+        }
+      : undefined,
     lastUpdated: new Date(project.last_updated),
     imageUrl: project.image_url,
     shortDescription: project.short_description,

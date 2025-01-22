@@ -112,26 +112,26 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         .then(clearNulls),
   });
 
-  const { data: owners, isLoading: ownersLoading } = useQuery({
-    enabled: !isNew,
-    queryKey: ['project', 'owners'],
-    queryFn: () =>
-      fetch(`${serverBaseUrl}/projects/${id}/owners`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<User[]>((json) =>
-          json.data.map((user: any) =>
-            clearNulls({
-              id: user.id,
-              name: user.name,
-              discordId: user.discord_id,
-            }),
-          ),
-        ),
-  });
+  // const { data: owners, isLoading: ownersLoading } = useQuery({
+  //   enabled: !isNew,
+  //   queryKey: ['project', 'owners'],
+  //   queryFn: () =>
+  //     fetch(`${serverBaseUrl}/projects/${id}/owners`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     })
+  //       .then((res) => res.json())
+  //       .then<User[]>((json) =>
+  //         json.data.map((user: any) =>
+  //           clearNulls({
+  //             id: user.id,
+  //             name: user.name,
+  //             discordId: user.discord_id,
+  //           }),
+  //         ),
+  //       ),
+  // });
 
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
     enabled: !isNew,
@@ -164,13 +164,11 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const project = isEditing
     ? editProject
-    : { ...projectData, owners: owners ?? [], otherLinks: otherLinks ?? [] };
+    : { ...projectData, otherLinks: otherLinks ?? [] };
+  const { name = '', description = '', shortDescription = '', owner } = project;
 
   const canEdit =
-    user?.role == UserRole.Admin ||
-    (owners && owners.some((owner) => owner.id === user?.id));
-
-  const { name = '', description = '', shortDescription = '' } = project;
+    isAuthenticated && (user?.role == UserRole.Admin || owner?.id === user?.id);
 
   const previewButton = (
     <IconButton
@@ -397,7 +395,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
           )}
           {descriptionElement}
           {!isLoading &&
-            !ownersLoading &&
             !otherLinksLoading &&
             canEdit &&
             (isEditing ? (
