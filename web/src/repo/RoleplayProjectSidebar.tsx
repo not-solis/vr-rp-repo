@@ -106,7 +106,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
         tooltipPlacement='left'
         icon='link'
         url={isEditing ? '' : url}
-        containerStyle={{ width: '95%' }}
+        containerStyle={{ width: '100%' }}
         component={
           isEditing ? (
             <div

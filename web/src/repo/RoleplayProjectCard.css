@@ -25,6 +25,8 @@
   z-index: 1;
   padding: 16px 16px 24px 12px;
   margin: -16px -16px -24px -12px;
+  min-width: 0;
+  flex-grow: 1;
 }
 
 #card-link,

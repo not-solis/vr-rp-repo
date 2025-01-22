@@ -261,6 +261,19 @@ export function App() {
     setSnackbarOpen(false);
   };
 
+  const comingSoon = (
+    <h1
+      style={{
+        margin: '0 auto 10%',
+        alignSelf: 'center',
+        textAlign: 'center',
+        fontSize: 84,
+      }}
+    >
+      Coming soon!
+    </h1>
+  );
+
   return (
     <HelmetProvider>
       <EnvContext.Provider value={env}>
@@ -284,7 +297,7 @@ export function App() {
                       <Navbar />
                       <div style={{ flexGrow: 1, minHeight: 0 }}>
                         <Routes>
-                          <Route path='/' element={<div>HOME</div>} />
+                          <Route path='/' element={comingSoon} />
                           <Route path='/repo' element={<Repo />} />
                           <Route
                             path='/repo/new'
@@ -294,25 +307,9 @@ export function App() {
                             path='/repo/:id'
                             element={<RoleplayProjectPage />}
                           />
-                          <Route
-                            path='/community'
-                            element={<div>Where the blog go</div>}
-                          />
-                          <Route
-                            path='/resources'
-                            element={
-                              <div>Avatars, worlds, and docs, oh my!</div>
-                            }
-                          />
-                          {/* snackbar content */}
-                          <Route
-                            path='/about-us'
-                            element={<div>Memememememe</div>}
-                          />
-                          <Route
-                            path='/auth/*'
-                            element={<div>you did it!</div>}
-                          />
+                          <Route path='/community' element={comingSoon} />
+                          <Route path='/resources' element={comingSoon} />
+                          <Route path='/about-us' element={comingSoon} />
                           <Route
                             path='*'
                             element={<Navigate to='/' replace={true} />}

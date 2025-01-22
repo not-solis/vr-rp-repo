@@ -41,7 +41,7 @@ const validateProject: RequestHandler = (
   const { name, shortDescription, discordUrl, otherLinks } = project;
   const validationErrors: string[] = [];
 
-  if (!name) {
+  if (!name || !name.trim()) {
     validationErrors.push('No name provided.');
   }
   if (shortDescription && shortDescription.length > 512) {
