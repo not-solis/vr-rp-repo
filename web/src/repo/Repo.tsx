@@ -2,7 +2,7 @@ import './Repo.css';
 import { Box, CircularProgress, LinearProgress, useTheme } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { RepoFilters } from './RepoFilters';

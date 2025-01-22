@@ -27,7 +27,7 @@ import {
 } from '@tanstack/react-query';
 import { PropsWithChildren, useState } from 'react';
 import { CookiesProvider } from 'react-cookie';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
@@ -262,91 +262,97 @@ export function App() {
   };
 
   return (
-    <EnvContext.Provider value={env}>
-      <ThemeProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <SnackbarContext.Provider
-            value={{
-              createSnackbar: (props) => {
-                setSnackbarProps(props);
-                setSnackbarOpen(true);
-              },
-            }}
-          >
-            <AuthWrapper>
-              <CookiesProvider>
-                <Helmet>
-                  <meta property='og:url' content={window.location.href} />
-                </Helmet>
-                <BrowserRouter>
-                  <Box id='app-container'>
-                    <Navbar />
-                    <div style={{ flexGrow: 1, minHeight: 0 }}>
-                      <Routes>
-                        <Route path='/' element={<div>HOME</div>} />
-                        <Route path='/repo' element={<Repo />} />
-                        <Route
-                          path='/repo/new'
-                          element={<RoleplayProjectPage isNew />}
-                        />
-                        <Route
-                          path='/repo/:id'
-                          element={<RoleplayProjectPage />}
-                        />
-                        <Route
-                          path='/blog'
-                          element={<div>Where the blog go</div>}
-                        />
-                        <Route
-                          path='/resources'
-                          element={<div>Avatars, worlds, and docs, oh my!</div>}
-                        />
-                        {/* snackbar content */}
-                        <Route
-                          path='/about-us'
-                          element={<div>Memememememe</div>}
-                        />
-                        <Route
-                          path='/auth/*'
-                          element={<div>you did it!</div>}
-                        />
-                        <Route
-                          path='*'
-                          element={<Navigate to='/' replace={true} />}
-                        />
-                      </Routes>
-                    </div>
-                  </Box>
-                  <Snackbar
-                    open={snackbarOpen}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    autoHideDuration={snackbarProps?.autoHideDuration ?? 6000}
-                    onClose={onSnackbarClose}
-                    disableWindowBlurListener
-                    ClickAwayListenerProps={{ onClickAway: () => null }}
-                  >
-                    <Alert
-                      severity={snackbarProps?.severity}
-                      variant='standard'
+    <HelmetProvider>
+      <EnvContext.Provider value={env}>
+        <ThemeProvider theme={theme}>
+          <QueryClientProvider client={queryClient}>
+            <SnackbarContext.Provider
+              value={{
+                createSnackbar: (props) => {
+                  setSnackbarProps(props);
+                  setSnackbarOpen(true);
+                },
+              }}
+            >
+              <AuthWrapper>
+                <CookiesProvider>
+                  <Helmet>
+                    <meta property='og:url' content={window.location.href} />
+                  </Helmet>
+                  <BrowserRouter>
+                    <Box id='app-container'>
+                      <Navbar />
+                      <div style={{ flexGrow: 1, minHeight: 0 }}>
+                        <Routes>
+                          <Route path='/' element={<div>HOME</div>} />
+                          <Route path='/repo' element={<Repo />} />
+                          <Route
+                            path='/repo/new'
+                            element={<RoleplayProjectPage isNew />}
+                          />
+                          <Route
+                            path='/repo/:id'
+                            element={<RoleplayProjectPage />}
+                          />
+                          <Route
+                            path='/community'
+                            element={<div>Where the blog go</div>}
+                          />
+                          <Route
+                            path='/resources'
+                            element={
+                              <div>Avatars, worlds, and docs, oh my!</div>
+                            }
+                          />
+                          {/* snackbar content */}
+                          <Route
+                            path='/about-us'
+                            element={<div>Memememememe</div>}
+                          />
+                          <Route
+                            path='/auth/*'
+                            element={<div>you did it!</div>}
+                          />
+                          <Route
+                            path='*'
+                            element={<Navigate to='/' replace={true} />}
+                          />
+                        </Routes>
+                      </div>
+                    </Box>
+                    <Snackbar
+                      open={snackbarOpen}
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      autoHideDuration={snackbarProps?.autoHideDuration ?? 6000}
                       onClose={onSnackbarClose}
-                      style={{ width: '100%' }}
+                      disableWindowBlurListener
+                      ClickAwayListenerProps={{ onClickAway: () => null }}
                     >
-                      <AlertTitle>{snackbarProps?.title}</AlertTitle>
-                      {typeof snackbarProps?.content === 'string' ? (
-                        snackbarProps?.content
-                      ) : (
-                        <Stack spacing={1}>
-                          {snackbarProps?.content.map((c) => <div>- {c}</div>)}
-                        </Stack>
-                      )}
-                    </Alert>
-                  </Snackbar>
-                </BrowserRouter>
-              </CookiesProvider>
-            </AuthWrapper>
-          </SnackbarContext.Provider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </EnvContext.Provider>
+                      <Alert
+                        severity={snackbarProps?.severity}
+                        variant='standard'
+                        onClose={onSnackbarClose}
+                        style={{ width: '100%' }}
+                      >
+                        <AlertTitle>{snackbarProps?.title}</AlertTitle>
+                        {typeof snackbarProps?.content === 'string' ? (
+                          snackbarProps?.content
+                        ) : (
+                          <Stack spacing={1}>
+                            {snackbarProps?.content.map((c) => (
+                              <div>- {c}</div>
+                            ))}
+                          </Stack>
+                        )}
+                      </Alert>
+                    </Snackbar>
+                  </BrowserRouter>
+                </CookiesProvider>
+              </AuthWrapper>
+            </SnackbarContext.Provider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </EnvContext.Provider>
+    </HelmetProvider>
   );
 }
