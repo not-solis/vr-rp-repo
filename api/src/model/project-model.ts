@@ -67,7 +67,7 @@ export const getProjects = async (
         )
       ) filter (where roleplay_links.url is not null) as other_links
       FROM roleplay_projects
-        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND NOT ownership.pending)
+        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on users.user_id = ownership.user_id
         LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
@@ -110,7 +110,7 @@ export const getProjectById = async (id: string) => {
         users.name as owner_name,
         users.role as owner_role
       FROM roleplay_projects
-        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND NOT ownership.pending)
+        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on users.user_id = ownership.user_id
       WHERE roleplay_projects.id=$1
       ;
@@ -198,7 +198,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
 
           const queries = [];
           if (role === UserRole.User) {
-            queries.push(createOwnership(projectId, user, false));
+            queries.push(createOwnership(projectId, user, true));
           }
 
           if (otherLinks.length > 0) {
