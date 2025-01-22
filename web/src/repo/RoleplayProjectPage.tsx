@@ -122,27 +122,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         .then(clearNulls),
   });
 
-  // const { data: owners, isLoading: ownersLoading } = useQuery({
-  //   enabled: !isNew,
-  //   queryKey: ['project', 'owners'],
-  //   queryFn: () =>
-  //     fetch(`${serverBaseUrl}/projects/${id}/owners`, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     })
-  //       .then((res) => res.json())
-  //       .then<User[]>((json) =>
-  //         json.data.map((user: any) =>
-  //           clearNulls({
-  //             id: user.id,
-  //             name: user.name,
-  //             discordId: user.discord_id,
-  //           }),
-  //         ),
-  //       ),
-  // });
-
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
     enabled: !isNew,
     queryKey: ['project', 'links'],
@@ -398,7 +377,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         className='scrollable-y hidden-scrollbar'
       >
         <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
-          <Grow in={isAdminInfoAlertOpen} unmountOnExit>
+          <Grow in={isAdminInfoAlertOpen && !isEditing} unmountOnExit>
             <Alert
               onClose={() => setAdminInfoAlertOpen(false)}
               severity='info'

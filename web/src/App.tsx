@@ -354,8 +354,8 @@ export function App() {
                           snackbarProps?.content
                         ) : (
                           <Stack spacing={1}>
-                            {snackbarProps?.content.map((c) => (
-                              <div>- {c}</div>
+                            {snackbarProps?.content.map((c, i) => (
+                              <div key={i}>- {c}</div>
                             ))}
                           </Stack>
                         )}
