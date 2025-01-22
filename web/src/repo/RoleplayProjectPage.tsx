@@ -9,6 +9,11 @@ import {
 import {
   Button,
   CardMedia,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   LinearProgress,
   TextField,
@@ -45,11 +50,24 @@ interface RoleplayProjectPageProps {
   isNew?: boolean;
 }
 
+function clearNulls<T>(obj: T): T {
+  if (obj) {
+    Object.keys(obj).forEach((k) => {
+      if (obj[k as keyof T] === null) {
+        delete obj[k as keyof T];
+      }
+    });
+  }
+
+  return obj;
+}
+
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew = false } = props;
   const { serverBaseUrl } = useEnv();
   const [isEditing, setEditing] = useState(isNew);
   const [isPreviewDescription, setPreviewDescription] = useState(false);
+  const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
     {} as RoleplayProject,
   );
@@ -90,7 +108,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         .then((json) => {
           const project = json.data;
           return remapRoleplayProject(project);
-        }),
+        })
+        .then(clearNulls),
   });
 
   const { data: owners, isLoading: ownersLoading } = useQuery({
@@ -104,11 +123,13 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       })
         .then((res) => res.json())
         .then<User[]>((json) =>
-          json.data.map((user: any) => ({
-            id: user.id,
-            name: user.name,
-            discordId: user.discord_id,
-          })),
+          json.data.map((user: any) =>
+            clearNulls({
+              id: user.id,
+              name: user.name,
+              discordId: user.discord_id,
+            }),
+          ),
         ),
   });
 
@@ -122,7 +143,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         },
       })
         .then<ResponseData<RoleplayLink[]>>((res) => res.json())
-        .then((json) => json.data);
+        .then((json) => json.data)
+        .then(clearNulls);
     },
   });
 
@@ -242,6 +264,14 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const cancelEdit = () => {
     setEditing(false);
     setPreviewDescription(false);
+  };
+
+  const onSaveButtonClick = () => {
+    if (isNew) {
+      setSaveDialogOpen(true);
+    } else {
+      saveProject();
+    }
   };
 
   const saveProject = () => {
@@ -384,7 +414,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                   style={{
                     borderRadius: 8,
                   }}
-                  onClick={saveProject}
+                  onClick={onSaveButtonClick}
                 >
                   <Save style={{ paddingRight: 8 }} />
                   <Typography>Save</Typography>
@@ -430,6 +460,39 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         project={project as RoleplayProject}
         setEditProject={setEditProject}
       />
+
+      <Dialog
+        id='save-roleplay-dialog'
+        open={isSaveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        aria-labelledby='save-roleplay-dialog-title'
+        aria-describedby='save-roleplay-dialog-description'
+      >
+        <DialogContent>
+          <DialogTitle id='save-roleplay-dialog-title'>
+            Confirm save?
+          </DialogTitle>
+          <DialogContentText id='save-roleplay-dialog-description'>
+            You will be saved as the owner of this project. You will be able to
+            make edits later if you want.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color='plain' onClick={() => setSaveDialogOpen(false)}>
+            Disagree
+          </Button>
+          <Button
+            color='plain'
+            onClick={() => {
+              setSaveDialogOpen(false);
+              saveProject();
+            }}
+            autoFocus
+          >
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

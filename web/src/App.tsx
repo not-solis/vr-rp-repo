@@ -16,6 +16,7 @@ import {
   AlertTitle,
   Box,
   createTheme,
+  PaletteColorOptions,
   Snackbar,
   Stack,
   ThemeProvider,
@@ -92,6 +93,13 @@ declare module '@mui/material/styles' {
     };
   }
 
+  interface Palette {
+    plain: PaletteColorOptions;
+  }
+  interface PaletteOptions {
+    plain?: PaletteColorOptions;
+  }
+
   interface TypographyVariants {
     title: React.CSSProperties;
     text: React.CSSProperties;
@@ -104,6 +112,12 @@ declare module '@mui/material/styles' {
 
   interface TypeBackground {
     dark: string;
+  }
+}
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    plain: true;
   }
 }
 
@@ -162,6 +176,9 @@ export function App() {
       text: {
         primary: '#efefef',
         secondary: '#adadad',
+      },
+      plain: {
+        main: '#efefef',
       },
       divider: '#44454a',
     },

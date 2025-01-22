@@ -20,3 +20,8 @@
     padding-right: 0;
   }
 }
+
+/* #new-roleplay-dialog button {
+  color: var(--mui-palette-text-primary);
+  border-color: var(--mui-palette-text-secondary);
+} */

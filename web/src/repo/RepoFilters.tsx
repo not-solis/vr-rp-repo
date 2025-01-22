@@ -26,6 +26,7 @@ interface FilterProps {
   removeTagFilter: (tag: string) => void;
   showActiveOnly: boolean;
   setShowActiveOnly: (showActiveOnly: boolean) => void;
+  openNewRepoDialog: () => void;
 }
 
 export const RepoFilters = (props: FilterProps) => {
@@ -37,6 +38,7 @@ export const RepoFilters = (props: FilterProps) => {
     removeTagFilter,
     showActiveOnly,
     setShowActiveOnly,
+    openNewRepoDialog,
   } = props;
   const theme = useTheme();
   const [name, setName] = useState(nameFilter || '');
@@ -82,10 +84,7 @@ export const RepoFilters = (props: FilterProps) => {
         />
 
         {isAuthenticated && (
-          <Link
-            to='/repo/new'
-            style={{ marginLeft: 'auto', textDecoration: 'none' }}
-          >
+          <div style={{ marginLeft: 'auto', textDecoration: 'none' }}>
             <IconButton
               style={{
                 display: 'flex',
@@ -93,11 +92,12 @@ export const RepoFilters = (props: FilterProps) => {
                 gap: 8,
                 borderRadius: 8,
               }}
+              onClick={openNewRepoDialog}
             >
               <Add />
               <Typography variant='body1'>Add New</Typography>
             </IconButton>
-          </Link>
+          </div>
         )}
       </FormGroup>
     </Box>

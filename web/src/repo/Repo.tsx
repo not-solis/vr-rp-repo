@@ -1,9 +1,21 @@
 import './Repo.css';
-import { Box, CircularProgress, LinearProgress, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  LinearProgress,
+  useTheme,
+} from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useNavigate } from 'react-router-dom';
 
 import { RepoFilters } from './RepoFilters';
 import { RoleplayProjectCard } from './RoleplayProjectCard';
@@ -29,6 +41,8 @@ export const Repo = () => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [showActiveOnly, setShowActiveOnly] = useState(true);
+  const [showNewDialog, setShowNewDialog] = useState(false);
+  const navigate = useNavigate();
   const {
     data: pageData,
     error,
@@ -129,9 +143,31 @@ export const Repo = () => {
         removeTagFilter={removeTag}
         showActiveOnly={showActiveOnly}
         setShowActiveOnly={setShowActiveOnly}
+        openNewRepoDialog={() => setShowNewDialog(true)}
       />
       {isFetching && <LinearProgress />}
       {results}
+      <Dialog
+        id='new-roleplay-dialog'
+        open={showNewDialog}
+        onClose={() => setShowNewDialog(false)}
+        aria-describedby='new-roleplay-dialog-description'
+      >
+        <DialogContent>
+          <DialogContentText id='new-roleplay-dialog-description'>
+            By creating a new roleplay in the repo, I confirm that I am a
+            representative of this roleplay's administration.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color='plain' onClick={() => setShowNewDialog(false)}>
+            Disagree
+          </Button>
+          <Button color='plain' onClick={() => navigate('/repo/new')} autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
