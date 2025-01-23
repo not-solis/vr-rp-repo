@@ -1,5 +1,5 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  ArrowDropDown,
   Cancel,
   Edit,
   Save,
@@ -10,7 +10,6 @@ import {
   Alert,
   AlertTitle,
   Button,
-  CardMedia,
   Dialog,
   DialogActions,
   DialogContent,
@@ -19,20 +18,18 @@ import {
   Grow,
   IconButton,
   LinearProgress,
+  Menu,
+  MenuItem,
   Stack,
   TextField,
-  Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { RoleplayEditView } from './RoleplayEditView';
 import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
-import { IconText } from '../components/IconText';
 import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { useAuth } from '../context/AuthProvider';
@@ -42,9 +39,10 @@ import {
   remapRoleplayProject,
   RoleplayProject,
   RoleplayLink,
+  RoleplayStatus,
 } from '../model/RoleplayProject';
 import { ResponseData } from '../model/ServerResponse';
-import { User, UserRole } from '../model/User';
+import { UserRole } from '../model/User';
 
 import './RoleplayProjectPage.css';
 
@@ -74,6 +72,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isOwnershipDialogOpen, setOwnershipDialogOpen] = useState(false);
   const [isAdminInfoAlertOpen, setAdminInfoAlertOpen] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
+  const isMenuOpen = !!menuAnchorEl;
+  const statusTagRef = useRef<HTMLDivElement>(null);
   const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
     {} as RoleplayProject,
   );
@@ -151,10 +152,20 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     return null;
   }
 
+  if (isNew && !editProject.status) {
+    editProject.status = RoleplayStatus.Active;
+  }
+
   const project = isEditing
     ? editProject
     : { ...projectData, otherLinks: otherLinks ?? [] };
-  const { name = '', description = '', shortDescription = '', owner } = project;
+  const {
+    name = '',
+    description = '',
+    shortDescription = '',
+    owner,
+    status,
+  } = project;
 
   const canEdit =
     isAuthenticated && (user?.role == UserRole.Admin || owner?.id === user?.id);
@@ -362,6 +373,12 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     ? 'Create a new roleplay project in the Repo'
     : projectData?.shortDescription;
 
+  const openStatusMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    setMenuAnchorEl(e.currentTarget);
+  };
+
+  const closeStatusMenu = () => setMenuAnchorEl(undefined);
+
   return (
     <div id='project-page'>
       <Helmet>
@@ -396,88 +413,132 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
               </Stack>
             </Alert>
           </Grow>
-          {isEditing ? (
-            <TextField
-              required
-              label='Name'
-              value={name}
-              onChange={(e) =>
-                setEditProject({ ...project, name: e.currentTarget.value })
-              }
-              style={{ width: 'calc(100% - 240px)' }}
-              sx={{
-                '.MuiInputLabel-shrink': {
-                  fontSize: '1.6rem !important',
-                  lineHeight: '1.1em !important',
-                },
-                '.MuiOutlinedInput-root': {
-                  fieldset: {
-                    fontSize: '1.6rem',
-                  },
-                },
-              }}
-              slotProps={{
-                input: {
-                  style: { font: 'var(--mui-font-h1)' },
-                },
-                inputLabel: {
-                  style: {
-                    font: 'var(--mui-font-h1)',
-                    lineHeight: 1.55,
-                  },
-                },
-              }}
-            />
-          ) : (
-            <Typography variant='title'>{name}</Typography>
-          )}
-          {descriptionElement}
-          {!isLoading &&
-            !otherLinksLoading &&
-            canEdit &&
-            (isEditing ? (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  display: 'flex',
-                  gap: 8,
-                }}
-              >
-                <IconButton
-                  style={{
-                    borderRadius: 8,
+          <Stack direction='row' gap={4} alignItems='center'>
+            {isEditing ? (
+              <>
+                <TextField
+                  required
+                  label='Name'
+                  value={name}
+                  onChange={(e) =>
+                    setEditProject({ ...project, name: e.currentTarget.value })
+                  }
+                  style={{ width: 'calc(500px)' }}
+                  sx={{
+                    '.MuiInputLabel-shrink': {
+                      fontSize: '1.6rem !important',
+                      lineHeight: '1.1em !important',
+                    },
+                    '.MuiOutlinedInput-root': {
+                      fieldset: {
+                        fontSize: '1.6rem',
+                      },
+                    },
                   }}
-                  onClick={onSaveButtonClick}
-                >
-                  <Save style={{ paddingRight: 8 }} />
-                  <Typography>Save</Typography>
-                </IconButton>
-                <IconButton
-                  style={{
-                    borderRadius: 8,
+                  slotProps={{
+                    input: {
+                      style: { font: 'var(--mui-font-h1)' },
+                    },
+                    inputLabel: {
+                      style: {
+                        font: 'var(--mui-font-h1)',
+                        lineHeight: 1.55,
+                      },
+                    },
                   }}
-                  onClick={cancelEdit}
+                />
+                <Menu
+                  open={isMenuOpen}
+                  onClose={closeStatusMenu}
+                  anchorEl={menuAnchorEl}
                 >
-                  <Cancel style={{ paddingRight: 8 }} />
-                  <Typography>Cancel</Typography>
-                </IconButton>
-              </div>
+                  {Object.entries(RoleplayStatus).map(([k, v]) => (
+                    <MenuItem
+                      onClick={() => {
+                        setEditProject({ ...project, status: k });
+                        closeStatusMenu();
+                      }}
+                      key={k}
+                      value={v as string}
+                    >
+                      <TagChip
+                        label={v}
+                        className={v.toLowerCase()}
+                        style={{ fontSize: 24, padding: '0 6px' }}
+                      />
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
             ) : (
-              <IconButton
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  borderRadius: 8,
-                }}
-                onClick={startEdit}
-              >
-                <Edit style={{ paddingRight: 8 }} />
-                <Typography>Edit</Typography>
-              </IconButton>
-            ))}
+              <>
+                <Typography variant='title'>{name}</Typography>
+              </>
+            )}
+            <TagChip
+              label={status || 'Unknown'}
+              className={status?.toLowerCase() || 'inactive'}
+              style={{ fontSize: 30, padding: '2px 8px' }}
+              ref={statusTagRef}
+              onClick={isEditing ? openStatusMenu : undefined}
+              onDelete={isEditing ? () => {} : undefined}
+              deleteIcon={
+                <ArrowDropDown
+                  style={{
+                    pointerEvents: 'none',
+                    fontSize: 24,
+                    color: 'white',
+                  }}
+                />
+              }
+            />
+          </Stack>
+          {descriptionElement}
+          <div
+            style={{
+              position: 'absolute',
+              top: -20,
+              right: -32,
+              display: 'flex',
+              gap: 8,
+            }}
+          >
+            {!isLoading &&
+              !otherLinksLoading &&
+              canEdit &&
+              (isEditing ? (
+                <>
+                  <IconButton
+                    style={{
+                      borderRadius: 8,
+                    }}
+                    onClick={onSaveButtonClick}
+                  >
+                    <Save style={{ paddingRight: 8 }} />
+                    <Typography>Save</Typography>
+                  </IconButton>
+                  <IconButton
+                    style={{
+                      borderRadius: 8,
+                    }}
+                    onClick={cancelEdit}
+                  >
+                    <Cancel style={{ paddingRight: 8 }} />
+                    <Typography>Cancel</Typography>
+                  </IconButton>
+                </>
+              ) : (
+                <IconButton
+                  style={{
+                    borderRadius: 8,
+                  }}
+                  onClick={startEdit}
+                >
+                  <Edit style={{ paddingRight: 8 }} />
+                  <Typography>Edit</Typography>
+                </IconButton>
+              ))}
+          </div>
         </div>
       </div>
 

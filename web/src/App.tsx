@@ -76,24 +76,6 @@ library.add(faAnglesLeft);
 library.add(faClock);
 
 declare module '@mui/material/styles' {
-  interface Theme {
-    roleplayStatus: {
-      active: string;
-      hiatus: string;
-      upcoming: string;
-      inactive: string;
-    };
-  }
-  // allow configuration using `createTheme()`
-  interface ThemeOptions {
-    roleplayStatus?: {
-      active?: string;
-      hiatus?: string;
-      upcoming?: string;
-      inactive?: string;
-    };
-  }
-
   interface Palette {
     plain: PaletteColorOptions;
   }
@@ -281,12 +263,6 @@ export function App() {
       body2: {
         fontSize: '0.9rem',
       },
-    },
-    roleplayStatus: {
-      active: '#009200',
-      inactive: '#424647',
-      upcoming: '#067f8c',
-      hiatus: '#9e561b',
     },
   });
 

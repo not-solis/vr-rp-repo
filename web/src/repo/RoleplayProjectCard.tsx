@@ -52,13 +52,6 @@ export const RoleplayProjectCard = (props: {
     setTitleRect(titleRef.current.getBoundingClientRect());
   }, []);
 
-  const statusColors: Record<string, string> = {
-    [RoleplayStatus.Active]: theme.roleplayStatus.active,
-    [RoleplayStatus.Inactive]: theme.roleplayStatus.inactive,
-    [RoleplayStatus.Upcoming]: theme.roleplayStatus.upcoming,
-    [RoleplayStatus.Hiatus]: theme.roleplayStatus.hiatus,
-  };
-
   return (
     <Card variant='outlined' className='project-card'>
       <CardContent className='full-height'>
@@ -86,7 +79,7 @@ export const RoleplayProjectCard = (props: {
               {otherLinks &&
                 otherLinks.map((link) => (
                   <IconText
-                    key={link.url}
+                    key={link.label + link.url}
                     text={link.label}
                     icon={'link'}
                     url={link.url}
@@ -120,10 +113,7 @@ export const RoleplayProjectCard = (props: {
                 </Tooltip>
                 <TagChip
                   label={status || 'Unknown'}
-                  style={{
-                    backgroundColor:
-                      statusColors[status ?? RoleplayStatus.Inactive],
-                  }}
+                  className={status?.toLowerCase() || 'inactive'}
                 />
               </Box>
 

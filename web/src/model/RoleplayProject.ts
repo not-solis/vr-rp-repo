@@ -2,9 +2,9 @@ import { User } from './User';
 
 export enum RoleplayStatus {
   Active = 'Active',
-  Inactive = 'Inactive',
   Upcoming = 'Upcoming',
   Hiatus = 'Hiatus',
+  Inactive = 'Inactive',
 }
 
 export enum RoleplayEntryProcess {

@@ -1,7 +1,48 @@
-.tag span {
+div.tag {
+  background-color: #50326c;
+  height: auto;
+}
+
+div.tag span {
   padding: 5px 8px;
 }
 
-.tag.interactable:hover {
+div.tag.interactable:hover {
   box-shadow: inset 0 0 3px 4px rgba(255, 255, 255, 0.03);
+}
+
+div.tag.active {
+  background-color: #009200;
+}
+
+div.tag.inactive {
+  background-color: #424647;
+}
+
+div.tag.upcoming {
+  background-color: #067f8c;
+}
+
+div.tag.hiatus {
+  background-color: #9e561b;
+}
+
+div.tag.interactable:hover {
+  background-color: #50326c;
+}
+
+div.tag.interactable.active:hover {
+  background-color: #009200;
+}
+
+div.tag.interactable.inactive:hover {
+  background-color: #424647;
+}
+
+div.tag.interactable.upcoming:hover {
+  background-color: #067f8c;
+}
+
+div.tag.interactable.hiatus:hover {
+  background-color: #9e561b;
 }
