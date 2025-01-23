@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Add, Delete, Upload } from '@mui/icons-material';
+import { Add, Delete, Schedule, Upload } from '@mui/icons-material';
 import {
   Button,
   CardMedia,
@@ -60,6 +60,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     imageUrl = '',
     tags = [],
     setting = '',
+    runtime = '',
     isMetaverse = false,
     entryProcess = '',
     applicationProcess = '',
@@ -273,7 +274,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 tooltip={'Owner'}
                 tooltipPlacement='left'
                 text={owner.name}
-                icon={'user'}
+                icon='user'
               />
             ) : (
               isAuthenticated && (
@@ -281,7 +282,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                   color='plain'
                   variant='outlined'
                   onClick={openOwnershipDialog}
-                  style={{ borderRadius: 6 }}
+                  style={{ borderRadius: 6, marginBottom: 8 }}
                 >
                   Request Ownership
                 </Button>
@@ -289,11 +290,34 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
             )}
 
             <IconText
+              tooltip='Runtime'
+              tooltipPlacement='left'
+              text={runtime}
+              icon='clock'
+              iconPrefix='far'
+              containerStyle={{ width: '100%' }}
+              component={
+                isEditing ? (
+                  <BlurrableTextField
+                    label='Runtime'
+                    variant='standard'
+                    size='small'
+                    value={runtime}
+                    onChange={(e) =>
+                      setEditProject({ ...project, runtime: e.target.value })
+                    }
+                    style={{ width: '100%' }}
+                  />
+                ) : undefined
+              }
+            />
+
+            <IconText
               tooltip='Setting'
               tooltipPlacement='left'
               text={setting}
-              icon={'earth-americas'}
-              containerStyle={{ width: '95%' }}
+              icon='earth-americas'
+              containerStyle={{ width: '100%' }}
               component={
                 isEditing ? (
                   <BlurrableTextField
@@ -315,7 +339,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               tooltip={'Entry Process'}
               tooltipPlacement='left'
               text={entryProcess}
-              icon={'door-open'}
+              icon='door-open'
               component={
                 isEditing ? (
                   <StringEnumSelector
@@ -340,7 +364,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               tooltip={'Application Process'}
               tooltipPlacement='left'
               text={applicationProcess}
-              icon={'clipboard'}
+              icon='clipboard'
               iconPrefix='far'
               component={
                 isEditing ? (
@@ -367,7 +391,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               tooltip='Metaverse'
               tooltipPlacement='left'
               text={metaverseText}
-              icon={'globe'}
+              icon='globe'
               component={
                 isEditing ? (
                   <FormControlLabel
@@ -395,7 +419,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               tooltip={'Supporting Cast'}
               tooltipPlacement='left'
               text={suppCastText}
-              icon={'handshake'}
+              icon='handshake'
               component={
                 isEditing ? (
                   <FormControlLabel
@@ -423,7 +447,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               tooltip={'Quest Compatibility'}
               tooltipPlacement='left'
               text={questCompatibleText}
-              icon={'meta'}
+              icon='meta'
               iconPrefix='fab'
               component={
                 isEditing ? (

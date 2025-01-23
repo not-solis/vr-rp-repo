@@ -146,7 +146,7 @@ router.get('/:id', (req, res) => {
 router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
   const user = getAuthUser(req);
-  createOwnership(id, user)
+  createOwnership(id, user.user_id)
     .then((response) => {
       res.status(200).send(response);
     })

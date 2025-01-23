@@ -16,7 +16,7 @@ export interface RoleplayProject {
   description?: string;
   setting?: string;
   tags?: string[];
-  runtime?: Date[];
+  runtime?: string;
   status?: string;
   entryProcess?: string;
   applicationProcess?: string;
@@ -138,6 +138,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     shortDescription,
     description,
     setting,
+    runtime,
     tags,
     status,
     entryProcess,
@@ -160,6 +161,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           short_description,
           description,
           setting,
+          runtime,
           tags,
           status,
           entry_process,
@@ -169,7 +171,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           is_quest_compatible,
           discord_url,
           image_url)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
           RETURNING id;
           `,
           [
@@ -177,6 +179,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
             shortDescription,
             description,
             setting,
+            runtime,
             tags,
             status,
             entryProcess,
@@ -198,7 +201,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
 
           const queries = [];
           if (role === UserRole.User) {
-            queries.push(createOwnership(projectId, user, true));
+            queries.push(createOwnership(projectId, user_id, true));
           }
 
           if (otherLinks.length > 0) {
@@ -238,6 +241,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
     shortDescription,
     description,
     setting,
+    runtime,
     tags,
     status,
     entryProcess,
@@ -260,16 +264,17 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
           short_description=$2,
           description=$3,
           setting=$4,
-          tags=$5,
-          status=$6,
-          entry_process=$7,
-          application_process=$8,
-          has_support_cast=$9,
-          is_metaverse=$10,
-          is_quest_compatible=$11,
-          discord_url=$12,
-          image_url=$13
-          WHERE id=$14
+          runtime=$5
+          tags=$6,
+          status=$7,
+          entry_process=$8,
+          application_process=$9,
+          has_support_cast=$10,
+          is_metaverse=$11,
+          is_quest_compatible=$12,
+          discord_url=$13,
+          image_url=$14
+          WHERE id=$15
           RETURNING id;
           `,
           [
@@ -277,6 +282,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             shortDescription,
             description,
             setting,
+            runtime,
             tags,
             status,
             entryProcess,

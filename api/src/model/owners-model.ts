@@ -14,7 +14,7 @@ export const getOwnerByProjectId = async (
         users.discord_id as discord_id
       FROM ownership
         INNER JOIN users on ownership.user_id = users.user_id
-      WHERE ownership.project_id=$1 AND NOT ownership.pending;
+      WHERE ownership.project_id=$1 AND ownership.active;
       `,
       [id],
     )
@@ -32,13 +32,13 @@ export const getOwnerByProjectId = async (
 
 export const createOwnership = async (
   projectId: string,
-  user: User,
-  pending: boolean = true,
+  userId: string,
+  active: boolean = false,
 ): Promise<ResponseData<User>> => {
   return await pool
     .query(
-      'INSERT INTO ownership (user_id, project_id, pending) VALUES ($1, $2, $3) RETURNING *;',
-      [user.user_id, projectId, pending],
+      'INSERT INTO ownership (user_id, project_id, active) VALUES ($1, $2, $3) RETURNING *;',
+      [userId, projectId, active],
     )
     .then((results) => {
       if (!results.rowCount) {

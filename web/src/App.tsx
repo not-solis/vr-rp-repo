@@ -1,6 +1,6 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
-import { faClipboard } from '@fortawesome/free-regular-svg-icons';
+import { faClipboard, faClock } from '@fortawesome/free-regular-svg-icons';
 import {
   faAnglesLeft,
   faAnglesRight,
@@ -73,6 +73,7 @@ library.add(faHandshake);
 library.add(faLink);
 library.add(faAnglesRight);
 library.add(faAnglesLeft);
+library.add(faClock);
 
 declare module '@mui/material/styles' {
   interface Theme {

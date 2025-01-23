@@ -37,7 +37,7 @@ export interface RoleplayProject {
   description?: string;
   setting?: string;
   tags?: string[];
-  runtime?: Date[];
+  runtime?: string;
   status?: string;
   entryProcess?: string;
   applicationProcess?: string;
@@ -65,7 +65,7 @@ export const remapRoleplayProject = (project: any): RoleplayProject => {
     description: project.description,
     setting: project.setting,
     tags: project.tags,
-    runtime: [],
+    runtime: project.runtime,
     status: project.status,
     entryProcess: project.entry_process,
     applicationProcess: project.application_process,
