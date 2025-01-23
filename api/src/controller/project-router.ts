@@ -12,7 +12,7 @@ import { auth, getAuthUser } from './auth-router';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { ResponseData } from '..';
-import { User } from '../model/users-model';
+import { User, UserRole } from '../model/users-model';
 
 const { CLIENT_URL = 'http://localhost:3000' } = process.env;
 
@@ -82,24 +82,29 @@ const checkOwnership: RequestHandler = (
 ) => {
   const project = req.body as RoleplayProject;
   const user = getAuthUser(req);
-  getOwnerByProjectId(project.id)
-    .then((results: any) => results.data as any[])
-    .then((owners) => {
-      if (owners.some((owner) => owner.id === user.user_id)) {
-        next();
-      } else {
-        res.status(401).send({
+
+  if (user.role === UserRole.Admin) {
+    next();
+  } else if (user.role === UserRole.User) {
+    getOwnerByProjectId(project.id)
+      .then((results) => results.data)
+      .then((owner) => {
+        if (owner?.user_id === user.user_id) {
+          next();
+        } else {
+          res.status(401).send({
+            success: false,
+            errors: ['User is not authorized to modify this project.'],
+          });
+        }
+      })
+      .catch((e) =>
+        res.status(500).send({
           success: false,
-          errors: ['User is not authorized to modify this project.'],
-        });
-      }
-    })
-    .catch((e) =>
-      res.status(500).send({
-        success: false,
-        errors: ['Internal authentication error.'],
-      }),
-    );
+          errors: ['Internal authentication error.'],
+        }),
+      );
+  }
 };
 
 const router = Router();

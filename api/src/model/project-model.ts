@@ -264,7 +264,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
           short_description=$2,
           description=$3,
           setting=$4,
-          runtime=$5
+          runtime=$5,
           tags=$6,
           status=$7,
           entry_process=$8,

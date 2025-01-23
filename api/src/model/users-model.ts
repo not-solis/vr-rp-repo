@@ -4,6 +4,7 @@ import { pool } from './db-pool';
 export enum UserRole {
   User = 'User',
   Admin = 'Admin',
+  Banned = 'Banned',
 }
 
 export interface User {
