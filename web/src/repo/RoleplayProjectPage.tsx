@@ -280,7 +280,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 title: 'Success',
                 content: 'Project successfully saved!',
                 severity: 'success',
-                autoHideDuration: 3000,
               });
             });
           } else {
@@ -289,6 +288,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 title: 'Validation Error',
                 content: json.errors ?? [],
                 severity: 'error',
+                autoHideDuration: 5000,
               });
             });
           }
@@ -311,7 +311,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
               title: 'Success',
               content: 'Project successfully saved!',
               severity: 'success',
-              autoHideDuration: 3000,
             });
           } else {
             res.json().then((json: ResponseData<unknown>) => {
@@ -319,6 +318,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 title: 'Validation Error',
                 content: json.errors ?? [],
                 severity: 'error',
+                autoHideDuration: 5000,
               });
             });
           }
@@ -342,7 +342,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             title: 'Success',
             content: 'Request submitted!',
             severity: 'success',
-            autoHideDuration: 3000,
           });
         } else {
           res.json().then((json: ResponseData<unknown>) => {
@@ -350,6 +349,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
               title: 'Error',
               content: json.errors ?? [],
               severity: 'error',
+              autoHideDuration: 5000,
             });
           });
         }
@@ -507,13 +507,12 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         <DialogTitle id='save-roleplay-dialog-title'>Confirm save?</DialogTitle>
         <DialogContent>
           <DialogContentText id='save-roleplay-dialog-description'>
-            You will be saved as the owner of this project. You will be able to
-            make edits later if you want.
+            As the owner of {name}, you will be able to edit it later.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button color='plain' onClick={() => setSaveDialogOpen(false)}>
-            Disagree
+            Back
           </Button>
           <Button
             color='plain'
@@ -523,7 +522,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             }}
             autoFocus
           >
-            Agree
+            Save
           </Button>
         </DialogActions>
       </Dialog>

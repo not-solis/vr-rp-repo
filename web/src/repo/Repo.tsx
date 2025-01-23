@@ -151,20 +151,24 @@ export const Repo = () => {
         id='new-roleplay-dialog'
         open={showNewDialog}
         onClose={() => setShowNewDialog(false)}
+        aria-labelledby='new-roleplay-dialog-title'
         aria-describedby='new-roleplay-dialog-description'
       >
+        <DialogTitle id='new-roleplay-dialog-title'>
+          Create a roleplay in the Repo?
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id='new-roleplay-dialog-description'>
-            By creating a new roleplay in the repo, I confirm that I am a
-            representative of this roleplay's administration.
+            You will be listed as the owner of this roleplay. Make sure you are
+            authorized to represent it before continuing.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button color='plain' onClick={() => setShowNewDialog(false)}>
-            Disagree
+            Back
           </Button>
           <Button color='plain' onClick={() => navigate('/repo/new')} autoFocus>
-            Agree
+            Continue
           </Button>
         </DialogActions>
       </Dialog>

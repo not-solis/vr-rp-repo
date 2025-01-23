@@ -16,6 +16,7 @@ import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagChip } from '../components/TagChip';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
+import { useSnackbar } from '../context/SnackbarProvider';
 import {
   RoleplayApplicationProcess,
   RoleplayEntryProcess,
@@ -47,6 +48,7 @@ const VisuallyHiddenInput = styled('input')({
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { user, isAuthenticated } = useAuth();
+  const { createSnackbar } = useSnackbar();
   const {
     isOpen,
     isEditing = false,
@@ -202,10 +204,17 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
               }}
               role={undefined}
               component='label'
+              onClick={() =>
+                createSnackbar({
+                  title: 'Unimplemented',
+                  severity: 'warning',
+                  content: 'File upload is not yet implemented.',
+                })
+              }
             >
               <Typography>Upload Image</Typography>
               <Upload />
-              <VisuallyHiddenInput
+              {/* <VisuallyHiddenInput
                 type='file'
                 accept='image/*'
                 onChange={(event) => {
@@ -218,7 +227,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                     });
                   }
                 }}
-              />
+              /> */}
             </IconButton>
           )}
 
@@ -277,7 +286,8 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 icon='user'
               />
             ) : (
-              isAuthenticated && (
+              isAuthenticated &&
+              !isEditing && (
                 <Button
                   color='plain'
                   variant='outlined'
