@@ -131,8 +131,27 @@ export const RoleplayProjectCard = (props: {
                 <Typography variant='subtitle1'>{owner.name}</Typography>
               )}
 
+              {runtime && (
+                <IconText
+                  text={runtime}
+                  icon='clock'
+                  iconPrefix='far'
+                  iconPadding={6}
+                  containerStyle={{
+                    color: '#d0d0aa',
+                  }}
+                />
+              )}
+
               {tags && tags.length > 0 && (
-                <Box sx={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <Box
+                  style={{
+                    display: 'flex',
+                    gap: 6,
+                    flexWrap: 'wrap',
+                    paddingTop: 2,
+                  }}
+                >
                   {tags.map((tag) => (
                     <TagChip
                       key={tag}

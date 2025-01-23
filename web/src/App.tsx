@@ -250,8 +250,9 @@ export function App() {
         fontWeight: 'bold',
       },
       subtitle1: {
-        fontSize: '1rem',
+        fontSize: '1.1rem',
         fontStyle: 'italic',
+        lineHeight: '20px',
         color: 'var(--mui-palette-text-secondary)',
       },
       h1: {
