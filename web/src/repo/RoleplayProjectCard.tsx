@@ -119,7 +119,7 @@ export const RoleplayProjectCard = (props: {
                   </Typography>
                 </Tooltip>
                 <TagChip
-                  label={status}
+                  label={status || 'Unknown'}
                   style={{
                     backgroundColor:
                       statusColors[status ?? RoleplayStatus.Inactive],
@@ -149,7 +149,7 @@ export const RoleplayProjectCard = (props: {
                     display: 'flex',
                     gap: 6,
                     flexWrap: 'wrap',
-                    paddingTop: 2,
+                    padding: '2px 0',
                   }}
                 >
                   {tags.map((tag) => (
