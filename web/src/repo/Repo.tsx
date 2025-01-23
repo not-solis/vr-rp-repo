@@ -192,7 +192,7 @@ export const Repo = () => {
             label='Tags'
             variant='outlined'
             addTag={addTag}
-            style={{ width: 500 }}
+            style={{ width: 500, maxWidth: '100%' }}
             size='small'
             tags={tagFilters}
             onTagClick={removeTag}

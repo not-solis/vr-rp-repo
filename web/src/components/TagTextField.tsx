@@ -20,6 +20,7 @@ export const TagTextField = (
       multiple
       value={tags}
       freeSolo
+      style={{ maxWidth: '100%' }}
       onChange={(event, values, reason) => {
         if (reason === 'createOption') {
           addTag(values[values.length - 1]);
