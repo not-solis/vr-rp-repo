@@ -14,14 +14,22 @@
   padding: 20px;
 }
 
+#filter-bar {
+  box-shadow: var(--mui-shadows-4);
+  z-index: 10;
+}
+
+#repo-filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 32px;
+}
+
 @media (max-width: 720px) {
   .repo-search-results {
     padding-left: 0;
     padding-right: 0;
   }
 }
-
-/* #new-roleplay-dialog button {
-  color: var(--mui-palette-text-primary);
-  border-color: var(--mui-palette-text-secondary);
-} */

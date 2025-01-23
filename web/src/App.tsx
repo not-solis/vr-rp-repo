@@ -35,7 +35,7 @@ import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
 import { EnvContext } from './context/EnvProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
-import { User } from './model/User';
+import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 import './App.css';
@@ -137,8 +137,20 @@ const AuthWrapper = (props: PropsWithChildren) => {
   });
 
   const isAuthenticated = !!user;
+  const hasPermission = (role: UserRole = UserRole.User) => {
+    if (!user?.role) {
+      return false;
+    }
+
+    const order = [UserRole.Admin, UserRole.User, UserRole.Banned];
+    const userOrder = order.indexOf(user.role);
+    const roleOrder = order.indexOf(role);
+    return userOrder <= roleOrder;
+  };
   return (
-    <AuthContext.Provider value={{ user, isAuthLoading, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{ user, isAuthLoading, isAuthenticated, hasPermission }}
+    >
       {props.children}
     </AuthContext.Provider>
   );

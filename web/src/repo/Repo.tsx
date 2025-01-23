@@ -1,15 +1,20 @@
 import './Repo.css';
+import { Add } from '@mui/icons-material';
 import {
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
   LinearProgress,
-  useTheme,
+  Typography,
 } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -17,14 +22,16 @@ import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate } from 'react-router-dom';
 
-import { RepoFilters } from './RepoFilters';
 import { RoleplayProjectCard } from './RoleplayProjectCard';
+import { BlurrableTextField } from '../components/BlurrableTextField';
+import { TagTextField } from '../components/TagTextField';
+import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
-  RoleplayStatus,
 } from '../model/RoleplayProject';
+import { UserRole } from '../model/User';
 
 const PAGE_SIZE = 50;
 
@@ -38,10 +45,12 @@ const TITLE = 'The VR Roleplay Repo';
 
 export const Repo = () => {
   const { serverBaseUrl } = useEnv();
+  const [name, setName] = useState('');
   const [nameFilter, setNameFilter] = useState<string>('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [showActiveOnly, setShowActiveOnly] = useState(true);
   const [showNewDialog, setShowNewDialog] = useState(false);
+  const { hasPermission } = useAuth();
   const navigate = useNavigate();
   const {
     data: pageData,
@@ -135,7 +144,63 @@ export const Repo = () => {
           content='The collection of all roleplays run in VR.'
         />
       </Helmet>
-      <RepoFilters
+      <Box id='filter-bar'>
+        <FormGroup id='repo-filters'>
+          <BlurrableTextField
+            label='Name'
+            variant='outlined'
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => {
+              setNameFilter(name);
+            }}
+            value={name}
+            size='small'
+          />
+          <TagTextField
+            label='Tags'
+            variant='outlined'
+            addTag={addTag}
+            style={{ width: 500 }}
+            size='small'
+            tags={tagFilters}
+            onTagClick={removeTag}
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={showActiveOnly}
+                onChange={(e) => setShowActiveOnly(e.target.checked)}
+              />
+            }
+            label='Show Active Only'
+            labelPlacement='start'
+            slotProps={{
+              typography: {
+                variant: 'body1',
+              },
+            }}
+          />
+
+          {hasPermission() && (
+            <div style={{ marginLeft: 'auto', textDecoration: 'none' }}>
+              <IconButton
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  borderRadius: 8,
+                }}
+                onClick={() => setShowNewDialog(true)}
+              >
+                <Add />
+                <Typography variant='body1'>Add New</Typography>
+              </IconButton>
+            </div>
+          )}
+        </FormGroup>
+      </Box>
+      {/* <RepoFilters
         nameFilter={nameFilter}
         setNameFilter={setNameFilter}
         tagFilters={tagFilters}
@@ -144,7 +209,7 @@ export const Repo = () => {
         showActiveOnly={showActiveOnly}
         setShowActiveOnly={setShowActiveOnly}
         openNewRepoDialog={() => setShowNewDialog(true)}
-      />
+      /> */}
       {isFetching && <LinearProgress />}
       {results}
       <Dialog
