@@ -154,6 +154,7 @@ export const RoleplayEditView = (props: RoleplayEditViewProps) => {
         >
           <StringEnumSelector
             enumType={RoleplayStatus}
+            includeEmptyValue
             label='Status'
             value={status}
             onChange={(e) =>
@@ -165,6 +166,7 @@ export const RoleplayEditView = (props: RoleplayEditViewProps) => {
           />
           <StringEnumSelector
             enumType={RoleplayEntryProcess}
+            includeEmptyValue
             label='Entry Process'
             value={entryProcess}
             onChange={(e) =>
@@ -176,6 +178,7 @@ export const RoleplayEditView = (props: RoleplayEditViewProps) => {
           />
           <StringEnumSelector
             enumType={RoleplayApplicationProcess}
+            includeEmptyValue
             label='Application Process'
             value={applicationProcess}
             onChange={(e) =>

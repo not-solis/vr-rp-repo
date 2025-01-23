@@ -126,7 +126,7 @@ router.get('/', (req, res) => {
     Array.isArray(tags)
       ? (tags as string[])
       : ((tags as string)?.split('|') ?? []),
-    asc !== 'false',
+    asc === 'true',
     active === 'true',
   )
     .then((response) => {

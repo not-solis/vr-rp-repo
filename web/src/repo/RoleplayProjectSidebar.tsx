@@ -354,6 +354,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 isEditing ? (
                   <StringEnumSelector
                     enumType={RoleplayEntryProcess}
+                    includeEmptyValue
                     label='Entry Process'
                     value={entryProcess}
                     size='small'
@@ -380,6 +381,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 isEditing ? (
                   <StringEnumSelector
                     enumType={RoleplayApplicationProcess}
+                    includeEmptyValue
                     label='Application Process'
                     value={applicationProcess}
                     size='small'

@@ -9,19 +9,22 @@ import {
 interface StringEnumSelectorProps {
   enumType: Record<string, string>;
   label: string;
+  includeEmptyValue?: boolean;
 }
 
 export const StringEnumSelector = (
   props: StringEnumSelectorProps & SelectProps,
 ) => {
-  const { enumType, label, style, ...restProps } = props;
+  const { enumType, label, style, includeEmptyValue, ...restProps } = props;
   const labelId = `${label.toLowerCase().replace(' ', '-')}-label`;
 
   const select = (
     <Select labelId={labelId} label={label} size='small' {...restProps}>
-      <MenuItem value={''}>
-        <em>-</em>
-      </MenuItem>
+      {includeEmptyValue && (
+        <MenuItem value={''}>
+          <em>-</em>
+        </MenuItem>
+      )}
       {Object.entries(enumType).map(([k, v]) => (
         <MenuItem key={k} value={v as string}>
           {v}
