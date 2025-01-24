@@ -20,7 +20,7 @@ import { useEnv } from '../context/EnvProvider';
 import './UserComponent.css';
 
 export const UserComponent = () => {
-  const { serverBaseUrl, discordClientId, discordRedirectUrl } = useEnv();
+  const { serverBaseUrl, discordClientId, discordRedirectPath } = useEnv();
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
@@ -172,7 +172,7 @@ export const UserComponent = () => {
       responseType='code'
       isCrossOrigin
       clientId={discordClientId ?? ''}
-      redirectUri={discordRedirectUrl ?? ''}
+      redirectUri={new URL(discordRedirectPath, serverBaseUrl).toString()}
       scope='identify'
       buttonText='Login with Discord'
       onSuccess={onAuthSuccess}

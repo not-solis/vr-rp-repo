@@ -42,13 +42,13 @@ import './App.css';
 
 const {
   REACT_APP_SERVER_BASE_URL,
-  REACT_APP_DISCORD_REDIRECT_URL,
+  REACT_APP_DISCORD_REDIRECT_PATH,
   REACT_APP_DISCORD_CLIENT_ID,
 } = process.env;
 
 if (!REACT_APP_SERVER_BASE_URL) {
   throw new Error('Server URL not configured.');
-} else if (!REACT_APP_DISCORD_REDIRECT_URL) {
+} else if (!REACT_APP_DISCORD_REDIRECT_PATH) {
   throw new Error('Discord redirect URL not configured.');
 } else if (!REACT_APP_DISCORD_CLIENT_ID) {
   throw new Error('Discord client ID not configured.');
@@ -56,7 +56,7 @@ if (!REACT_APP_SERVER_BASE_URL) {
 
 const env = {
   serverBaseUrl: REACT_APP_SERVER_BASE_URL,
-  discordRedirectUrl: REACT_APP_DISCORD_REDIRECT_URL,
+  discordRedirectPath: REACT_APP_DISCORD_REDIRECT_PATH,
   discordClientId: REACT_APP_DISCORD_CLIENT_ID,
 };
 
