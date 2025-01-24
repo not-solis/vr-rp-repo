@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -26,14 +26,10 @@ export const Navbar = () => {
 
   return (
     <nav className='nav'>
-      <Link
-        to='/'
-        className='no-underline'
-        style={{ color: theme.palette.text.primary }}
-      >
-        <header>VR Roleplay Myriad</header>
-      </Link>
       <Box className='main-menu'>
+        <Link id='myriad-title' to='/' className='no-underline'>
+          VR Roleplay Myriad
+        </Link>
         {windowDimensions.width > 1100 ? (
           ['Repo', 'Community', 'Resources', 'About Us'].map((t) => {
             const hrefPath = `/${t.toLowerCase().replace(' ', '-')}`;
@@ -44,13 +40,11 @@ export const Navbar = () => {
                 to={hrefPath}
                 style={{
                   color: pathname.startsWith(hrefPath)
-                    ? '#babc6f'
+                    ? '#be983e'
                     : theme.palette.text.secondary,
                 }}
               >
-                <Typography variant='h5' fontWeight='bold'>
-                  {t}
-                </Typography>
+                <h1>{t}</h1>
               </Link>
             );
           })

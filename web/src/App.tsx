@@ -239,12 +239,13 @@ export function App() {
       },
     },
     typography: {
+      fontFamily: 'Sora, serif',
       title: {
-        fontSize: '4rem',
+        fontSize: '3.2rem',
         fontWeight: 'bold',
       },
       subtitle1: {
-        fontSize: '1.1rem',
+        fontSize: '0.95rem',
         fontStyle: 'italic',
         lineHeight: '20px',
         color: 'var(--mui-palette-text-secondary)',
@@ -258,19 +259,19 @@ export function App() {
         fontWeight: 'bold',
       },
       h3: {
-        fontSize: '2.2rem',
+        fontSize: '2rem',
       },
       h4: {
-        fontSize: '1.8rem',
+        fontSize: '1.6rem',
       },
       h5: {
-        fontSize: '1.6rem',
+        fontSize: '1.4rem',
       },
       text: {
         fontSize: '1.25rem',
       },
       body1: {
-        fontSize: '1.1rem',
+        fontSize: '1rem',
       },
       body2: {
         fontSize: '0.9rem',
@@ -288,7 +289,7 @@ export function App() {
   const comingSoon = (
     <h1
       style={{
-        margin: '0 auto 10%',
+        margin: '25vh auto',
         alignSelf: 'center',
         textAlign: 'center',
         fontSize: 84,

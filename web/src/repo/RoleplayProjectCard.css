@@ -10,15 +10,6 @@
   flex: 1 0;
 }
 
-.project-card a {
-  /* color: var(--mui-palette-text-secondary);
-  text-decoration-style: dotted;
-  text-decoration-color: #5d5d5d;
-  text-decoration-thickness: 1.2px;
-  text-underline-offset: 2.4px; */
-  transition: all 0.2s;
-}
-
 #card-link {
   display: inline-block;
   position: relative;

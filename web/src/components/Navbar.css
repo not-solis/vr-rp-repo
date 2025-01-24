@@ -5,42 +5,40 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: min(3vw, 1.5em) min(2vw, 40px);
+  padding: min(1.2vw, 1em) min(2vw, 40px);
   background-color: var(--mui-palette-background-dark);
   box-shadow: var(--mui-shadows-5);
   z-index: 100;
+  font-family: Sora, serif;
 }
 
-.nav header {
+#myriad-title {
   height: 1em;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  font-size: min(3em, 6px + 3vw);
-  cursor: pointer;
+  color: #b92c69;
+  font-size: min(2.6em, 10px + 2.5vw);
+  font-weight: bold;
 }
 
 .main-menu {
   display: flex;
   flex-direction: row;
-  flex-grow: 1;
   align-items: center;
-  justify-content: flex-start;
-  padding: 10px 20px 0px;
+  padding-right: 32px;
+  gap: min(2vw, 32px);
 }
 
 .main-menu a {
-  padding: 0 min(1.25vw, 16px);
-  font-size: min(1.6em, 2px + 1.9vw);
-  transition: 0.3s;
+  transition: filter 0.3s;
 }
 
-.main-menu .selected {
-  color: #babc6f;
+.main-menu h1 {
+  font-size: min(1.4em, 2px + 1.9vw);
+  font-weight: bold;
 }
 
-.main-menu a:hover {
-  filter: brightness(150%);
+.main-menu a:hover:not(#myriad-title) {
+  filter: brightness(130%);
   cursor: pointer;
 }

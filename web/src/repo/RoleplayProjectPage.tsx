@@ -391,9 +391,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       </Helmet>
       <div
         id='project-info-container'
-        className='scrollable-y hidden-scrollbar'
+        className={`scrollable-y hidden-scrollbar ${!isSidebarOpen ? 'closed' : ''}`}
       >
-        <div id='project-info' className={!isSidebarOpen ? 'closed' : ''}>
+        <div id='project-info'>
           <Grow in={isAdminInfoAlertOpen && !isEditing} unmountOnExit>
             <Alert
               onClose={() => setAdminInfoAlertOpen(false)}
@@ -464,7 +464,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                       <TagChip
                         label={v}
                         className={v.toLowerCase()}
-                        style={{ fontSize: 24, padding: '0 6px' }}
+                        style={{ fontSize: 20, padding: '0 6px' }}
                       />
                     </MenuItem>
                   ))}
@@ -478,7 +478,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             <TagChip
               label={status || 'Unknown'}
               className={status?.toLowerCase() || 'inactive'}
-              style={{ fontSize: 30, padding: '2px 8px' }}
+              style={{ fontSize: 26, padding: '2px 8px' }}
               ref={statusTagRef}
               onClick={isEditing ? openStatusMenu : undefined}
               onDelete={isEditing ? () => {} : undefined}
@@ -497,8 +497,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
           <div
             style={{
               position: 'absolute',
-              top: -20,
-              right: -32,
+              top: 12,
+              right: 12,
               display: 'flex',
               gap: 8,
             }}

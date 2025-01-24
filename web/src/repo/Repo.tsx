@@ -3,7 +3,6 @@ import {
   Add,
   ArrowDownward,
   ArrowUpward,
-  Check,
   CheckBoxOutlined,
 } from '@mui/icons-material';
 import {
@@ -138,28 +137,26 @@ export const Repo = () => {
     results = <div>Error loading repo, please try again.</div>;
   } else if (projects && projects.length > 0) {
     results = (
-      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
-        <InfiniteScroll
-          scrollableTarget='repo-scroll-box'
-          className='repo-search-results'
-          dataLength={projects?.length ?? 0}
-          next={() => !isFetching && fetchNextPage()}
-          hasMore={hasNextPage}
-          loader={
-            isFetchingNextPage ? <CircularProgress /> : <h4>End of the line</h4>
-          }
-        >
-          {projects?.map((p) => (
-            <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
-          ))}
-        </InfiniteScroll>
-      </div>
+      <InfiniteScroll
+        scrollableTarget='repo-scroll-box'
+        className='repo-search-results'
+        dataLength={projects?.length ?? 0}
+        next={() => !isFetching && fetchNextPage()}
+        hasMore={hasNextPage}
+        loader={
+          isFetchingNextPage ? <CircularProgress /> : <h4>End of the line</h4>
+        }
+      >
+        {projects?.map((p) => (
+          <RoleplayProjectCard key={p.name} project={p} addTag={addTag} />
+        ))}
+      </InfiniteScroll>
     );
   }
 
   const getSortByText = () => {
     if (sortBy === SortBy.Name) {
-      return sortAscending ? 'A → Z' : 'Z ← A';
+      return sortAscending ? 'A to Z' : 'Z to A';
     } else if (sortBy === SortBy.LastUpdated || sortBy === SortBy.CreatedAt) {
       return `${sortAscending ? 'Least' : 'Most'} recent`;
     }
@@ -276,8 +273,14 @@ export const Repo = () => {
         setShowActiveOnly={setShowActiveOnly}
         openNewRepoDialog={() => setShowNewDialog(true)}
       /> */}
-      {isFetching && <LinearProgress />}
-      {results}
+      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
+        {isFetching && (
+          <LinearProgress
+            style={{ position: 'absolute', marginTop: -3, left: 0, right: 0 }}
+          />
+        )}
+        {results}
+      </div>
       <Dialog
         id='new-roleplay-dialog'
         open={showNewDialog}

@@ -5,7 +5,8 @@
   align-items: center;
   margin-right: 12px;
   padding: 8px;
-  transition: 0.06s;
+  transition-property: border, filter;
+  transition-duration: 0.08s;
   background-color: var(--mui-palette-background-default);
 }
 
@@ -20,7 +21,7 @@
 }
 
 .toggle-arrow {
-  transition: 0.3s !important;
+  transition: transform 0.3s !important;
 }
 
 .toggle-open {

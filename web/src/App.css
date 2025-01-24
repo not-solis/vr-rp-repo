@@ -9,7 +9,8 @@
 
 .interactable {
   cursor: pointer;
-  transition: 0.08s !important;
+  transition-property: transform filter box-shadow;
+  transition-duration: 0.08s;
 }
 
 .interactable:hover {

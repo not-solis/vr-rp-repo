@@ -12,28 +12,28 @@
 
 #project-info-container {
   height: 100%;
-  padding: min(30px, 3vw) min(50px, 5vw);
   box-sizing: border-box;
+  transition: margin 0.5s;
 }
 
 #project-info {
   height: 100%;
   position: relative;
   margin: 0;
+  padding: min(30px, 3vw) min(50px, 5vw);
   min-width: 300px;
-  transition: margin 0.5s;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 @media (min-width: 800px) {
-  #project-info {
+  #project-info-container {
     margin-right: var(--project-sidebar-width);
     min-width: 300px;
   }
 
-  #project-info.closed {
+  #project-info-container.closed {
     margin-right: calc(var(--project-sidebar-width) * 0.85);
     margin-left: calc(var(--project-sidebar-width) * 0.15);
   }
