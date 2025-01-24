@@ -6,17 +6,16 @@
     "moduleResolution": "node",
     "allowJs": true,
     "outDir": "build",
-    "outFile": "./build/index.js",
+    "outFile": "api/index.js",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
-    "skipLibCheck": true,
-    "declaration": true
+    "skipLibCheck": true
   },
   "ts-node": {
     // Tell ts-node CLI to install the --loader automatically
     "esm": true
   },
-  "include": ["src", "build/index.js"]
+  "include": ["src", "api"]
 }
