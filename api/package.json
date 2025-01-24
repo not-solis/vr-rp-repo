@@ -2,11 +2,12 @@
   "name": "vr-roleplay-myriad-api",
   "version": "1.0.0",
   "description": "",
-  "main": "stc/index.ts",
+  "main": "src/index.ts",
   "type": "module",
   "scripts": {
     "dev": "npx -y tsx src/index.ts --env-file=.env",
     "serve": "npx -y tsx src/index.ts",
+    "build": "npx webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
@@ -39,6 +40,9 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^15.14.0",
     "prettier": "^3.4.2",
-    "typescript-eslint": "^8.20.0"
+    "ts-loader": "^9.5.2",
+    "typescript-eslint": "^8.20.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   }
 }

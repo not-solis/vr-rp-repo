@@ -10,7 +10,6 @@ import { createOwnership, getOwnerByProjectId } from '../model/owners-model';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
 import { auth, getAuthUser } from './auth-router';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import { ResponseData } from '..';
 import { User, UserRole } from '../model/users-model';
 
@@ -109,12 +108,6 @@ const checkOwnership: RequestHandler = (
 
 const router = Router();
 router.use(cookieParser());
-router.use(
-  cors({
-    origin: [CLIENT_URL],
-    credentials: true,
-  }),
-);
 
 router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;

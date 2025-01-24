@@ -1,10 +1,8 @@
 import { RequestHandler, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
 import { createUser, getUserByDiscordId, User } from '../model/users-model';
 import {
-  CLIENT_URL,
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
@@ -40,12 +38,6 @@ export const getAuthUser = (request: any): User => {
 const router = Router();
 
 router.use(cookieParser());
-router.use(
-  cors({
-    origin: [CLIENT_URL],
-    credentials: true,
-  }),
-);
 
 router.get('/', (request, response) => {
   try {
