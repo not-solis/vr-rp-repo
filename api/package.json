@@ -9,6 +9,9 @@
     "serve": "npx -y tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
