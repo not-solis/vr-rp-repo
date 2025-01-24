@@ -9,7 +9,7 @@ import {
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
   JWT_SECRET,
-} from '../env';
+} from '../config';
 const { sign, verify } = jwt;
 
 const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
@@ -26,7 +26,7 @@ export const auth: RequestHandler = (request, response, next) => {
     verify(token, JWT_SECRET);
     next();
   } catch (err) {
-    console.error('Error: ', err);
+    console.error(err);
     response.status(401).json();
   }
 };
