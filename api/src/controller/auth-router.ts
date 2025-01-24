@@ -3,19 +3,14 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { createUser, getUserByDiscordId, User } from '../model/users-model';
-const { sign, verify } = jwt;
-
-const {
-  DISCORD_REDIRECT_URL = '',
-  DISCORD_CLIENT_ID = '',
-  DISCORD_CLIENT_SECRET = '',
+import {
+  CLIENT_URL,
+  DISCORD_CLIENT_ID,
+  DISCORD_CLIENT_SECRET,
+  DISCORD_REDIRECT_PATH,
   JWT_SECRET,
-  CLIENT_URL = 'http://localhost:3000',
-} = process.env;
-
-if (!JWT_SECRET) {
-  throw new Error('No JWT_SECRET provided');
-}
+} from '../env';
+const { sign, verify } = jwt;
 
 const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
 
@@ -118,7 +113,7 @@ router.get('/discord', async (request, response) => {
           client_secret: DISCORD_CLIENT_SECRET,
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: DISCORD_REDIRECT_URL,
+          redirect_uri: new URL(request.host, DISCORD_REDIRECT_PATH).toString(),
           scope: 'identify',
         }),
       },
