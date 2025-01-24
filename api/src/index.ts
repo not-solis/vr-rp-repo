@@ -39,5 +39,4 @@ app.use('/projects', projectRouter);
 app.use('/auth', authRouter);
 
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
-
-export { app };
+export default app;

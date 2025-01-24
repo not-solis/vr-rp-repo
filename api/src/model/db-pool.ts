@@ -4,13 +4,29 @@ const { Pool } = pg;
 
 dotenv.config();
 
-const connectionDetails: PoolConfig = {
-  user: process.env.POSTGRES_DB_USER,
-  host: process.env.POSTGRES_DB_HOST,
-  database: process.env.POSTGRES_DB_DATABASE,
-  password: process.env.POSTGRES_DB_PASSWORD,
-  port: parseInt(process.env.POSTGRES_DB_PORT!) ?? 5432,
-};
+const {
+  POSTGRES_URL,
+  POSTGRES_USER,
+  POSTGRES_HOST,
+  POSTGRES_DATABASE,
+  POSTGRES_PASSWORD,
+  POSTGRES_PORT,
+} = process.env;
+
+const connectionDetails: PoolConfig = POSTGRES_URL
+  ? {
+      connectionString: POSTGRES_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    }
+  : {
+      user: POSTGRES_USER,
+      host: POSTGRES_HOST,
+      database: POSTGRES_DATABASE,
+      password: POSTGRES_PASSWORD,
+      port: parseInt(POSTGRES_PORT!) ?? undefined,
+    };
 
 export const pool = new Pool(connectionDetails);
 export const makeTransaction = (
