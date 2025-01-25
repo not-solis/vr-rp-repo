@@ -1,6 +1,6 @@
-import { ResponseData } from '..';
-import { pool } from './db-pool';
-import { User } from './users-model';
+import { ResponseData } from '../index.js';
+import { pool } from './db-pool.js';
+import { User } from './users-model.js';
 
 export const getOwnerByProjectId = async (
   id: string,

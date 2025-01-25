@@ -1,8 +1,8 @@
 import { PoolClient } from 'pg';
-import { makeTransaction, pool } from './db-pool';
-import { User, UserRole } from './users-model';
-import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model';
-import { createOwnership } from './owners-model';
+import { makeTransaction, pool } from './db-pool.js';
+import { User, UserRole } from './users-model.js';
+import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model.js';
+import { createOwnership } from './owners-model.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 

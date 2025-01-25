@@ -5,13 +5,13 @@ import {
   createProject,
   RoleplayProject,
   updateProject,
-} from '../model/project-model';
-import { createOwnership, getOwnerByProjectId } from '../model/owners-model';
-import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model';
-import { auth, getAuthUser } from './auth-router';
+} from '../model/project-model.js';
+import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
+import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
+import { auth, getAuthUser } from './auth-router.js';
 import cookieParser from 'cookie-parser';
-import { ResponseData } from '..';
-import { User, UserRole } from '../model/users-model';
+import { ResponseData } from '../index.js';
+import { User, UserRole } from '../model/users-model.js';
 
 const { CLIENT_URL = 'http://localhost:3000' } = process.env;
 

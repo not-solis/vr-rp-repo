@@ -1,21 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": ["es6"],
-    "module": "System",
-    "moduleResolution": "node",
-    "allowJs": true,
+    "lib": ["ES6"],
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowJs": false,
+    "checkJs": false,
     "outDir": "build",
-    "outFile": "api/index.js",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true,
+    "noEmit": true
   },
   "ts-node": {
-    // Tell ts-node CLI to install the --loader automatically
-    "esm": true
-  },
-  "include": ["src", "api"]
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
 }

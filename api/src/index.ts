@@ -1,9 +1,9 @@
 import express from 'express';
 import mung from 'express-mung';
-import { projectRouter } from './controller/project-router';
-import { authRouter } from './controller/auth-router';
+import { projectRouter } from './controller/project-router.js';
+import { authRouter } from './controller/auth-router.js';
 import cors from 'cors';
-import { CLIENT_URL } from './config';
+import { CLIENT_URL } from './env/config.js';
 
 export interface ResponseData<T> {
   success: boolean;
@@ -56,4 +56,4 @@ app.get('/', (_, res) => {
 });
 
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
-export default app;
+export { app };

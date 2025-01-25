@@ -1,13 +1,13 @@
 import { RequestHandler, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
-import { createUser, getUserByDiscordId, User } from '../model/users-model';
+import { createUser, getUserByDiscordId, User } from '../model/users-model.js';
 import {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
   JWT_SECRET,
-} from '../config';
+} from '../env/config.js';
 const { sign, verify } = jwt;
 
 const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;

@@ -1,4 +1,4 @@
-import { makeTransaction, pool } from './db-pool';
+import { makeTransaction, pool } from './db-pool.js';
 
 export interface RoleplayLink {
   label: string;

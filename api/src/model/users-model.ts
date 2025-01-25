@@ -1,5 +1,5 @@
-import { ResponseData } from '..';
-import { pool } from './db-pool';
+import { ResponseData } from '../index.js';
+import { pool } from './db-pool.js';
 
 export enum UserRole {
   User = 'User',
