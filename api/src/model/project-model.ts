@@ -3,6 +3,8 @@ import { makeTransaction, pool } from './db-pool.js';
 import { User, UserRole } from './users-model.js';
 import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model.js';
 import { createOwnership } from './owners-model.js';
+import { put } from '@vercel/blob';
+import { BLOB_READ_WRITE_TOKEN } from '../env/config.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 
@@ -304,5 +306,18 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
         })
         .catch(reject);
     }, reject);
+  });
+};
+
+export const uploadImage = async (
+  fileName: string,
+  file: string | Buffer | Blob | ArrayBuffer | ReadableStream | File,
+  contentType: string,
+) => {
+  return put(`projects/img/${fileName}`, file, {
+    access: 'public',
+    addRandomSuffix: true,
+    token: BLOB_READ_WRITE_TOKEN,
+    contentType,
   });
 };

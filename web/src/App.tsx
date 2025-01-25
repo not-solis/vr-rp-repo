@@ -33,7 +33,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
-import { EnvContext } from './context/EnvProvider';
+import { EnvContext, EnvContextData } from './context/EnvProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
@@ -44,6 +44,7 @@ const {
   REACT_APP_SERVER_BASE_URL,
   REACT_APP_DISCORD_REDIRECT_PATH,
   REACT_APP_DISCORD_CLIENT_ID,
+  REACT_APP_MAX_IMAGE_SIZE,
 } = process.env;
 
 if (!REACT_APP_SERVER_BASE_URL) {
@@ -54,10 +55,11 @@ if (!REACT_APP_SERVER_BASE_URL) {
   throw new Error('Discord client ID not configured.');
 }
 
-const env = {
+const env: EnvContextData = {
   serverBaseUrl: REACT_APP_SERVER_BASE_URL,
   discordRedirectPath: REACT_APP_DISCORD_REDIRECT_PATH,
   discordClientId: REACT_APP_DISCORD_CLIENT_ID,
+  maxImageSize: parseInt(REACT_APP_MAX_IMAGE_SIZE!) || 1048576,
 };
 
 const queryClient = new QueryClient();

@@ -7,6 +7,7 @@ import {
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
   JWT_SECRET,
+  NODE_ENV,
 } from '../env/config.js';
 const { sign, verify } = jwt;
 
@@ -58,6 +59,8 @@ router.get('/', (request, response) => {
     response.cookie('userToken', newToken, {
       maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
     response.json({ authenticated: true, user });
   } catch (err) {
@@ -94,6 +97,12 @@ router.get('/discord', async (request, response) => {
     return;
   }
 
+  const secure = NODE_ENV !== 'development';
+  const redirectUrl = new URL(
+    DISCORD_REDIRECT_PATH,
+    `http${secure ? 's' : ''}://${request.headers.host}`,
+  );
+
   try {
     const { access_token, token_type } = await fetch(
       'https://discord.com/api/oauth2/token',
@@ -105,7 +114,7 @@ router.get('/discord', async (request, response) => {
           client_secret: DISCORD_CLIENT_SECRET,
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: new URL(request.host, DISCORD_REDIRECT_PATH).toString(),
+          redirect_uri: redirectUrl.toString(),
           scope: 'identify',
         }),
       },
@@ -138,10 +147,13 @@ router.get('/discord', async (request, response) => {
     response.cookie('userToken', token, {
       maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
     });
 
     respond(200, user);
   } catch (error) {
+    console.error(error);
     respond(500, error);
   }
 });

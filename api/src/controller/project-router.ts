@@ -5,15 +5,15 @@ import {
   createProject,
   RoleplayProject,
   updateProject,
+  uploadImage,
 } from '../model/project-model.js';
 import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth, getAuthUser } from './auth-router.js';
 import cookieParser from 'cookie-parser';
 import { ResponseData } from '../index.js';
-import { User, UserRole } from '../model/users-model.js';
-
-const { CLIENT_URL = 'http://localhost:3000' } = process.env;
+import { UserRole } from '../model/users-model.js';
+import fileUpload, { UploadedFile } from 'express-fileupload';
 
 const MAX_QUERY = 1000;
 
@@ -74,18 +74,18 @@ const validateProject: RequestHandler = (
   }
 };
 
-const checkOwnership: RequestHandler = (
+const checkOwnership: RequestHandler = async (
   req,
   res: Response<ResponseData<unknown>>,
   next,
 ) => {
-  const project = req.body as RoleplayProject;
+  const { id } = req.params;
   const user = getAuthUser(req);
 
   if (user.role === UserRole.Admin) {
     next();
   } else if (user.role === UserRole.User) {
-    getOwnerByProjectId(project.id)
+    getOwnerByProjectId(id)
       .then((results) => results.data)
       .then((owner) => {
         if (owner?.user_id === user.user_id) {
@@ -108,6 +108,13 @@ const checkOwnership: RequestHandler = (
 
 const router = Router();
 router.use(cookieParser());
+router.use(
+  fileUpload({
+    limits: {
+      fileSize: 1024 * 1024,
+    },
+  }),
+);
 
 router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;
@@ -189,6 +196,30 @@ router.patch(
       })
       .catch((error) =>
         res.status(500).send({ success: false, errors: [error.message] }),
+      );
+  },
+);
+
+router.post(
+  '/image',
+  auth,
+  (req: Request, res: Response<ResponseData<unknown>>) => {
+    if (!req.files) {
+      res.status(400).send({ success: false, errors: ['No image provided.'] });
+      return;
+    }
+
+    const file = req.files.image as UploadedFile;
+
+    uploadImage(file.name, file.data, file.mimetype)
+      .then((blob) => {
+        res.status(201).json({
+          success: true,
+          data: blob.url,
+        });
+      })
+      .catch((err) =>
+        res.status(500).send({ success: false, errors: [err.message] }),
       );
   },
 );

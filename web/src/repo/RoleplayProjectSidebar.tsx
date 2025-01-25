@@ -6,8 +6,10 @@ import {
   Checkbox,
   FormControlLabel,
   IconButton,
+  styled,
   Typography,
 } from '@mui/material';
+import { useState } from 'react';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
@@ -15,6 +17,7 @@ import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagChip } from '../components/TagChip';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
+import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
 import {
   RoleplayApplicationProcess,
@@ -22,6 +25,7 @@ import {
   RoleplayLink,
   RoleplayProject,
 } from '../model/RoleplayProject';
+import { ResponseData } from '../model/ServerResponse';
 
 import './RoleplayProjectSidebar.css';
 
@@ -34,20 +38,21 @@ interface RoleplayProjectSidebarProps {
   openOwnershipDialog: () => void;
 }
 
-// const VisuallyHiddenInput = styled('input')({
-//   clip: 'rect(0 0 0 0)',
-//   clipPath: 'inset(50%)',
-//   height: 1,
-//   overflow: 'hidden',
-//   position: 'absolute',
-//   bottom: 0,
-//   left: 0,
-//   whiteSpace: 'nowrap',
-//   width: 1,
-// });
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { isAuthenticated } = useAuth();
+  const { serverBaseUrl, maxImageSize } = useEnv();
   const { createSnackbar } = useSnackbar();
   const {
     isOpen,
@@ -71,6 +76,39 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     discordUrl = '',
     otherLinks = [],
   } = project;
+
+  const saveImage = (imageFile: File) => {
+    if (!imageFile) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    fetch(`${serverBaseUrl}/projects/image`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    }).then((res) => {
+      if (res.status === 201) {
+        res.json().then((json: ResponseData<string>) => {
+          setEditProject({
+            ...project,
+            imageUrl: json.data,
+          });
+        });
+      } else {
+        res.json().then((json: ResponseData<string>) => {
+          createSnackbar({
+            title: 'Image Upload Error',
+            content: json.errors ?? [],
+            severity: 'error',
+            autoHideDuration: 6000,
+          });
+        });
+      }
+    });
+  };
 
   const sidebarLinks = [];
   if (isEditing || discordUrl) {
@@ -209,30 +247,29 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 }}
                 role={undefined}
                 component='label'
-                onClick={() =>
-                  createSnackbar({
-                    title: 'Unimplemented',
-                    severity: 'warning',
-                    content: 'File upload is not yet implemented.',
-                  })
-                }
               >
                 <Typography>Upload Image</Typography>
                 <Upload />
-                {/* <VisuallyHiddenInput
-                type='file'
-                accept='image/*'
-                onChange={(event) => {
-                  const { files } = event.currentTarget;
-                  if (files && files.length > 0) {
-                    const file = files[0];
-                    setEditProject({
-                      ...project,
-                      imageUrl: URL.createObjectURL(file),
-                    });
-                  }
-                }}
-              /> */}
+                <VisuallyHiddenInput
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => {
+                    const { files } = event.currentTarget;
+                    if (files && files.length > 0) {
+                      const file = files[0];
+                      if (file.size > maxImageSize) {
+                        createSnackbar({
+                          title: 'Input Error',
+                          severity: 'error',
+                          content:
+                            'Image is too large! Max upload size is 1MB.',
+                        });
+                      } else {
+                        saveImage(file);
+                      }
+                    }
+                  }}
+                />
               </IconButton>
             )}
 

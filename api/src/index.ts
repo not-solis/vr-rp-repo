@@ -2,8 +2,8 @@ import express from 'express';
 import mung from 'express-mung';
 import { projectRouter } from './controller/project-router.js';
 import { authRouter } from './controller/auth-router.js';
-import cors from 'cors';
-import { CLIENT_URL } from './env/config.js';
+import cors, { CorsOptions } from 'cors';
+import { CLIENT_URL, CLIENT_URL_PATTERN } from './env/config.js';
 
 export interface ResponseData<T> {
   success: boolean;
@@ -11,30 +11,46 @@ export interface ResponseData<T> {
   data?: T;
 }
 
-const app = express();
 const PORT = 3001;
+const app = express();
+
+// cors
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    const valid =
+      !origin ||
+      (CLIENT_URL
+        ? CLIENT_URL === origin
+        : new RegExp(CLIENT_URL_PATTERN).test(origin));
+    callback(
+      valid
+        ? null
+        : new Error(
+            `Unsupported cross-origin request from ${origin} using pattern ${CLIENT_URL_PATTERN}`,
+          ),
+      valid,
+    );
+  },
+  // allowedHeaders: [
+  //   'X-CSRF-Token',
+  //   'X-Requested-With',
+  //   'Accept',
+  //   'Accept-Version',
+  //   'Content-Length',
+  //   'Content - MD5',
+  //   'Content - Type',
+  //   'Date',
+  //   'X - Api - Version',
+  // ],
+  methods: ['GET', 'OPTIONS', 'PATCH', 'DELETE', 'POST', 'PUT'],
+  credentials: true,
+  preflightContinue: true,
+};
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
-// cors
-// app.use(cors());
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Credentials', 'true');
-//   res.setHeader('Access-Control-Allow-Origin', CLIENT_URL);
-//   res.setHeader(
-//     'Access-Control-Allow-Methods',
-//     'GET,OPTIONS,PATCH,DELETE,POST,PUT',
-//   );
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
-//   );
-//   if (req.method === 'OPTIONS') {
-//     res.status(200).end();
-//     return;
-//   }
-//   next();
-// });
 app.use(
   mung.json((body) => {
     const remapJson = (obj: any) => {
