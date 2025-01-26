@@ -128,7 +128,7 @@ const AuthWrapper = (props: PropsWithChildren) => {
         .then((json) => {
           const { user } = json;
           return {
-            id: user.id,
+            id: user.user_id,
             name: user.name,
             imageUrl: user.image_url,
             role: user.role,

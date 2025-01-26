@@ -15,6 +15,31 @@ export interface User {
   discord_id?: string;
 }
 
+export const getUserById = async (id: string) => {
+  return await pool
+    .query(
+      `
+      SELECT
+        user_id,
+        name,
+        image_url,
+        role
+      FROM users
+      WHERE user_id=$1`,
+      [id],
+    )
+    .then((results) => {
+      if (results?.rows) {
+        return results.rows[0] as User;
+      } else {
+        throw new Error('No user found by id.');
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
 export const getUserByDiscordId = async (
   id: string,
 ): Promise<ResponseData<User>> => {
@@ -70,7 +95,25 @@ export const createUser = async (
       }
     })
     .catch((err) => {
+      throw err;
+    });
+};
+
+export const updateUserName = async (id: string, name: string) => {
+  return await pool
+    .query('UPDATE users SET name=$1 WHERE user_id=$2 RETURNING name', [
+      name,
+      id,
+    ])
+    .then((results) => {
+      if (results?.rowCount) {
+        return results.rows[0].name;
+      } else {
+        throw new Error('Username update failed.');
+      }
+    })
+    .catch((err) => {
       console.error(err);
-      throw new Error('Internal server error.');
+      throw err;
     });
 };

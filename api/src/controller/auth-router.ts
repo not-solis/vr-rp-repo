@@ -1,7 +1,11 @@
 import { RequestHandler, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
-import { createUser, getUserByDiscordId, User } from '../model/users-model.js';
+import {
+  createUser,
+  getUserByDiscordId,
+  getUserById,
+} from '../model/users-model.js';
 import {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
@@ -23,7 +27,7 @@ export const auth: RequestHandler = (request, response, next) => {
       response.status(401).json();
     }
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
-    response.locals.user = jwtToken.user as User;
+    response.locals.userId = jwtToken.id;
     next();
   } catch (err) {
     console.error(err);
@@ -35,7 +39,7 @@ const router = Router();
 
 router.use(cookieParser());
 
-router.get('/', (request, response) => {
+router.get('/', async (request, response) => {
   try {
     const { userToken: token } = request.cookies;
     if (!token) {
@@ -45,10 +49,12 @@ router.get('/', (request, response) => {
     }
 
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
-    const user: User = jwtToken.user;
-    const newToken = sign({ user }, JWT_SECRET, {
+    const id = jwtToken.id;
+    const newToken = sign({ id }, JWT_SECRET, {
       expiresIn: TOKEN_EXPIRATION,
     });
+
+    const user = await getUserById(id);
 
     // Reset token in cookie
     response.cookie('userToken', newToken, {
@@ -132,9 +138,10 @@ router.get('/discord', async (request, response) => {
       );
       user = newUser;
     }
+    const { user_id: id } = user!;
 
     // Sign user JWT
-    const token = sign({ user }, JWT_SECRET, {
+    const token = sign({ id }, JWT_SECRET, {
       expiresIn: TOKEN_EXPIRATION,
     });
 

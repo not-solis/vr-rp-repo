@@ -11,28 +11,64 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
+import { useSnackbar } from '../context/SnackbarProvider';
 import './UserComponent.css';
+import { ResponseData } from '../model/ServerResponse';
 
 export const UserComponent = () => {
   const { serverBaseUrl, discordClientId, discordRedirectPath } = useEnv();
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
+  const [name, setName] = useState(user?.name);
   const buttonRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const isMenuOpen = !!menuAnchorEl;
+  const queryClient = useQueryClient();
+  const { createSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const theme = useTheme();
 
   if (isAuthLoading) {
     return <CircularProgress />;
   }
+
+  const saveName = () => {
+    if (name && name !== user?.name) {
+      fetch(`${serverBaseUrl}/users/name`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+        credentials: 'include',
+      })
+        .then<ResponseData<string>>((res) => res.json())
+        .then((json) => {
+          if (json.success) {
+            queryClient.refetchQueries({
+              queryKey: ['auth'],
+            });
+          } else {
+            createSnackbar({
+              title: 'User save error',
+              severity: 'error',
+              content: json.errors || [],
+            });
+          }
+        })
+        .finally(() => setEditingName(false));
+    } else {
+      cancelNameEdit();
+    }
+  };
 
   const handleLogout = () => {
     fetch(`${serverBaseUrl}/auth/logout`, {
@@ -72,6 +108,11 @@ export const UserComponent = () => {
       capture: true,
     });
     setMenuAnchorEl(undefined);
+  };
+
+  const cancelNameEdit = () => {
+    setName(user!.name);
+    setEditingName(false);
   };
 
   return user ? (
@@ -132,15 +173,16 @@ export const UserComponent = () => {
             disabled={!isEditingName}
             variant='outlined'
             size='small'
-            value={user.name}
+            value={isEditingName ? name : user.name}
             style={{ width: 160, marginRight: 6 }}
+            onChange={(e) => setName(e.target.value)}
             slotProps={{
               input: {
                 endAdornment: isEditingName && (
                   <IconButton
                     size='small'
                     style={{ marginRight: -8 }}
-                    onClick={() => setEditingName(false)}
+                    onClick={cancelNameEdit}
                   >
                     <Close fontSize='small' />
                   </IconButton>
@@ -150,12 +192,17 @@ export const UserComponent = () => {
           />
           {isEditingName ? (
             <>
-              <IconButton onClick={() => setEditingName(false)}>
+              <IconButton onClick={saveName}>
                 <Save />
               </IconButton>
             </>
           ) : (
-            <IconButton onClick={() => setEditingName(true)}>
+            <IconButton
+              onClick={() => {
+                setName(user.name);
+                setEditingName(true);
+              }}
+            >
               <Edit />
             </IconButton>
           )}

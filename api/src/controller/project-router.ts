@@ -12,7 +12,7 @@ import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth } from './auth-router.js';
 import cookieParser from 'cookie-parser';
 import { ResponseData } from '../index.js';
-import { User, UserRole } from '../model/users-model.js';
+import { getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 
 const MAX_QUERY = 1000;
@@ -87,17 +87,19 @@ const checkOwnership: RequestHandler = async (
   next,
 ) => {
   const { id } = req.params;
-  const user: User = res.locals.user;
+  const userId = res.locals.userId;
   if (!id) {
     console.warn('No id to check for ownership.');
     next();
   }
-  if (!user) {
+  if (!userId) {
     res.status(500).send({
       success: false,
       errors: ['Invalid routing middleware: no auth before ownership check.'],
     });
   }
+
+  const user = await getUserById(userId);
 
   if (user.role === UserRole.Admin) {
     next();
@@ -160,8 +162,8 @@ router.get('/:id', (req, res) => {
 
 router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
-  const user: User = res.locals.user;
-  createOwnership(id, user.user_id)
+  const userId = res.locals.userId;
+  createOwnership(id, userId)
     .then((response) => {
       res.status(200).send(response);
     })
@@ -181,9 +183,10 @@ router.get('/:id/links', (req, res) => {
     );
 });
 
-router.post('/', auth, validateProject, (req, res) => {
+router.post('/', auth, validateProject, async (req, res) => {
   const project: RoleplayProject = res.locals.project;
-  const user: User = res.locals.user;
+  const userId = res.locals.userId;
+  const user = await getUserById(userId);
   createProject(user, project)
     .then((response) => {
       res.status(200).send(response);
