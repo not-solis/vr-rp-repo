@@ -22,3 +22,5 @@ if (!DISCORD_REDIRECT_PATH) {
 } else if (!BLOB_READ_WRITE_TOKEN) {
   throw new Error('No BLOB_READ_WRITE_TOKEN provided');
 }
+
+export const isDev = NODE_ENV === 'development';

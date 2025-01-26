@@ -5,15 +5,15 @@ import {
   createProject,
   RoleplayProject,
   updateProject,
-  uploadImage,
+  getImageUrlByProjectId,
 } from '../model/project-model.js';
 import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
-import { auth, getAuthUser } from './auth-router.js';
+import { auth } from './auth-router.js';
 import cookieParser from 'cookie-parser';
 import { ResponseData } from '../index.js';
-import { UserRole } from '../model/users-model.js';
-import fileUpload, { UploadedFile } from 'express-fileupload';
+import { User, UserRole } from '../model/users-model.js';
+import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 
 const MAX_QUERY = 1000;
 
@@ -31,6 +31,9 @@ const isValidUrl = (url: string) => {
   return urlRegex.test(url);
 };
 
+/**
+ * Validates the project provided in the request body.
+ */
 const validateProject: RequestHandler = (
   req,
   res: Response<ResponseData<unknown>>,
@@ -70,17 +73,31 @@ const validateProject: RequestHandler = (
   if (validationErrors.length > 0) {
     res.status(400).json({ success: false, errors: validationErrors });
   } else {
+    res.locals.project = project;
     next();
   }
 };
 
+/**
+ * Checks whether the user owns the project denoted by the id param. Must come after {@link auth}.
+ */
 const checkOwnership: RequestHandler = async (
   req,
   res: Response<ResponseData<unknown>>,
   next,
 ) => {
   const { id } = req.params;
-  const user = getAuthUser(req);
+  const user: User = res.locals.user;
+  if (!id) {
+    console.warn('No id to check for ownership.');
+    next();
+  }
+  if (!user) {
+    res.status(500).send({
+      success: false,
+      errors: ['Invalid routing middleware: no auth before ownership check.'],
+    });
+  }
 
   if (user.role === UserRole.Admin) {
     next();
@@ -97,7 +114,7 @@ const checkOwnership: RequestHandler = async (
           });
         }
       })
-      .catch((e) =>
+      .catch(() =>
         res.status(500).send({
           success: false,
           errors: ['Internal authentication error.'],
@@ -108,13 +125,6 @@ const checkOwnership: RequestHandler = async (
 
 const router = Router();
 router.use(cookieParser());
-router.use(
-  fileUpload({
-    limits: {
-      fileSize: 1024 * 1024,
-    },
-  }),
-);
 
 router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;
@@ -141,7 +151,7 @@ router.get('/:id', (req, res) => {
   const { id } = req.params;
   getProjectById(id)
     .then((response) => {
-      res.status(200).send(response);
+      res.status(200).send({ success: true, data: response });
     })
     .catch((error) =>
       res.status(500).send({ success: false, errors: [error.message] }),
@@ -150,7 +160,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
-  const user = getAuthUser(req);
+  const user: User = res.locals.user;
   createOwnership(id, user.user_id)
     .then((response) => {
       res.status(200).send(response);
@@ -172,8 +182,8 @@ router.get('/:id/links', (req, res) => {
 });
 
 router.post('/', auth, validateProject, (req, res) => {
-  const project = req.body as RoleplayProject;
-  const user = getAuthUser(req);
+  const project: RoleplayProject = res.locals.project;
+  const user: User = res.locals.user;
   createProject(user, project)
     .then((response) => {
       res.status(200).send(response);
@@ -190,7 +200,8 @@ router.patch(
   checkOwnership,
   (req: Request, res: Response<ResponseData<unknown>>) => {
     const { id } = req.params;
-    updateProject(id, req.body as RoleplayProject)
+    const project: RoleplayProject = res.locals.project;
+    updateProject(id, project)
       .then((response) => {
         res.status(200).send({ success: true, data: response });
       })
@@ -202,26 +213,26 @@ router.patch(
 
 router.post(
   '/image',
+  limitImageUpload,
   auth,
-  (req: Request, res: Response<ResponseData<unknown>>) => {
-    if (!req.files) {
-      res.status(400).send({ success: false, errors: ['No image provided.'] });
-      return;
-    }
+  handleImageUploadRequest('projects/img'),
+);
 
-    const file = req.files.image as UploadedFile;
-
-    uploadImage(file.name, file.data, file.mimetype)
-      .then((blob) => {
-        res.status(201).json({
-          success: true,
-          data: blob.url,
-        });
-      })
-      .catch((err) =>
-        res.status(500).send({ success: false, errors: [err.message] }),
+router.post(
+  '/image/:id',
+  limitImageUpload,
+  auth,
+  checkOwnership,
+  async (req: Request, res: Response<ResponseData<unknown>>, next) => {
+    const { id } = req.params;
+    if (id) {
+      await getImageUrlByProjectId(id).then(
+        (imageUrl) => (res.locals.old = imageUrl),
       );
+    }
+    next();
   },
+  handleImageUploadRequest('projects/img'),
 );
 
 export { router as projectRouter };

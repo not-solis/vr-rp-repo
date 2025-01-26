@@ -25,7 +25,6 @@ import {
   RoleplayLink,
   RoleplayProject,
 } from '../model/RoleplayProject';
-import { ResponseData } from '../model/ServerResponse';
 
 import './RoleplayProjectSidebar.css';
 
@@ -35,6 +34,8 @@ interface RoleplayProjectSidebarProps {
   toggleOpen: () => void;
   project: RoleplayProject;
   setEditProject: (project: RoleplayProject) => void;
+  imageFile?: File;
+  setImageFile: (file: File) => void;
   openOwnershipDialog: () => void;
 }
 
@@ -52,7 +53,7 @@ const VisuallyHiddenInput = styled('input')({
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { isAuthenticated } = useAuth();
-  const { serverBaseUrl, maxImageSize } = useEnv();
+  const { maxImageSize } = useEnv();
   const { createSnackbar } = useSnackbar();
   const {
     isOpen,
@@ -60,6 +61,8 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     toggleOpen,
     project,
     setEditProject,
+    imageFile,
+    setImageFile,
     openOwnershipDialog,
   } = props;
   const {
@@ -76,39 +79,6 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     discordUrl = '',
     otherLinks = [],
   } = project;
-
-  const saveImage = (imageFile: File) => {
-    if (!imageFile) {
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
-    fetch(`${serverBaseUrl}/projects/image`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    }).then((res) => {
-      if (res.status === 201) {
-        res.json().then((json: ResponseData<string>) => {
-          setEditProject({
-            ...project,
-            imageUrl: json.data,
-          });
-        });
-      } else {
-        res.json().then((json: ResponseData<string>) => {
-          createSnackbar({
-            title: 'Image Upload Error',
-            content: json.errors ?? [],
-            severity: 'error',
-            autoHideDuration: 6000,
-          });
-        });
-      }
-    });
-  };
 
   const sidebarLinks = [];
   if (isEditing || discordUrl) {
@@ -230,10 +200,10 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
       >
         <div id='project-sidebar-container'>
           <div id='project-sidebar-content'>
-            {imageUrl && (
+            {(imageUrl || imageFile) && (
               <CardMedia
                 component='img'
-                image={imageUrl}
+                image={imageFile ? URL.createObjectURL(imageFile) : imageUrl}
                 alt={`${name} icon`}
               />
             )}
@@ -265,7 +235,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                             'Image is too large! Max upload size is 1MB.',
                         });
                       } else {
-                        saveImage(file);
+                        setImageFile(file);
                       }
                     }
                   }}

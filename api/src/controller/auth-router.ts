@@ -6,8 +6,8 @@ import {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
+  isDev,
   JWT_SECRET,
-  NODE_ENV,
 } from '../env/config.js';
 const { sign, verify } = jwt;
 
@@ -22,18 +22,13 @@ export const auth: RequestHandler = (request, response, next) => {
     if (!token) {
       response.status(401).json();
     }
-    verify(token, JWT_SECRET);
+    const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
+    response.locals.user = jwtToken.user as User;
     next();
   } catch (err) {
     console.error(err);
     response.status(401).json();
   }
-};
-
-export const getAuthUser = (request: any): User => {
-  const { userToken: token } = request.cookies;
-  const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
-  return jwtToken.user as User;
 };
 
 const router = Router();
@@ -97,7 +92,7 @@ router.get('/discord', async (request, response) => {
     return;
   }
 
-  const secure = NODE_ENV !== 'development';
+  const secure = !isDev;
   const redirectUrl = new URL(
     DISCORD_REDIRECT_PATH,
     `http${secure ? 's' : ''}://${request.headers.host}`,

@@ -31,17 +31,6 @@ const corsOptions: CorsOptions = {
       valid,
     );
   },
-  // allowedHeaders: [
-  //   'X-CSRF-Token',
-  //   'X-Requested-With',
-  //   'Accept',
-  //   'Accept-Version',
-  //   'Content-Length',
-  //   'Content - MD5',
-  //   'Content - Type',
-  //   'Date',
-  //   'X - Api - Version',
-  // ],
   methods: ['GET', 'OPTIONS', 'PATCH', 'DELETE', 'POST', 'PUT'],
   credentials: true,
   preflightContinue: true,
@@ -65,11 +54,11 @@ app.use(
   }),
 );
 
-app.use('/projects', projectRouter);
-app.use('/auth', authRouter);
 app.get('/', (_, res) => {
   res.status(200).json({ message: 'Hello world!' });
 });
+app.use('/projects', projectRouter);
+app.use('/auth', authRouter);
 
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
 export { app };

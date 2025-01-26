@@ -68,6 +68,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew = false } = props;
   const { serverBaseUrl } = useEnv();
   const [isEditing, setEditing] = useState(isNew);
+  const [imageFile, setImageFile] = useState<File>();
   const [isPreviewDescription, setPreviewDescription] = useState(false);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isOwnershipDialogOpen, setOwnershipDialogOpen] = useState(false);
@@ -262,6 +263,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const cancelEdit = () => {
     setEditing(false);
     setPreviewDescription(false);
+    setImageFile(undefined);
   };
 
   const onSaveButtonClick = () => {
@@ -272,7 +274,33 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     }
   };
 
-  const saveProject = () => {
+  const saveProject = async () => {
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+
+      await fetch(`${serverBaseUrl}/projects/image/${id ?? ''}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      }).then(async (res) => {
+        if (res.status === 201) {
+          await res.json().then((json: ResponseData<string>) => {
+            project.imageUrl = json.data;
+          });
+        } else {
+          await res.json().then((json: ResponseData<string>) => {
+            createSnackbar({
+              title: 'Image Upload Error',
+              content: json.errors ?? [],
+              severity: 'error',
+              autoHideDuration: 6000,
+            });
+          });
+        }
+      });
+    }
+
     if (isNew) {
       fetch(`${serverBaseUrl}/projects`, {
         headers: {
@@ -555,6 +583,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         toggleOpen={() => setSidebarOpen(!isSidebarOpen)}
         project={project as RoleplayProject}
         setEditProject={setEditProject}
+        imageFile={imageFile}
+        setImageFile={setImageFile}
         openOwnershipDialog={() => setOwnershipDialogOpen(true)}
       />
 
