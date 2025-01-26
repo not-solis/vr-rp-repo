@@ -24,3 +24,4 @@ if (!DISCORD_REDIRECT_PATH) {
 }
 
 export const isDev = NODE_ENV === 'development';
+export const PORT = parseInt(process.env.PORT ?? '3001');

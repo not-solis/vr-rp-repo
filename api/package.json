@@ -8,6 +8,7 @@
     "start": "npx -y tsx src/index.ts",
     "start:local": "npx -y tsx src/index.ts --env-file=.env",
     "start:dev": "npx -y tsx src/index.ts --env-file=.env.development.local",
+    "dev": "cross-env PORT=3002 npm run start:local",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@vercel/blob": "^0.27.1",
+    "@vercel/node": "^5.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -39,6 +41,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/pg": "^8.11.10",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

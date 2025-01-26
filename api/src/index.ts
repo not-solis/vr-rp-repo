@@ -3,7 +3,7 @@ import mung from 'express-mung';
 import { projectRouter } from './controller/project-router.js';
 import { authRouter } from './controller/auth-router.js';
 import cors, { CorsOptions } from 'cors';
-import { CLIENT_URL, CLIENT_URL_PATTERN } from './env/config.js';
+import { CLIENT_URL, CLIENT_URL_PATTERN, PORT } from './env/config.js';
 import { userRouter } from './controller/user-router.js';
 
 export interface ResponseData<T> {
@@ -12,7 +12,6 @@ export interface ResponseData<T> {
   data?: T;
 }
 
-const PORT = 3001;
 const app = express();
 
 // cors
@@ -60,6 +59,5 @@ app.get('/', (_, res) => {
 app.use('/projects', projectRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
-
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
 export { app };
