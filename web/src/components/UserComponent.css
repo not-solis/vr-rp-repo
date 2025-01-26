@@ -20,6 +20,20 @@
   filter: brightness(115%);
 }
 
+#user-menu-avatar {
+  transition: filter 0.06s;
+}
+
+#user-menu-avatar:hover {
+  filter: saturate(80%) brightness(115%);
+  cursor: pointer;
+}
+
+#user-menu-avatar:active {
+  filter: saturate(100%) brightness(90%);
+  cursor: pointer;
+}
+
 .toggle-arrow {
   transition: transform 0.3s !important;
 }

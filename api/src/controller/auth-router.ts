@@ -31,6 +31,7 @@ export const auth: RequestHandler = (request, response, next) => {
     next();
   } catch (err) {
     console.error(err);
+    response.clearCookie('userToken');
     response.status(401).json();
   }
 };

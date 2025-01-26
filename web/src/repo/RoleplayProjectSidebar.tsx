@@ -6,16 +6,15 @@ import {
   Checkbox,
   FormControlLabel,
   IconButton,
-  styled,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
 import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagChip } from '../components/TagChip';
 import { TagTextField } from '../components/TagTextField';
+import { VisuallyHiddenInput } from '../components/VisuallyHiddenInput';
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
@@ -38,18 +37,6 @@ interface RoleplayProjectSidebarProps {
   setImageFile: (file: File) => void;
   openOwnershipDialog: () => void;
 }
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { isAuthenticated } = useAuth();

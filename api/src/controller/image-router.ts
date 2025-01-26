@@ -28,9 +28,10 @@ export const handleImageUploadRequest =
 
     const old: string = res.locals.old;
     const file = req.files.image as UploadedFile;
+    const filePath = path.replace(/^\/*|\/*$/g, '');
     uploadImage(
       file.name,
-      isDev ? 'dev' : path.replace(/\/?$/g, ''),
+      isDev ? `dev/${filePath}` : filePath,
       file.data,
       file.mimetype,
     )

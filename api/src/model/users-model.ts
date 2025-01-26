@@ -117,3 +117,22 @@ export const updateUserName = async (id: string, name: string) => {
       throw err;
     });
 };
+
+export const updateUserImageUrl = async (id: string, imageUrl: string) => {
+  return await pool
+    .query(
+      'UPDATE users SET image_url=$1 WHERE user_id=$2 RETURNING image_url',
+      [imageUrl, id],
+    )
+    .then((results) => {
+      if (results?.rowCount) {
+        return results.rows[0].image_url;
+      } else {
+        throw new Error('Username update failed.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      throw err;
+    });
+};

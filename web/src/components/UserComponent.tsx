@@ -4,9 +4,11 @@ import {
   Avatar,
   Button,
   CircularProgress,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
+  Stack,
   TextField,
   Typography,
   useTheme,
@@ -16,6 +18,7 @@ import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OAuth2Login from 'react-simple-oauth2-login';
 
+import { VisuallyHiddenInput } from './VisuallyHiddenInput';
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
@@ -23,7 +26,8 @@ import './UserComponent.css';
 import { ResponseData } from '../model/ServerResponse';
 
 export const UserComponent = () => {
-  const { serverBaseUrl, discordClientId, discordRedirectPath } = useEnv();
+  const { serverBaseUrl, discordClientId, discordRedirectPath, maxImageSize } =
+    useEnv();
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
@@ -40,6 +44,12 @@ export const UserComponent = () => {
     return <CircularProgress />;
   }
 
+  const refetchUser = () => {
+    queryClient.refetchQueries({
+      queryKey: ['auth'],
+    });
+  };
+
   const saveName = () => {
     if (name && name !== user?.name) {
       fetch(`${serverBaseUrl}/users/name`, {
@@ -53,9 +63,7 @@ export const UserComponent = () => {
         .then<ResponseData<string>>((res) => res.json())
         .then((json) => {
           if (json.success) {
-            queryClient.refetchQueries({
-              queryKey: ['auth'],
-            });
+            refetchUser();
           } else {
             createSnackbar({
               title: 'User save error',
@@ -67,6 +75,64 @@ export const UserComponent = () => {
         .finally(() => setEditingName(false));
     } else {
       cancelNameEdit();
+    }
+  };
+
+  const saveImage = async (file: File) => {
+    if (file) {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const imageUrl = await fetch(`${serverBaseUrl}/users/image`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+        .then<ResponseData<string>>((res) => res.json())
+        .then((json) => {
+          if (json.success) {
+            return json.data;
+          } else {
+            throw new Error(json.errors ? json.errors[0] : 'Unknown error.');
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          createSnackbar({
+            title: 'Image Upload Error',
+            content: err.message ?? err,
+            severity: 'error',
+            autoHideDuration: 6000,
+          });
+        });
+
+      if (imageUrl) {
+        fetch(`${serverBaseUrl}/users/image`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'PATCH',
+          body: JSON.stringify({ imageUrl }),
+          credentials: 'include',
+        })
+          .then<ResponseData<unknown>>((res) => res.json())
+          .then((json) => {
+            if (json.success) {
+              refetchUser();
+            } else {
+              throw new Error(json.errors ? json.errors[0] : 'Unknown error.');
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            createSnackbar({
+              title: 'User Update Error',
+              content: err.message ?? err,
+              severity: 'error',
+              autoHideDuration: 6000,
+            });
+          });
+      }
     }
   };
 
@@ -168,44 +234,82 @@ export const UserComponent = () => {
           },
         }}
       >
-        <li style={{ padding: '6px 12px' }}>
-          <TextField
-            disabled={!isEditingName}
-            variant='outlined'
-            size='small'
-            value={isEditingName ? name : user.name}
-            style={{ width: 160, marginRight: 6 }}
-            onChange={(e) => setName(e.target.value)}
-            slotProps={{
-              input: {
-                endAdornment: isEditingName && (
-                  <IconButton
-                    size='small'
-                    style={{ marginRight: -8 }}
-                    onClick={cancelNameEdit}
-                  >
-                    <Close fontSize='small' />
-                  </IconButton>
-                ),
-              },
-            }}
-          />
-          {isEditingName ? (
-            <>
-              <IconButton onClick={saveName}>
-                <Save />
-              </IconButton>
-            </>
-          ) : (
-            <IconButton
-              onClick={() => {
-                setName(user.name);
-                setEditingName(true);
+        <li style={{ paddingBottom: 8, paddingLeft: 16 }}>
+          <Stack direction='row' alignItems='center' spacing={2}>
+            <label>
+              <Avatar
+                id='user-menu-avatar'
+                alt={user.name}
+                src={user.imageUrl}
+                style={{ width: 52, height: 52 }}
+              >
+                {user.name.charAt(0)}
+              </Avatar>
+              <VisuallyHiddenInput
+                type='file'
+                accept='image/*'
+                onChange={(event) => {
+                  const { files } = event.currentTarget;
+                  if (files && files.length > 0) {
+                    const file = files[0];
+                    if (file.size > maxImageSize) {
+                      createSnackbar({
+                        title: 'Input Error',
+                        severity: 'error',
+                        content: 'Image is too large! Max upload size is 1MB.',
+                      });
+                    } else {
+                      saveImage(file);
+                    }
+                  }
+                }}
+              />
+            </label>
+
+            <Typography>{user.name}</Typography>
+          </Stack>
+        </li>
+        <Divider />
+        <li style={{ padding: '10px 12px' }}>
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <TextField
+              disabled={!isEditingName}
+              variant='outlined'
+              size='small'
+              value={isEditingName ? name : user.name}
+              style={{ width: 160 }}
+              onChange={(e) => setName(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: isEditingName && (
+                    <IconButton
+                      size='small'
+                      style={{ marginRight: -8 }}
+                      onClick={cancelNameEdit}
+                    >
+                      <Close fontSize='small' />
+                    </IconButton>
+                  ),
+                },
               }}
-            >
-              <Edit />
-            </IconButton>
-          )}
+            />
+            {isEditingName ? (
+              <>
+                <IconButton onClick={saveName}>
+                  <Save />
+                </IconButton>
+              </>
+            ) : (
+              <IconButton
+                onClick={() => {
+                  setName(user.name);
+                  setEditingName(true);
+                }}
+              >
+                <Edit />
+              </IconButton>
+            )}
+          </Stack>
         </li>
         <MenuItem onClick={handleLogout}>
           <Logout style={{ marginRight: 6 }} />
