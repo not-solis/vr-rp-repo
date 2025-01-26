@@ -24,7 +24,7 @@
   flex-direction: row;
   align-items: center;
   gap: 16px;
-  padding: 20px 32px;
+  padding: 20px 32px 12px;
 }
 
 @media (max-width: 720px) {

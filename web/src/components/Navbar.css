@@ -5,20 +5,11 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: min(1.2vw, 1em) min(2vw, 40px);
+  padding: 0.6em min(2vw, 40px);
   background-color: var(--mui-palette-background-dark);
   box-shadow: var(--mui-shadows-5);
   z-index: 100;
   font-family: Sora, serif;
-}
-
-#myriad-title {
-  height: 1em;
-  display: flex;
-  align-items: center;
-  color: #b92c69;
-  font-size: min(2.6em, 10px + 2.5vw);
-  font-weight: bold;
 }
 
 .main-menu {
@@ -33,8 +24,21 @@
   transition: filter 0.3s;
 }
 
+#myriad-title {
+  display: flex;
+  align-items: center;
+  color: #b92c69;
+}
+
 .main-menu h1 {
-  font-size: min(1.4em, 2px + 1.9vw);
+  margin: 0;
+  font-size: min(2.3em, 10px + 2.5vw);
+  font-weight: bold;
+}
+
+.main-menu h2 {
+  margin: 0;
+  font-size: min(1.2em, 2px + 1.9vw);
   font-weight: bold;
 }
 

@@ -1,0 +1,9 @@
+#home-page {
+  width: 100%;
+}
+
+#home-page-header {
+  width: 100%;
+  padding: 16px 64px;
+  box-shadow: var(--mui-shadows-4);
+}

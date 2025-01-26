@@ -35,6 +35,7 @@ import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
 import { EnvContext, EnvContextData } from './context/EnvProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
+import { HomePage } from './home/HomePage';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
@@ -324,7 +325,7 @@ export function App() {
                       <Navbar />
                       <div style={{ flexGrow: 1, minHeight: 0 }}>
                         <Routes>
-                          <Route path='/' element={comingSoon} />
+                          <Route path='/' element={<HomePage />} />
                           <Route path='/repo' element={<Repo />} />
                           <Route
                             path='/repo/new'

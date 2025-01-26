@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   margin-right: 12px;
-  padding: 8px;
+  padding: 6px 8px;
   transition-property: border, filter;
   transition-duration: 0.08s;
   background-color: var(--mui-palette-background-default);

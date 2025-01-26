@@ -28,10 +28,10 @@ export const Navbar = () => {
     <nav className='nav'>
       <Box className='main-menu'>
         <Link id='myriad-title' to='/' className='no-underline'>
-          VR Roleplay Myriad
+          <h1>VR Roleplay Myriad</h1>
         </Link>
         {windowDimensions.width > 1100 ? (
-          ['Repo', 'Community', 'Resources', 'About Us'].map((t) => {
+          ['Repo', 'Community', 'About Us'].map((t) => {
             const hrefPath = `/${t.toLowerCase().replace(' ', '-')}`;
             return (
               <Link
@@ -44,7 +44,7 @@ export const Navbar = () => {
                     : theme.palette.text.secondary,
                 }}
               >
-                <h1>{t}</h1>
+                <h2>{t}</h2>
               </Link>
             );
           })
