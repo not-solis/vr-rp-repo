@@ -121,7 +121,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
           }
           return remappedProject;
         })
-        .then(clearNulls),
+        .then(clearNulls)
+        .catch(() => navigate('/repo')),
   });
 
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
