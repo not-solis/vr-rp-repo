@@ -35,7 +35,7 @@ import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
-import { useEnv } from '../context/EnvProvider';
+import { REACT_APP_SERVER_BASE_URL } from '../Env';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -58,7 +58,6 @@ interface ProjectQueryResponse {
 const TITLE = 'The VR Roleplay Repo';
 
 export const Repo = () => {
-  const { serverBaseUrl } = useEnv();
   const [name, setName] = useState('');
   const [nameFilter, setNameFilter] = useState('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -85,7 +84,7 @@ export const Repo = () => {
       sortAscending,
     ],
     queryFn: async ({ pageParam }) => {
-      const url = new URL('/projects', serverBaseUrl);
+      const url = new URL('/projects', REACT_APP_SERVER_BASE_URL);
       url.searchParams.append('start', `${pageParam}`);
       url.searchParams.append('limit', `${PAGE_SIZE}`);
       url.searchParams.append('sortBy', sortBy);

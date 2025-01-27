@@ -5,6 +5,8 @@ import { authRouter } from './controller/auth-router.js';
 import cors, { CorsOptions } from 'cors';
 import { CLIENT_URL, CLIENT_URL_PATTERN, PORT } from './env/config.js';
 import { userRouter } from './controller/user-router.js';
+import { updatesRouter } from './controller/updates-router.js';
+import cookieParser from 'cookie-parser';
 
 export interface ResponseData<T> {
   success: boolean;
@@ -38,6 +40,7 @@ app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(
   mung.json((body) => {
@@ -59,5 +62,6 @@ app.get('/', (_, res) => {
 app.use('/projects', projectRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
+app.use('/updates', updatesRouter);
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
 export { app };

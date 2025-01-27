@@ -10,7 +10,10 @@ interface Update {
   created: Date;
 }
 
-export const getUpdatesByProjectId = async (id: string): Promise<Update[]> => {
+export const getUpdates = async (
+  projectId?: string,
+  userId?: string,
+): Promise<Update[]> => {
   return await pool
     .query(
       `SELECT
@@ -19,10 +22,13 @@ export const getUpdatesByProjectId = async (id: string): Promise<Update[]> => {
         roleplay_projects.name as project_name
       FROM updates
         INNER JOIN users ON (updates.user_id = users.user_id AND users.role != 'Banned')
-        LEFT JOIN roleplay_projects ON updates.project_id = roleplay_projects.id
-      WHERE project_id=$1
+        LEFT JOIN roleplay_projects
+          ON (updates.project_id = roleplay_projects.id AND roleplay_projects.status != 'Deleted')
+      WHERE
+        ($1::uuid IS NULL OR updates.project_id=$1)
+        AND ($2::uuid IS NULL OR updates.user_id=$2)
       ORDER BY created DESC`,
-      [id],
+      [projectId, userId],
     )
     .then((results) => {
       if (results?.rows) {
@@ -39,7 +45,32 @@ export const getUpdatesByProjectId = async (id: string): Promise<Update[]> => {
           created: row.created,
         }));
       } else {
-        throw new Error('Username update failed.');
+        throw new Error('Get updates failed.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      throw err;
+    });
+};
+
+export const postUpdate = async (
+  text: string,
+  userId: string,
+  projectId?: string,
+): Promise<Update[]> => {
+  return await pool
+    .query(
+      `INSERT INTO updates (user_id, project_id, update_text)
+      VALUES ($1, $2, $3)
+      RETURNING id`,
+      [userId, projectId, text],
+    )
+    .then((results) => {
+      if (results?.rows) {
+        return results.rows[0].id;
+      } else {
+        throw new Error('Post update failed.');
       }
     })
     .catch((err) => {

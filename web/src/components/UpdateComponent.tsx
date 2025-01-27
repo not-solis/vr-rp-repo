@@ -18,10 +18,11 @@ import './UpdateComponent.css';
 interface UpdateComponentProps {
   update: Update;
   showProject?: boolean;
+  fullWidth?: boolean;
 }
 
 export const UpdateComponent = (props: UpdateComponentProps) => {
-  const { update, showProject = false } = props;
+  const { update, showProject = false, fullWidth = false } = props;
   const { project, user, text, created } = update;
   const { formattedDate } = useTimeAgo({
     date: created,
@@ -29,7 +30,11 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
   });
 
   return (
-    <Card variant='outlined' className='update-card'>
+    <Card
+      variant='outlined'
+      className='update-card'
+      style={{ width: fullWidth ? '100%' : 'contents' }}
+    >
       <CardContent style={{ padding: 12 }}>
         <Stack gap={1}>
           <Stack
@@ -79,7 +84,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
               <Typography
                 variant='subtitle1'
                 className='disabled-text-interaction'
-                style={{ marginLeft: 'auto' }}
+                style={{ marginLeft: 'auto', marginRight: 8 }}
               >
                 {formattedDate}
               </Typography>

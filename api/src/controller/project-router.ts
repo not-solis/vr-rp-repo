@@ -15,7 +15,6 @@ import cookieParser from 'cookie-parser';
 import { ResponseData } from '../index.js';
 import { getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
-import { getUpdatesByProjectId } from '../model/updates-model.js';
 
 const MAX_QUERY = 1000;
 
@@ -231,17 +230,6 @@ router.delete(
       );
   },
 );
-
-router.get('/:id/updates', (req, res) => {
-  const { id } = req.params;
-  getUpdatesByProjectId(id)
-    .then((response) => {
-      res.status(200).send({ success: true, data: response });
-    })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
-    );
-});
 
 router.post(
   '/image',

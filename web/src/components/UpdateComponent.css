@@ -5,6 +5,7 @@
   font-size: clamp(0.7em, 1vw, 1em);
   min-width: var(--min-card-width);
   box-shadow: var(--mui-shadows-4);
+  box-sizing: border-box;
   flex: 1 0;
 }
 
@@ -13,5 +14,7 @@
 }
 
 .update-text {
-  white-space: pre-line;
+  word-wrap: break-all;
+  overflow-wrap: break-word;
+  white-space-collapse: preserve-breaks;
 }

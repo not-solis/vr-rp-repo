@@ -27,14 +27,17 @@ import OAuth2Login from 'react-simple-oauth2-login';
 
 import { VisuallyHiddenInput } from './VisuallyHiddenInput';
 import { useAuth } from '../context/AuthProvider';
-import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
+import {
+  REACT_APP_DISCORD_CLIENT_ID,
+  REACT_APP_DISCORD_REDIRECT_PATH,
+  REACT_APP_MAX_IMAGE_SIZE,
+  REACT_APP_SERVER_BASE_URL,
+} from '../Env';
 import { ResponseData } from '../model/ServerResponse';
 import './UserComponent.css';
 
 export const UserComponent = () => {
-  const { serverBaseUrl, discordClientId, discordRedirectPath, maxImageSize } =
-    useEnv();
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
@@ -59,7 +62,7 @@ export const UserComponent = () => {
 
   const saveName = () => {
     if (name && name !== user?.name) {
-      fetch(`${serverBaseUrl}/users/name`, {
+      fetch(`${REACT_APP_SERVER_BASE_URL}/users/name`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -90,7 +93,7 @@ export const UserComponent = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const imageUrl = await fetch(`${serverBaseUrl}/users/image`, {
+      const imageUrl = await fetch(`${REACT_APP_SERVER_BASE_URL}/users/image`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -114,7 +117,7 @@ export const UserComponent = () => {
         });
 
       if (imageUrl) {
-        fetch(`${serverBaseUrl}/users/image`, {
+        fetch(`${REACT_APP_SERVER_BASE_URL}/users/image`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -144,7 +147,7 @@ export const UserComponent = () => {
   };
 
   const handleLogout = () => {
-    fetch(`${serverBaseUrl}/auth/logout`, {
+    fetch(`${REACT_APP_SERVER_BASE_URL}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     }).then(() => navigate(0));
@@ -250,7 +253,7 @@ export const UserComponent = () => {
                   const { files } = event.currentTarget;
                   if (files && files.length > 0) {
                     const file = files[0];
-                    if (file.size > maxImageSize) {
+                    if (file.size > REACT_APP_MAX_IMAGE_SIZE) {
                       createSnackbar({
                         title: 'Input Error',
                         severity: 'error',
@@ -358,8 +361,11 @@ export const UserComponent = () => {
             authorizationUrl='https://discord.com/oauth2/authorize'
             responseType='code'
             isCrossOrigin
-            clientId={discordClientId ?? ''}
-            redirectUri={new URL(discordRedirectPath, serverBaseUrl).toString()}
+            clientId={REACT_APP_DISCORD_CLIENT_ID ?? ''}
+            redirectUri={new URL(
+              REACT_APP_DISCORD_REDIRECT_PATH,
+              REACT_APP_SERVER_BASE_URL,
+            ).toString()}
             scope='identify'
             buttonText='Discord'
             onSuccess={onAuthSuccess}

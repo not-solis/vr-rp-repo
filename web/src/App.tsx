@@ -36,35 +36,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
-import { EnvContext, EnvContextData } from './context/EnvProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
+import { REACT_APP_SERVER_BASE_URL } from './Env';
 import { HomePage } from './home/HomePage';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 import './App.css';
-
-const {
-  REACT_APP_SERVER_BASE_URL,
-  REACT_APP_DISCORD_REDIRECT_PATH,
-  REACT_APP_DISCORD_CLIENT_ID,
-  REACT_APP_MAX_IMAGE_SIZE,
-} = process.env;
-
-if (!REACT_APP_SERVER_BASE_URL) {
-  throw new Error('Server URL not configured.');
-} else if (!REACT_APP_DISCORD_REDIRECT_PATH) {
-  throw new Error('Discord redirect URL not configured.');
-} else if (!REACT_APP_DISCORD_CLIENT_ID) {
-  throw new Error('Discord client ID not configured.');
-}
-
-const env: EnvContextData = {
-  serverBaseUrl: REACT_APP_SERVER_BASE_URL,
-  discordRedirectPath: REACT_APP_DISCORD_REDIRECT_PATH,
-  discordClientId: REACT_APP_DISCORD_CLIENT_ID,
-  maxImageSize: parseInt(REACT_APP_MAX_IMAGE_SIZE!) || 1048576,
-};
 
 const queryClient = new QueryClient();
 
@@ -130,7 +108,7 @@ const AuthWrapper = (props: PropsWithChildren) => {
   const { data: user, isLoading: isAuthLoading } = useQuery({
     queryKey: ['auth'],
     queryFn: () => {
-      return fetch(`${env.serverBaseUrl}/auth`, {
+      return fetch(`${REACT_APP_SERVER_BASE_URL}/auth`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -298,80 +276,78 @@ export function App() {
 
   return (
     <HelmetProvider>
-      <EnvContext.Provider value={env}>
-        <ThemeProvider theme={theme}>
-          <QueryClientProvider client={queryClient}>
-            <SnackbarContext.Provider
-              value={{
-                createSnackbar: (props) => {
-                  setSnackbarProps(props);
-                  setSnackbarOpen(true);
-                },
-              }}
-            >
-              <AuthWrapper>
-                <CookiesProvider>
-                  <Helmet>
-                    <meta property='og:url' content={window.location.href} />
-                  </Helmet>
-                  <BrowserRouter>
-                    <Box id='app-container'>
-                      <Navbar />
-                      <div style={{ flexGrow: 1, minHeight: 0 }}>
-                        <Routes>
-                          <Route path='/' element={<HomePage />} />
-                          <Route path='/repo' element={<Repo />} />
-                          <Route
-                            path='/repo/new'
-                            element={<RoleplayProjectPage isNew />}
-                          />
-                          <Route
-                            path='/repo/:id'
-                            element={<RoleplayProjectPage />}
-                          />
-                          <Route path='/community' element={comingSoon} />
-                          <Route path='/resources' element={comingSoon} />
-                          <Route path='/about-us' element={comingSoon} />
-                          <Route
-                            path='*'
-                            element={<Navigate to='/' replace={true} />}
-                          />
-                        </Routes>
-                      </div>
-                    </Box>
-                    <Snackbar
-                      open={snackbarOpen}
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <SnackbarContext.Provider
+            value={{
+              createSnackbar: (props) => {
+                setSnackbarProps(props);
+                setSnackbarOpen(true);
+              },
+            }}
+          >
+            <AuthWrapper>
+              <CookiesProvider>
+                <Helmet>
+                  <meta property='og:url' content={window.location.href} />
+                </Helmet>
+                <BrowserRouter>
+                  <Box id='app-container'>
+                    <Navbar />
+                    <div style={{ flexGrow: 1, minHeight: 0 }}>
+                      <Routes>
+                        <Route path='/' element={<HomePage />} />
+                        <Route path='/repo' element={<Repo />} />
+                        <Route
+                          path='/repo/new'
+                          element={<RoleplayProjectPage isNew />}
+                        />
+                        <Route
+                          path='/repo/:id'
+                          element={<RoleplayProjectPage />}
+                        />
+                        <Route path='/community' element={comingSoon} />
+                        <Route path='/resources' element={comingSoon} />
+                        <Route path='/about-us' element={comingSoon} />
+                        <Route
+                          path='*'
+                          element={<Navigate to='/' replace={true} />}
+                        />
+                      </Routes>
+                    </div>
+                  </Box>
+                  <Snackbar
+                    open={snackbarOpen}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
+                    onClose={onSnackbarClose}
+                    disableWindowBlurListener
+                    ClickAwayListenerProps={{ onClickAway: () => null }}
+                  >
+                    <Alert
+                      severity={snackbarProps?.severity}
+                      variant='standard'
                       onClose={onSnackbarClose}
-                      disableWindowBlurListener
-                      ClickAwayListenerProps={{ onClickAway: () => null }}
+                      style={{ width: '100%' }}
                     >
-                      <Alert
-                        severity={snackbarProps?.severity}
-                        variant='standard'
-                        onClose={onSnackbarClose}
-                        style={{ width: '100%' }}
-                      >
-                        <AlertTitle>{snackbarProps?.title}</AlertTitle>
-                        {typeof snackbarProps?.content === 'string' ? (
-                          snackbarProps?.content
-                        ) : (
-                          <Stack spacing={1}>
-                            {snackbarProps?.content.map((c, i) => (
-                              <div key={i}>- {c}</div>
-                            ))}
-                          </Stack>
-                        )}
-                      </Alert>
-                    </Snackbar>
-                  </BrowserRouter>
-                </CookiesProvider>
-              </AuthWrapper>
-            </SnackbarContext.Provider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </EnvContext.Provider>
+                      <AlertTitle>{snackbarProps?.title}</AlertTitle>
+                      {typeof snackbarProps?.content === 'string' ? (
+                        snackbarProps?.content
+                      ) : (
+                        <Stack spacing={1}>
+                          {snackbarProps?.content.map((c, i) => (
+                            <div key={i}>- {c}</div>
+                          ))}
+                        </Stack>
+                      )}
+                    </Alert>
+                  </Snackbar>
+                </BrowserRouter>
+              </CookiesProvider>
+            </AuthWrapper>
+          </SnackbarContext.Provider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </HelmetProvider>
   );
 }

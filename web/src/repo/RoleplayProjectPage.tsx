@@ -4,6 +4,7 @@ import {
   Delete,
   Edit,
   Save,
+  Send,
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
@@ -26,6 +27,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useWindowWidth } from '@react-hook/window-size';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -36,8 +38,8 @@ import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { UpdateComponent } from '../components/UpdateComponent';
 import { useAuth } from '../context/AuthProvider';
-import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
+import { REACT_APP_SERVER_BASE_URL } from '../Env';
 import {
   remapRoleplayProject,
   RoleplayProject,
@@ -45,11 +47,15 @@ import {
   RoleplayStatus,
 } from '../model/RoleplayProject';
 import { ResponseData } from '../model/ServerResponse';
-import { Update } from '../model/Update';
+import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
 
 import './RoleplayProjectPage.css';
 
+/**
+ * Pixel width under which to stack updates under roleplay info.
+ */
+const UPDATE_STACK_TRESHOLD = 1660;
 const SIDEBAR_START_OPEN_WIDTH = 800;
 
 interface RoleplayProjectPageProps {
@@ -70,7 +76,7 @@ function clearNulls<T>(obj: T): T {
 
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew = false } = props;
-  const { serverBaseUrl } = useEnv();
+  const windowWidth = useWindowWidth();
   const [isEditing, setEditing] = useState(isNew);
   const [imageFile, setImageFile] = useState<File>();
   const [isPreviewDescription, setPreviewDescription] = useState(false);
@@ -81,11 +87,12 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const isMenuOpen = !!menuAnchorEl;
   const statusTagRef = useRef<HTMLDivElement>(null);
+  const [updateText, setUpdateText] = useState('');
   const [editProject, setEditProject] = useState<Partial<RoleplayProject>>(
     {} as RoleplayProject,
   );
   const [isSidebarOpen, setSidebarOpen] = useState(
-    window.screen.width > SIDEBAR_START_OPEN_WIDTH,
+    windowWidth > SIDEBAR_START_OPEN_WIDTH,
   );
   const { user, isAuthenticated } = useAuth();
   const { createSnackbar } = useSnackbar();
@@ -98,9 +105,17 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     navigate('/repo');
   }
 
+  const stackUpdates = windowWidth < UPDATE_STACK_TRESHOLD;
+
   const refetchProject = () => {
     queryClient.refetchQueries({
       queryKey: ['project'],
+    });
+  };
+
+  const refetchUpdates = () => {
+    queryClient.refetchQueries({
+      queryKey: ['project', 'updates'],
     });
   };
 
@@ -112,7 +127,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['project'],
     queryFn: () =>
-      fetch(`${serverBaseUrl}/projects/${id}`, {
+      fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -134,7 +149,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['project', 'links'],
     queryFn: () => {
-      return fetch(`${serverBaseUrl}/projects/${id}/links`, {
+      return fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}/links`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -149,7 +164,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['project', 'updates'],
     queryFn: () => {
-      return fetch(`${serverBaseUrl}/projects/${id}/updates`)
+      const url = new URL('/updates', REACT_APP_SERVER_BASE_URL);
+      url.searchParams.append('projectId', id!);
+      return fetch(url)
         .then<ResponseData<Update[]>>((res) => res.json())
         .then((json) =>
           json.data?.map((update) => {
@@ -240,6 +257,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             value={description}
             multiline
             minRows={8}
+            maxRows={24}
             fullWidth
             onChange={(e) =>
               setEditProject({
@@ -297,7 +315,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const deleteProject = () => {
-    fetch(`${serverBaseUrl}/projects/${id}`, {
+    fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     })
@@ -329,7 +347,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       const formData = new FormData();
       formData.append('image', imageFile);
 
-      await fetch(`${serverBaseUrl}/projects/image/${id ?? ''}`, {
+      await fetch(`${REACT_APP_SERVER_BASE_URL}/projects/image/${id ?? ''}`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -352,7 +370,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     }
 
     if (isNew) {
-      fetch(`${serverBaseUrl}/projects`, {
+      fetch(`${REACT_APP_SERVER_BASE_URL}/projects`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -384,7 +402,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         })
         .catch((e) => console.error(e));
     } else {
-      fetch(`${serverBaseUrl}/projects/${id}`, {
+      fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -417,7 +435,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const requestOwnership = () => {
-    fetch(`${serverBaseUrl}/projects/${id}/owner`, {
+    fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}/owner`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -457,6 +475,74 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const closeStatusMenu = () => setMenuAnchorEl(undefined);
 
+  const updatePanel = (
+    <div
+      id='project-update-panel'
+      style={{ height: stackUpdates ? 'content' : '100%' }}
+    >
+      <Typography variant='h2'>Updates</Typography>
+      <Stack id='project-updates'>
+        {canEdit && (
+          <Stack gap={0.4} paddingRight={4}>
+            <TextField
+              value={updateText}
+              onChange={(e) => setUpdateText(e.target.value.substring(0, 2048))}
+              fullWidth
+              multiline
+              minRows={4}
+              maxRows={8}
+              slotProps={{
+                input: { style: { borderRadius: 8 } },
+              }}
+            />
+            <Stack direction='row' justifyContent='flex-end'>
+              <IconButton
+                style={{
+                  borderRadius: 8,
+                }}
+                onClick={() =>
+                  postUpdate({
+                    text: updateText,
+                    projectId: id,
+                    onSuccess: () => {
+                      refetchUpdates();
+                      setUpdateText('');
+                    },
+                    onFailure: (errors) => {
+                      createSnackbar({
+                        title: 'Post Update Error',
+                        severity: 'error',
+                        content: errors,
+                      });
+                    },
+                  })
+                }
+              >
+                <Typography>Post</Typography>
+                <Send style={{ paddingLeft: 8 }} />
+              </IconButton>
+            </Stack>
+          </Stack>
+        )}
+
+        <div
+          className={stackUpdates ? '' : 'scrollable-y hidden-scrollbar'}
+          style={{ flexGrow: 1, minHeight: 0 }}
+        >
+          <Stack gap={2} paddingTop={2} paddingBottom={2}>
+            {updatesLoading ? (
+              <CircularProgress />
+            ) : (
+              updates?.map((update) => (
+                <UpdateComponent key={update.id} update={update} fullWidth />
+              ))
+            )}
+          </Stack>
+        </div>
+      </Stack>
+    </div>
+  );
+
   return (
     <div id='project-page'>
       <Helmet>
@@ -468,15 +554,15 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         <meta property='og:description' content={metaDescription} />
       </Helmet>
       <div id='project-content' className={!isSidebarOpen ? 'closed' : ''}>
-        <div
-          id='project-info-container'
-          className='scrollable-y hidden-scrollbar'
-        >
-          <div id='project-info'>
+        <div id='project-info-container'>
+          <div id='project-info' className='scrollable-y hidden-scrollbar'>
             <Grow in={isAdminInfoAlertOpen && !isEditing} unmountOnExit>
               <Alert
                 onClose={() => setAdminInfoAlertOpen(false)}
                 severity='info'
+                style={{
+                  maxWidth: stackUpdates ? 'calc(100% - 240px)' : '100%',
+                }}
               >
                 <AlertTitle>Note:</AlertTitle>
                 <Stack spacing={0.8}>
@@ -575,19 +661,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
               />
             </Stack>
             {descriptionElement}
+            {!isEditing && stackUpdates && updatePanel}
           </div>
-          <div id='project-update-panel'>
-            <Typography variant='h2'>Updates</Typography>
-            <Stack id='project-updates' gap={2}>
-              {updatesLoading ? (
-                <CircularProgress />
-              ) : (
-                updates?.map((update) => (
-                  <UpdateComponent key={update.id} update={update} />
-                ))
-              )}
-            </Stack>
-          </div>
+          {!isEditing && !stackUpdates && updatePanel}
           <Stack
             direction='row'
             justifyContent='flex-end'

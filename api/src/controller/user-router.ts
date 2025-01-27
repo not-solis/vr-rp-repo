@@ -1,11 +1,9 @@
 import { Router } from 'express';
 import { auth } from './auth-router.js';
 import { updateUserImageUrl, updateUserName } from '../model/users-model.js';
-import cookieParser from 'cookie-parser';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 
 const router = Router();
-router.use(cookieParser());
 
 router.patch('/name', auth, (req, res) => {
   const id = res.locals.userId;

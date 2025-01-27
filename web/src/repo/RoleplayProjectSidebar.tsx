@@ -16,8 +16,8 @@ import { TagChip } from '../components/TagChip';
 import { TagTextField } from '../components/TagTextField';
 import { VisuallyHiddenInput } from '../components/VisuallyHiddenInput';
 import { useAuth } from '../context/AuthProvider';
-import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
+import { REACT_APP_MAX_IMAGE_SIZE } from '../Env';
 import {
   RoleplayApplicationProcess,
   RoleplayEntryProcess,
@@ -40,7 +40,6 @@ interface RoleplayProjectSidebarProps {
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const { isAuthenticated } = useAuth();
-  const { maxImageSize } = useEnv();
   const { createSnackbar } = useSnackbar();
   const {
     isOpen,
@@ -214,7 +213,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                     const { files } = event.currentTarget;
                     if (files && files.length > 0) {
                       const file = files[0];
-                      if (file.size > maxImageSize) {
+                      if (file.size > REACT_APP_MAX_IMAGE_SIZE) {
                         createSnackbar({
                           title: 'Input Error',
                           severity: 'error',

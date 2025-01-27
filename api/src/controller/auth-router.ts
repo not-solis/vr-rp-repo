@@ -1,6 +1,5 @@
 import { RequestHandler, Router } from 'express';
 import jwt from 'jsonwebtoken';
-import cookieParser from 'cookie-parser';
 import {
   createUser,
   getUserByDiscordId,
@@ -31,14 +30,11 @@ export const auth: RequestHandler = (request, response, next) => {
     next();
   } catch (err) {
     console.error(err);
-    response.clearCookie('userToken');
     response.status(401).json();
   }
 };
 
 const router = Router();
-
-router.use(cookieParser());
 
 router.get('/', async (request, response) => {
   try {
