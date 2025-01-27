@@ -1,5 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowDropDown, Close, Edit, Logout, Save } from '@mui/icons-material';
+import {
+  ArrowDropDown,
+  Close,
+  Edit,
+  Login,
+  Logout,
+  Save,
+} from '@mui/icons-material';
 import {
   Avatar,
   Button,
@@ -22,8 +29,8 @@ import { VisuallyHiddenInput } from './VisuallyHiddenInput';
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
-import './UserComponent.css';
 import { ResponseData } from '../model/ServerResponse';
+import './UserComponent.css';
 
 export const UserComponent = () => {
   const { serverBaseUrl, discordClientId, discordRedirectPath, maxImageSize } =
@@ -194,15 +201,11 @@ export const UserComponent = () => {
         <Avatar
           alt={user.name}
           src={user.imageUrl}
-          style={{ width: 32, height: 32, marginRight: 8 }}
+          style={{ width: 32, height: 32 }}
         >
           {user.name.charAt(0)}
         </Avatar>
-        <Typography
-          className='disabled-text-interaction'
-          variant='body1'
-          style={{ paddingRight: 16 }}
-        >
+        <Typography className='disabled-text-interaction' variant='body1'>
           {user.name}
         </Typography>
         <ArrowDropDown
@@ -236,13 +239,8 @@ export const UserComponent = () => {
       >
         <li style={{ paddingBottom: 8, paddingLeft: 16 }}>
           <Stack direction='row' alignItems='center' spacing={2}>
-            <label>
-              <Avatar
-                id='user-menu-avatar'
-                alt={user.name}
-                src={user.imageUrl}
-                style={{ width: 52, height: 52 }}
-              >
+            <label id='avatar-label'>
+              <Avatar id='user-menu-avatar' alt={user.name} src={user.imageUrl}>
                 {user.name.charAt(0)}
               </Avatar>
               <VisuallyHiddenInput
@@ -265,7 +263,6 @@ export const UserComponent = () => {
                 }}
               />
             </label>
-
             <Typography>{user.name}</Typography>
           </Stack>
         </li>
@@ -318,29 +315,73 @@ export const UserComponent = () => {
       </Menu>
     </>
   ) : (
-    <OAuth2Login
-      authorizationUrl='https://discord.com/oauth2/authorize'
-      responseType='code'
-      isCrossOrigin
-      clientId={discordClientId ?? ''}
-      redirectUri={new URL(discordRedirectPath, serverBaseUrl).toString()}
-      scope='identify'
-      buttonText='Login with Discord'
-      onSuccess={onAuthSuccess}
-      onFailure={onAuthFailure}
-      render={({ className, buttonText, children, onClick }) => (
-        <Button
-          style={{
-            backgroundColor: '#5865F2',
-            color: theme.palette.text.primary,
-          }}
-          variant='contained'
-          startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
-          onClick={onClick}
-        >
-          Login with Discord
-        </Button>
-      )}
-    />
+    <>
+      <div
+        id='user-button'
+        ref={buttonRef}
+        aria-controls={isMenuOpen ? 'user-menu' : undefined}
+        aria-haspopup='true'
+        aria-expanded={isMenuOpen ? 'true' : undefined}
+        onClick={isMenuOpen ? closeMenu : openMenu}
+      >
+        <Login />
+        Login
+      </div>
+      <Menu
+        id='login-menu'
+        ref={menuRef}
+        disableAutoFocusItem
+        disableScrollLock={true}
+        anchorEl={menuAnchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={isMenuOpen}
+        onClose={() => setMenuAnchorEl(undefined)}
+        MenuListProps={{
+          'aria-labelledby': 'login-button',
+          style: { padding: 8 },
+        }}
+        slotProps={{
+          root: {
+            style: { display: 'contents' },
+          },
+        }}
+      >
+        <li>
+          <OAuth2Login
+            authorizationUrl='https://discord.com/oauth2/authorize'
+            responseType='code'
+            isCrossOrigin
+            clientId={discordClientId ?? ''}
+            redirectUri={new URL(discordRedirectPath, serverBaseUrl).toString()}
+            scope='identify'
+            buttonText='Discord'
+            onSuccess={onAuthSuccess}
+            onFailure={onAuthFailure}
+            render={({ className, buttonText, children, onClick }) => (
+              <Button
+                style={{
+                  backgroundColor: '#5865F2',
+                  color: theme.palette.text.primary,
+                  textTransform: 'none',
+                  marginLeft: 'auto',
+                }}
+                variant='contained'
+                startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
+                onClick={onClick}
+              >
+                {buttonText}
+              </Button>
+            )}
+          />
+        </li>
+      </Menu>
+    </>
   );
 };

@@ -13,11 +13,9 @@
 }
 
 .main-menu {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding-right: 32px;
-  gap: min(2vw, 32px);
+  padding-right: 8px;
+  row-gap: 8px;
+  column-gap: 24px;
 }
 
 .main-menu a {
@@ -32,13 +30,13 @@
 
 .main-menu h1 {
   margin: 0;
-  font-size: min(2.3em, 10px + 2.5vw);
+  font-size: min(2.3em, 1.1em + 1.5vw);
   font-weight: bold;
 }
 
 .main-menu h2 {
   margin: 0;
-  font-size: min(1.2em, 2px + 1.9vw);
+  font-size: min(1.2em, 0.6em + 0.8vw);
   font-weight: bold;
 }
 

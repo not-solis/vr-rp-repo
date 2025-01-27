@@ -3,11 +3,17 @@
   border-radius: 12px;
   display: flex;
   align-items: center;
-  margin-right: 12px;
+  gap: 10px;
+  margin-left: auto;
   padding: 6px 8px;
   transition-property: border, filter;
   transition-duration: 0.08s;
   background-color: var(--mui-palette-background-default);
+  font-size: 1rem;
+}
+
+#user-button svg {
+  font-size: 1.2rem;
 }
 
 #user-button:hover {
@@ -20,7 +26,30 @@
   filter: brightness(115%);
 }
 
+#avatar-label {
+  position: relative;
+}
+
+#avatar-label::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+#avatar-label::after:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 #user-menu-avatar {
+  width: 52px;
+  height: 52px;
   transition: filter 0.06s;
 }
 
