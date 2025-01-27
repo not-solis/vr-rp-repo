@@ -11,7 +11,6 @@ import {
 import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth } from './auth-router.js';
-import cookieParser from 'cookie-parser';
 import { ResponseData } from '../index.js';
 import { getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
@@ -127,7 +126,6 @@ const checkOwnership: RequestHandler = async (
 };
 
 const router = Router();
-router.use(cookieParser());
 
 router.get('/', (req, res) => {
   const { start, limit, sortBy, name, tags, asc, active } = req.query;

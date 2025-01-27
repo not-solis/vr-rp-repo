@@ -5,8 +5,13 @@ import { auth } from './auth-router.js';
 const router = Router();
 
 router.get('/', (req, res) => {
-  const { projectId, userId } = req.query;
-  getUpdates(projectId as string, userId as string)
+  const { projectId, userId, start, limit } = req.query;
+  getUpdates(
+    projectId as string,
+    userId as string,
+    parseInt(start as string) || undefined,
+    parseInt(limit as string) || undefined,
+  )
     .then((response) => {
       res.status(200).send({ success: true, data: response });
     })

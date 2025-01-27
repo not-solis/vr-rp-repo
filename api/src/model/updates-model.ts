@@ -2,6 +2,8 @@ import { pool } from './db-pool.js';
 import { RoleplayProject } from './project-model.js';
 import { remapUser, User } from './users-model.js';
 
+const DEFAULT_QUERY_LIMIT = 1000;
+
 interface Update {
   id: string;
   user: User;
@@ -13,6 +15,8 @@ interface Update {
 export const getUpdates = async (
   projectId?: string,
   userId?: string,
+  start: number = 0,
+  limit: number = DEFAULT_QUERY_LIMIT,
 ): Promise<Update[]> => {
   return await pool
     .query(
@@ -27,8 +31,9 @@ export const getUpdates = async (
       WHERE
         ($1::uuid IS NULL OR updates.project_id=$1)
         AND ($2::uuid IS NULL OR updates.user_id=$2)
-      ORDER BY created DESC`,
-      [projectId, userId],
+      ORDER BY created DESC
+      OFFSET $3 LIMIT $4`,
+      [projectId, userId, start, limit],
     )
     .then((results) => {
       if (results?.rows) {
