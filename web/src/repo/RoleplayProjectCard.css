@@ -1,4 +1,4 @@
-.project-card {
+div.project-card {
   --min-card-width: 500px;
   border-radius: 20px !important;
   border-width: 1.5px !important;
@@ -8,6 +8,14 @@
   max-width: 1200px;
   box-shadow: var(--mui-shadows-4);
   flex: 1 0;
+  transition: 0.08s ease-out;
+}
+
+.project-card:hover {
+  border-color: #707176;
+  box-shadow:
+    inset 0 0 40px 26px rgba(255, 255, 255, 0.02),
+    var(--mui-shadows-6);
 }
 
 #card-link {

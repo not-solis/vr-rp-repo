@@ -8,12 +8,22 @@ export enum UserRole {
 }
 
 export interface User {
-  user_id: string;
+  userId: string;
   name: string;
-  image_url?: string;
+  imageUrl?: string;
   role: UserRole;
-  discord_id?: string;
+  discordId?: string;
 }
+
+export const remapUser = (user: any): User => {
+  return {
+    userId: user.user_id,
+    name: user.name,
+    imageUrl: user.image_url,
+    role: user.role,
+    discordId: user.discord_id,
+  };
+};
 
 export const getUserById = async (id: string) => {
   return await pool
@@ -30,7 +40,7 @@ export const getUserById = async (id: string) => {
     )
     .then((results) => {
       if (results?.rows) {
-        return results.rows[0] as User;
+        return remapUser(results.rows[0]);
       } else {
         throw new Error('No user found by id.');
       }
@@ -60,7 +70,7 @@ export const getUserByDiscordId = async (
       const success = !!results?.rows;
       return {
         success,
-        data: success ? results.rows[0] : undefined,
+        data: success ? remapUser(results.rows[0]) : undefined,
       };
     })
     .catch((err) => {

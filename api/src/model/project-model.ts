@@ -10,7 +10,7 @@ export interface RoleplayProject {
   id: string;
   name: string;
   owner?: User;
-  lastUpdated: Date;
+  lastUpdated?: Date;
   imageUrl?: string;
   shortDescription?: string;
   description?: string;
@@ -148,7 +148,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     imageUrl,
     otherLinks = [],
   } = project;
-  const { user_id, role } = user;
+  const { userId, role } = user;
   return await new Promise((resolve, reject) => {
     makeTransaction((client: PoolClient) => {
       client
@@ -199,7 +199,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
 
           const queries = [];
           if (role === UserRole.User) {
-            queries.push(createOwnership(projectId, user_id, true));
+            queries.push(createOwnership(projectId, userId, true));
           }
 
           if (otherLinks.length > 0) {

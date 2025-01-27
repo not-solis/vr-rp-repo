@@ -7,34 +7,56 @@
   height: 100%;
   position: relative;
   overflow-x: hidden;
-  --project-sidebar-width: min(500px, 16vw + 160px);
+  --project-sidebar-width: min(420px, 16vw + 160px);
+}
+
+#project-content {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  transition: padding 0.5s;
 }
 
 #project-info-container {
   height: 100%;
-  box-sizing: border-box;
-  transition: margin 0.5s;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #project-info {
-  height: 100%;
-  position: relative;
+  /* High flex-grow to prevent project-update-panel from growing until it wraps */
+  flex: 10000 0 450px;
   margin: 0;
   padding: min(30px, 3vw) min(50px, 5vw);
+  padding-right: 16px;
   min-width: 300px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   gap: 16px;
 }
 
+#project-update-panel {
+  flex: 1 0 500px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#project-updates {
+  padding: 12px;
+  padding-right: 32px;
+}
+
 @media (min-width: 800px) {
-  #project-info-container {
-    margin-right: var(--project-sidebar-width);
+  #project-content {
+    padding-right: var(--project-sidebar-width);
     min-width: 300px;
   }
 
-  #project-info-container.closed {
-    margin-right: calc(var(--project-sidebar-width) * 0.85);
-    margin-left: calc(var(--project-sidebar-width) * 0.15);
+  #project-content.closed {
+    padding-right: calc(var(--project-sidebar-width) * 0.85);
+    padding-left: calc(var(--project-sidebar-width) * 0.15);
   }
 }

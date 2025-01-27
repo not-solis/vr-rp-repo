@@ -11,6 +11,7 @@ import {
   Alert,
   AlertTitle,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -33,6 +34,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
 import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
+import { UpdateComponent } from '../components/UpdateComponent';
 import { useAuth } from '../context/AuthProvider';
 import { useEnv } from '../context/EnvProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
@@ -43,6 +45,7 @@ import {
   RoleplayStatus,
 } from '../model/RoleplayProject';
 import { ResponseData } from '../model/ServerResponse';
+import { Update } from '../model/Update';
 import { UserRole } from '../model/User';
 
 import './RoleplayProjectPage.css';
@@ -138,6 +141,22 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       })
         .then<ResponseData<RoleplayLink[]>>((res) => res.json())
         .then((json) => json.data)
+        .then(clearNulls);
+    },
+  });
+
+  const { data: updates, isLoading: updatesLoading } = useQuery({
+    enabled: !isNew,
+    queryKey: ['project', 'updates'],
+    queryFn: () => {
+      return fetch(`${serverBaseUrl}/projects/${id}/updates`)
+        .then<ResponseData<Update[]>>((res) => res.json())
+        .then((json) =>
+          json.data?.map((update) => {
+            const { created, ...rest } = update;
+            return { created: new Date(created), ...rest };
+          }),
+        )
         .then(clearNulls);
     },
   });
@@ -448,112 +467,131 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         <meta property='og:image:alt' content={`${metaName} icon`} />
         <meta property='og:description' content={metaDescription} />
       </Helmet>
-      <div
-        id='project-info-container'
-        className={`scrollable-y hidden-scrollbar ${!isSidebarOpen ? 'closed' : ''}`}
-      >
-        <div id='project-info'>
-          <Grow in={isAdminInfoAlertOpen && !isEditing} unmountOnExit>
-            <Alert
-              onClose={() => setAdminInfoAlertOpen(false)}
-              severity='info'
-              style={{ width: 'calc(100% - 240px)' }}
-            >
-              <AlertTitle>Note:</AlertTitle>
-              <Stack spacing={0.8}>
-                <Typography variant='body1'>
-                  This project was added to the Repo by a Myriad admin. Some
-                  information may be either missing or inaccurate.
-                </Typography>
-                <Typography variant='body1'>
-                  If you are an admin of this project, you can request ownership
-                  in the project info sidebar.
-                </Typography>
-              </Stack>
-            </Alert>
-          </Grow>
-          <Stack direction='row' gap={4} alignItems='center'>
-            {isEditing ? (
-              <>
-                <TextField
-                  required
-                  label='Name'
-                  value={name}
-                  onChange={(e) =>
-                    setEditProject({ ...project, name: e.currentTarget.value })
-                  }
-                  style={{ width: 'calc(500px)' }}
-                  sx={{
-                    '.MuiInputLabel-shrink': {
-                      fontSize: '1.6rem !important',
-                      lineHeight: '1.1em !important',
-                    },
-                    '.MuiOutlinedInput-root': {
-                      fieldset: {
-                        fontSize: '1.6rem',
+      <div id='project-content' className={!isSidebarOpen ? 'closed' : ''}>
+        <div
+          id='project-info-container'
+          className='scrollable-y hidden-scrollbar'
+        >
+          <div id='project-info'>
+            <Grow in={isAdminInfoAlertOpen && !isEditing} unmountOnExit>
+              <Alert
+                onClose={() => setAdminInfoAlertOpen(false)}
+                severity='info'
+              >
+                <AlertTitle>Note:</AlertTitle>
+                <Stack spacing={0.8}>
+                  <Typography variant='body1'>
+                    This project was added to the Repo by a Myriad admin. Some
+                    information may be either missing or inaccurate.
+                  </Typography>
+                  <Typography variant='body1'>
+                    If you are an admin of this project, you can request
+                    ownership in the project info sidebar.
+                  </Typography>
+                </Stack>
+              </Alert>
+            </Grow>
+            <Stack direction='row' gap={4} alignItems='center'>
+              {isEditing ? (
+                <>
+                  <TextField
+                    required
+                    label='Name'
+                    value={name}
+                    onChange={(e) =>
+                      setEditProject({
+                        ...project,
+                        name: e.currentTarget.value,
+                      })
+                    }
+                    style={{ width: 'calc(500px)' }}
+                    sx={{
+                      '.MuiInputLabel-shrink': {
+                        fontSize: '1.6rem !important',
+                        lineHeight: '1.1em !important',
                       },
-                    },
-                  }}
-                  slotProps={{
-                    input: {
-                      style: { font: 'var(--mui-font-h1)' },
-                    },
-                    inputLabel: {
-                      style: {
-                        font: 'var(--mui-font-h1)',
-                        lineHeight: 1.55,
+                      '.MuiOutlinedInput-root': {
+                        fieldset: {
+                          fontSize: '1.6rem',
+                        },
                       },
-                    },
-                  }}
-                />
-                <Menu
-                  open={isMenuOpen}
-                  onClose={closeStatusMenu}
-                  anchorEl={menuAnchorEl}
-                >
-                  {Object.entries(RoleplayStatus).map(([k, v]) => (
-                    <MenuItem
-                      onClick={() => {
-                        setEditProject({ ...project, status: k });
-                        closeStatusMenu();
-                      }}
-                      key={k}
-                      value={v as string}
-                    >
-                      <TagChip
-                        label={v}
-                        className={v.toLowerCase()}
-                        style={{ fontSize: 20, padding: '0 6px' }}
-                      />
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
-            ) : (
-              <>
-                <Typography variant='title'>{name}</Typography>
-              </>
-            )}
-            <TagChip
-              label={status || 'Unknown'}
-              className={status?.toLowerCase() || 'inactive'}
-              style={{ fontSize: 26, padding: '2px 8px' }}
-              ref={statusTagRef}
-              onClick={isEditing ? openStatusMenu : undefined}
-              onDelete={isEditing ? () => {} : undefined}
-              deleteIcon={
-                <ArrowDropDown
-                  style={{
-                    pointerEvents: 'none',
-                    fontSize: 24,
-                    color: 'white',
-                  }}
-                />
-              }
-            />
-          </Stack>
-          {descriptionElement}
-          <div
+                    }}
+                    slotProps={{
+                      input: {
+                        style: { font: 'var(--mui-font-h1)' },
+                      },
+                      inputLabel: {
+                        style: {
+                          font: 'var(--mui-font-h1)',
+                          lineHeight: 1.55,
+                        },
+                      },
+                    }}
+                  />
+                  <Menu
+                    open={isMenuOpen}
+                    onClose={closeStatusMenu}
+                    anchorEl={menuAnchorEl}
+                  >
+                    {Object.entries(RoleplayStatus).map(([k, v]) => (
+                      <MenuItem
+                        onClick={() => {
+                          setEditProject({ ...project, status: k });
+                          closeStatusMenu();
+                        }}
+                        key={k}
+                        value={v as string}
+                      >
+                        <TagChip
+                          label={v}
+                          className={v.toLowerCase()}
+                          style={{ fontSize: 20, padding: '0 6px' }}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </>
+              ) : (
+                <>
+                  <Typography variant='title'>{name}</Typography>
+                </>
+              )}
+              <TagChip
+                label={status || 'Unknown'}
+                className={status?.toLowerCase() || 'inactive'}
+                style={{ fontSize: 26, padding: '2px 8px' }}
+                ref={statusTagRef}
+                onClick={isEditing ? openStatusMenu : undefined}
+                onDelete={isEditing ? () => {} : undefined}
+                deleteIcon={
+                  <ArrowDropDown
+                    style={{
+                      pointerEvents: 'none',
+                      fontSize: 24,
+                      color: 'white',
+                    }}
+                  />
+                }
+              />
+            </Stack>
+            {descriptionElement}
+          </div>
+          <div id='project-update-panel'>
+            <Typography variant='h2'>Updates</Typography>
+            <Stack id='project-updates' gap={2}>
+              {updatesLoading ? (
+                <CircularProgress />
+              ) : (
+                updates?.map((update) => (
+                  <UpdateComponent key={update.id} update={update} />
+                ))
+              )}
+            </Stack>
+          </div>
+          <Stack
+            direction='row'
+            justifyContent='flex-end'
+            gap={0.6}
             style={{
               position: 'absolute',
               top: 12,
@@ -609,7 +647,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                   </IconButton>
                 </>
               ))}
-          </div>
+          </Stack>
         </div>
       </div>
 

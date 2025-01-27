@@ -139,7 +139,7 @@ router.get('/discord', async (request, response) => {
       );
       user = newUser;
     }
-    const { user_id: id } = user!;
+    const { userId: id } = user!;
 
     // Sign user JWT
     const token = sign({ id }, JWT_SECRET, {

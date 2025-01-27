@@ -26,6 +26,9 @@ import {
   QueryClient,
   useQuery,
 } from '@tanstack/react-query';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+import 'javascript-time-ago/load-all-locales';
 import { PropsWithChildren, useState } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -65,6 +68,7 @@ const env: EnvContextData = {
 
 const queryClient = new QueryClient();
 
+// FontAwesome icons
 library.add(faDiscord);
 library.add(faEarthAmericas);
 library.add(faDoorOpen);
@@ -77,6 +81,13 @@ library.add(faLink);
 library.add(faAnglesRight);
 library.add(faAnglesLeft);
 library.add(faClock);
+
+// react-time-ago default locale
+TimeAgo.addDefaultLocale(en);
+
+export const getLocale = () => {
+  return navigator.languages ? navigator.languages[0] : navigator.language;
+};
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -126,14 +137,9 @@ const AuthWrapper = (props: PropsWithChildren) => {
         },
       })
         .then((res) => res.json())
-        .then((json) => {
+        .then<User>((json) => {
           const { user } = json;
-          return {
-            id: user.user_id,
-            name: user.name,
-            imageUrl: user.image_url,
-            role: user.role,
-          } as User;
+          return user;
         });
     },
     retry: false,
@@ -212,18 +218,6 @@ export function App() {
             backgroundImage: 'var(--mui-overlays-1)',
             backgroundColor: 'var(--mui-palette-background-default)',
             zIndex: 4000,
-          },
-        },
-      },
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            transition: '0.1s ease-out',
-            '&:hover': {
-              borderColor: '#707176',
-              boxShadow:
-                'inset 0 0 40px 26px rgba(255, 255, 255, 0.02), var(--mui-shadows-6)',
-            },
           },
         },
       },
