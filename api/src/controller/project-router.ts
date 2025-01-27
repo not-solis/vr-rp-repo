@@ -6,6 +6,7 @@ import {
   RoleplayProject,
   updateProject,
   getImageUrlByProjectId,
+  deleteProject,
 } from '../model/project-model.js';
 import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
@@ -205,6 +206,22 @@ router.patch(
     const { id } = req.params;
     const project: RoleplayProject = res.locals.project;
     updateProject(id, project)
+      .then((response) => {
+        res.status(200).send({ success: true, data: response });
+      })
+      .catch((error) =>
+        res.status(500).send({ success: false, errors: [error.message] }),
+      );
+  },
+);
+
+router.delete(
+  '/:id',
+  auth,
+  checkOwnership,
+  (req: Request, res: Response<ResponseData<unknown>>) => {
+    const { id } = req.params;
+    deleteProject(id)
       .then((response) => {
         res.status(200).send({ success: true, data: response });
       })

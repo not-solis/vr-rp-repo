@@ -39,7 +39,7 @@ export const getProjects = async (
   // using limit + 1 to see if there are any remaining
   const queryParams: (string | number)[] = [start, limit + 1];
   const addedQueryParams: (string | number)[] = [];
-  const where = [];
+  const where = ["roleplay_projects.status != 'Deleted'"];
   if (name) {
     sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
     asc = true;
@@ -112,7 +112,7 @@ export const getProjectById = async (id: string) => {
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on users.user_id = ownership.user_id
-      WHERE roleplay_projects.id=$1
+      WHERE roleplay_projects.id=$1 AND roleplay_projects.status != 'Deleted'
       ;
       `,
       [id],
@@ -307,13 +307,35 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
 
 export const getImageUrlByProjectId = async (id: string) => {
   return await pool
-    .query('SELECT image_url FROM roleplay_projects WHERE id=$1', [id])
+    .query(
+      "SELECT image_url FROM roleplay_projects WHERE id=$1 AND status != 'Deleted'",
+      [id],
+    )
     .then((results) => {
       if (!results?.rowCount) {
         throw new Error('Failed to retrieve image URL');
       }
 
       return results.rows[0].image_url;
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
+    });
+};
+
+export const deleteProject = async (id: string) => {
+  return await pool
+    .query(
+      "UPDATE roleplay_projects SET status='Deleted' WHERE id=$1 RETURNING id",
+      [id],
+    )
+    .then((results) => {
+      if (!results?.rowCount) {
+        throw new Error('Failed to delete project');
+      }
+
+      return results.rows[0].id;
     })
     .catch((err) => {
       console.error(err);

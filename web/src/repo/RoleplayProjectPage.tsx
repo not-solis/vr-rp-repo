@@ -1,6 +1,7 @@
 import {
   ArrowDropDown,
   Cancel,
+  Delete,
   Edit,
   Save,
   Visibility,
@@ -70,6 +71,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const [isEditing, setEditing] = useState(isNew);
   const [imageFile, setImageFile] = useState<File>();
   const [isPreviewDescription, setPreviewDescription] = useState(false);
+  const [isErrorDialogOpen, setErrorDialogOpen] = useState(false);
   const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isOwnershipDialogOpen, setOwnershipDialogOpen] = useState(false);
   const [isAdminInfoAlertOpen, setAdminInfoAlertOpen] = useState(false);
@@ -273,6 +275,34 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     } else {
       saveProject();
     }
+  };
+
+  const deleteProject = () => {
+    fetch(`${serverBaseUrl}/projects/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          navigate('/repo');
+          createSnackbar({
+            title: 'Success',
+            content: 'Project successfully deleted!',
+            severity: 'success',
+          });
+        } else {
+          res.json().then((json: ResponseData<unknown>) => {
+            createSnackbar({
+              title: 'Delete Error',
+              content: json.errors ?? [],
+              severity: 'error',
+              autoHideDuration: 5000,
+            });
+          });
+        }
+      })
+      .catch((e) => console.error(e))
+      .finally(() => setErrorDialogOpen(false));
   };
 
   const saveProject = async () => {
@@ -557,15 +587,27 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                   </IconButton>
                 </>
               ) : (
-                <IconButton
-                  style={{
-                    borderRadius: 8,
-                  }}
-                  onClick={startEdit}
-                >
-                  <Edit style={{ paddingRight: 8 }} />
-                  <Typography>Edit</Typography>
-                </IconButton>
+                <>
+                  <IconButton
+                    style={{
+                      borderRadius: 8,
+                    }}
+                    color='error'
+                    onClick={() => setErrorDialogOpen(true)}
+                  >
+                    <Delete style={{ paddingRight: 8 }} />
+                    <Typography>Delete</Typography>
+                  </IconButton>
+                  <IconButton
+                    style={{
+                      borderRadius: 8,
+                    }}
+                    onClick={startEdit}
+                  >
+                    <Edit style={{ paddingRight: 8 }} />
+                    <Typography>Edit</Typography>
+                  </IconButton>
+                </>
               ))}
           </div>
         </div>
@@ -589,6 +631,35 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         openOwnershipDialog={() => setOwnershipDialogOpen(true)}
       />
 
+      <Dialog
+        id='delete-roleplay-dialog'
+        open={isErrorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        aria-labelledby='delete-roleplay-dialog-title'
+        aria-describedby='delete-roleplay-dialog-description'
+      >
+        <DialogTitle id='delete-roleplay-dialog-title'>
+          Delete {name}?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='delete-roleplay-dialog-description'>
+            Doing so will remove {name} from the Repo. This action is
+            irreversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color='plain'
+            onClick={() => setErrorDialogOpen(false)}
+            autoFocus
+          >
+            Back
+          </Button>
+          <Button color='error' onClick={deleteProject}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
         id='save-roleplay-dialog'
         open={isSaveDialogOpen}
