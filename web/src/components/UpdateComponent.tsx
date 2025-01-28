@@ -7,6 +7,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { RefObject, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTimeAgo } from 'react-time-ago';
 
@@ -21,14 +22,36 @@ interface UpdateComponentProps {
   fullWidth?: boolean;
 }
 
+const useTruncatedElement = (ref: RefObject<HTMLDivElement>) => {
+  const [isTruncated, setTruncated] = useState(false);
+  const [isReadingMore, setReadingMore] = useState(false);
+
+  useLayoutEffect(() => {
+    const { offsetHeight, scrollHeight } = ref.current ?? {};
+
+    setTruncated(
+      !!offsetHeight && !!scrollHeight && offsetHeight < scrollHeight,
+    );
+  }, [ref]);
+
+  return {
+    maxHeight: ref.current?.scrollHeight,
+    isTruncated,
+    isReadingMore,
+    setReadingMore,
+  };
+};
+
 export const UpdateComponent = (props: UpdateComponentProps) => {
+  const updateTextRef = useRef<HTMLDivElement>(null);
+  const { maxHeight, isTruncated, isReadingMore, setReadingMore } =
+    useTruncatedElement(updateTextRef);
   const { update, showProject = false, fullWidth = false } = props;
   const { project, user, text, created } = update;
   const { formattedDate } = useTimeAgo({
     date: created,
     locale: getLocale(),
   });
-  console.log(update);
 
   return (
     <Card
@@ -94,7 +117,22 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
           {showProject && project && (
             <Link to={`/repo/${project.id}`}>{project.name}</Link>
           )}
-          <Typography className='update-text'>{text}</Typography>
+          <Typography
+            ref={updateTextRef}
+            maxHeight={isReadingMore ? maxHeight : 286}
+            className='update-text'
+          >
+            {text}
+          </Typography>
+          {isTruncated && (
+            <Typography
+              className='read-more-text disabled-text-interaction ${}'
+              variant='body2'
+              onClick={() => setReadingMore(!isReadingMore)}
+            >
+              Read {isReadingMore ? 'less' : 'more'}...
+            </Typography>
+          )}
         </Stack>
       </CardContent>
     </Card>

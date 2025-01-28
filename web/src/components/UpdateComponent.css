@@ -14,7 +14,19 @@
 }
 
 .update-text {
-  word-wrap: break-all;
+  overflow: hidden;
   overflow-wrap: break-word;
   white-space-collapse: preserve-breaks;
+  transition: max-height 0.4s;
+}
+
+.read-more-text {
+  width: fit-content;
+  color: rgb(116, 218, 243);
+  transition: filter 0.1s;
+}
+
+.read-more-text:hover {
+  filter: brightness(85%);
+  cursor: pointer;
 }
