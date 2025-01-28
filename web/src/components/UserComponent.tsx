@@ -34,7 +34,7 @@ import {
   REACT_APP_MAX_IMAGE_SIZE,
   REACT_APP_SERVER_BASE_URL,
 } from '../Env';
-import { queryServer, ResponseData } from '../model/ServerResponse';
+import { queryServer } from '../model/ServerResponse';
 import './UserComponent.css';
 
 export const UserComponent = () => {
@@ -47,7 +47,6 @@ export const UserComponent = () => {
   const isMenuOpen = !!menuAnchorEl;
   const queryClient = useQueryClient();
   const { createSnackbar, createErrorSnackbar } = useSnackbar();
-  const navigate = useNavigate();
   const theme = useTheme();
 
   if (isAuthLoading) {
@@ -56,6 +55,12 @@ export const UserComponent = () => {
 
   const refetchUser = () => {
     queryClient.refetchQueries({
+      queryKey: ['auth'],
+    });
+  };
+
+  const resetUser = () => {
+    queryClient.resetQueries({
       queryKey: ['auth'],
     });
   };
@@ -107,18 +112,21 @@ export const UserComponent = () => {
   };
 
   const handleLogout = () => {
-    queryServer('/auth/logout', { method: 'POST', useAuth: true }).then(() =>
-      navigate(0),
+    queryServer('/auth/logout', { method: 'POST', useAuth: true }).then(
+      resetUser,
     );
     closeMenu();
   };
 
-  const onAuthSuccess = (data: Record<string, any>) => {
-    navigate(0);
-    // setUser(data as User);
+  const onAuthSuccess = () => {
+    closeMenu();
+    refetchUser();
   };
 
-  const onAuthFailure = (err: Error) => console.error(err);
+  const onAuthFailure = (err: Error) => {
+    closeMenu();
+    console.error(err);
+  };
 
   // Uses native MouseEvent
   const handleClickOutside = (event: MouseEvent) => {

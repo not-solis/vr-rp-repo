@@ -21,15 +21,11 @@ import {
   Stack,
   ThemeProvider,
 } from '@mui/material';
-import {
-  QueryClientProvider,
-  QueryClient,
-  useQuery,
-} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import 'javascript-time-ago/load-all-locales';
-import { PropsWithChildren, useState } from 'react';
+import { useState } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -43,8 +39,6 @@ import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
 import './App.css';
-
-const queryClient = new QueryClient();
 
 // FontAwesome icons
 library.add(faDiscord);
@@ -104,7 +98,7 @@ declare module '@mui/material/Typography' {
   }
 }
 
-const AuthWrapper = (props: PropsWithChildren) => {
+export function App() {
   const { data: user, isLoading: isAuthLoading } = useQuery({
     queryKey: ['auth'],
     queryFn: () => queryServer<User>('/auth', { useAuth: true }),
@@ -122,16 +116,7 @@ const AuthWrapper = (props: PropsWithChildren) => {
     const roleOrder = order.indexOf(role);
     return userOrder <= roleOrder;
   };
-  return (
-    <AuthContext.Provider
-      value={{ user, isAuthLoading, isAuthenticated, hasPermission }}
-    >
-      {props.children}
-    </AuthContext.Provider>
-  );
-};
 
-export function App() {
   const [snackbarProps, setSnackbarProps] = useState<SnackbarProps>();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const theme = createTheme({
@@ -265,93 +250,93 @@ export function App() {
   return (
     <HelmetProvider>
       <ThemeProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <SnackbarContext.Provider
-            value={{
-              createSnackbar: (props) => {
-                setSnackbarProps(props);
-                setSnackbarOpen(true);
-              },
-              createErrorSnackbar: (err) => {
-                const props: SnackbarProps = err.name
-                  ? {
-                      title: err.name,
-                      severity: 'error',
-                      content: err.message,
-                      autoHideDuration: 6000,
-                    }
-                  : {
-                      title: 'Error',
-                      severity: 'error',
-                      content: err,
-                      autoHideDuration: 6000,
-                    };
-                setSnackbarProps(props);
-                setSnackbarOpen(true);
-              },
-            }}
+        <SnackbarContext.Provider
+          value={{
+            createSnackbar: (props) => {
+              setSnackbarProps(props);
+              setSnackbarOpen(true);
+            },
+            createErrorSnackbar: (err) => {
+              const props: SnackbarProps = err.name
+                ? {
+                    title: err.name,
+                    severity: 'error',
+                    content: err.message,
+                    autoHideDuration: 6000,
+                  }
+                : {
+                    title: 'Error',
+                    severity: 'error',
+                    content: err,
+                    autoHideDuration: 6000,
+                  };
+              setSnackbarProps(props);
+              setSnackbarOpen(true);
+            },
+          }}
+        >
+          <AuthContext.Provider
+            value={{ user, isAuthLoading, isAuthenticated, hasPermission }}
           >
-            <AuthWrapper>
-              <CookiesProvider>
-                <Helmet>
-                  <meta property='og:url' content={window.location.href} />
-                </Helmet>
-                <BrowserRouter>
-                  <Box id='app-container'>
-                    <Navbar />
-                    <div style={{ flexGrow: 1, minHeight: 0 }}>
-                      <Routes>
-                        <Route path='/' element={<HomePage />} />
-                        <Route path='/repo' element={<Repo />} />
-                        <Route
-                          path='/repo/new'
-                          element={<RoleplayProjectPage isNew />}
-                        />
-                        <Route
-                          path='/repo/:id'
-                          element={<RoleplayProjectPage />}
-                        />
-                        <Route path='/community' element={comingSoon} />
-                        <Route path='/resources' element={comingSoon} />
-                        <Route path='/about-us' element={comingSoon} />
-                        <Route
-                          path='*'
-                          element={<Navigate to='/' replace={true} />}
-                        />
-                      </Routes>
-                    </div>
-                  </Box>
-                  <Snackbar
-                    open={snackbarOpen}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
+            <CookiesProvider>
+              <Helmet>
+                <meta property='og:url' content={window.location.href} />
+              </Helmet>
+              <BrowserRouter>
+                <Box id='app-container'>
+                  <Navbar />
+                  <div style={{ flexGrow: 1, minHeight: 0 }}>
+                    <Routes>
+                      <Route path='/' element={<HomePage />} />
+                      <Route path='/repo' element={<Repo />} />
+                      <Route
+                        path='/repo/new'
+                        element={<RoleplayProjectPage isNew />}
+                      />
+                      <Route
+                        path='/repo/:id'
+                        element={<RoleplayProjectPage />}
+                      />
+                      <Route path='/community' element={comingSoon} />
+                      <Route path='/resources' element={comingSoon} />
+                      <Route path='/about-us' element={comingSoon} />
+                      <Route
+                        path='*'
+                        element={<Navigate to='/' replace={true} />}
+                      />
+                    </Routes>
+                  </div>
+                </Box>
+                <Snackbar
+                  open={snackbarOpen}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
+                  onClose={onSnackbarClose}
+                  disableWindowBlurListener
+                  ClickAwayListenerProps={{ onClickAway: () => null }}
+                >
+                  <Alert
+                    severity={snackbarProps?.severity}
+                    variant='standard'
                     onClose={onSnackbarClose}
-                    disableWindowBlurListener
-                    ClickAwayListenerProps={{ onClickAway: () => null }}
+                    style={{ width: '100%' }}
                   >
-                    <Alert
-                      severity={snackbarProps?.severity}
-                      variant='standard'
-                      onClose={onSnackbarClose}
-                      style={{ width: '100%' }}
-                    >
-                      <AlertTitle>{snackbarProps?.title}</AlertTitle>
-                      {typeof snackbarProps?.content === 'string' ? (
-                        snackbarProps?.content
-                      ) : (
-                        <Stack spacing={1}>
-                          {snackbarProps?.content.map((c, i) => (
-                            <div key={i}>- {c}</div>
-                          ))}
-                        </Stack>
-                      )}
-                    </Alert>
-                  </Snackbar>
-                </BrowserRouter>
-              </CookiesProvider>
-            </AuthWrapper>
-          </SnackbarContext.Provider>
-        </QueryClientProvider>
+                    <AlertTitle>{snackbarProps?.title}</AlertTitle>
+                    {typeof snackbarProps?.content === 'string' ? (
+                      snackbarProps?.content
+                    ) : (
+                      <Stack spacing={1}>
+                        {snackbarProps?.content.map((c, i) => (
+                          <div key={i}>- {c}</div>
+                        ))}
+                      </Stack>
+                    )}
+                  </Alert>
+                </Snackbar>
+              </BrowserRouter>
+            </CookiesProvider>
+          </AuthContext.Provider>
+        </SnackbarContext.Provider>
       </ThemeProvider>
     </HelmetProvider>
   );
