@@ -28,6 +28,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
     date: created,
     locale: getLocale(),
   });
+  console.log(update);
 
   return (
     <Card

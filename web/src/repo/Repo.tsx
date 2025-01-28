@@ -39,7 +39,7 @@ import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
-import { queryServer } from '../model/ServerResponse';
+import { PageData, queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
 
@@ -47,12 +47,6 @@ enum SortBy {
   Name = 'name',
   LastUpdated = 'last_updated',
   CreatedAt = 'created_at',
-}
-
-interface ProjectQueryResponse {
-  hasNext: boolean;
-  data: RoleplayProject[];
-  nextCursor: number;
 }
 
 const TITLE = 'The VR Roleplay Repo';
@@ -84,7 +78,7 @@ export const Repo = () => {
       sortAscending,
     ],
     queryFn: async ({ pageParam }) =>
-      queryServer<ProjectQueryResponse>('/projects', {
+      queryServer<PageData<RoleplayProject>>('/projects', {
         queryParams: {
           start: `${pageParam}`,
           limit: `${PAGE_SIZE}`,
@@ -96,7 +90,7 @@ export const Repo = () => {
             : {}),
           ...(showActiveOnly ? { showActiveOnly: 'true' } : {}),
         },
-      }).then<ProjectQueryResponse>((pageData) => {
+      }).then((pageData) => {
         if (!pageData) {
           throw new Error('Missing page data');
         }
@@ -270,16 +264,6 @@ export const Repo = () => {
           )}
         </FormGroup>
       </Box>
-      {/* <RepoFilters
-        nameFilter={nameFilter}
-        setNameFilter={setNameFilter}
-        tagFilters={tagFilters}
-        addTagFilter={addTag}
-        removeTagFilter={removeTag}
-        showActiveOnly={showActiveOnly}
-        setShowActiveOnly={setShowActiveOnly}
-        openNewRepoDialog={() => setShowNewDialog(true)}
-      /> */}
       <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
         {isFetching && (
           <LinearProgress

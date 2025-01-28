@@ -3,6 +3,7 @@ import { makeTransaction, pool } from './db-pool.js';
 import { User, UserRole } from './users-model.js';
 import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model.js';
 import { createOwnership } from './owners-model.js';
+import { PageData } from '../data/PageData.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 
@@ -89,7 +90,7 @@ export const getProjects = async (
           hasNext: rowCount > limit,
           data: rows,
           nextCursor: start + limit,
-        };
+        } as PageData<RoleplayProject>;
       } else {
         throw new Error('No results found.');
       }

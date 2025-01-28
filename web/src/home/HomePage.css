@@ -1,4 +1,5 @@
 #home-page {
+  height: 100%;
   width: 100%;
 }
 
@@ -6,4 +7,7 @@
   width: 100%;
   padding: 16px 64px;
   box-shadow: var(--mui-shadows-4);
+}
+
+#home-page-contents {
 }

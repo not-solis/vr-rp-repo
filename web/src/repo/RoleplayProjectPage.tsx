@@ -45,7 +45,7 @@ import {
   RoleplayLink,
   RoleplayStatus,
 } from '../model/RoleplayProject';
-import { queryServer } from '../model/ServerResponse';
+import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
 
@@ -148,14 +148,15 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['project', 'updates'],
     queryFn: () => {
-      return queryServer<Update[]>('/updates', {
+      return queryServer<PageData<Update>>('/updates', {
         queryParams: { projectId: id! },
-      }).then((updates) =>
-        updates?.map((update) => {
+      }).then((pageData) => {
+        console.log(pageData);
+        return pageData?.data?.map((update) => {
           const { created, ...rest } = update;
           return { created: new Date(created), ...rest };
-        }),
-      );
+        });
+      });
     },
   });
 

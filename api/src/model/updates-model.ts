@@ -1,3 +1,4 @@
+import { PageData } from '../data/PageData.js';
 import { pool } from './db-pool.js';
 import { RoleplayProject } from './project-model.js';
 import { remapUser, User } from './users-model.js';
@@ -17,7 +18,7 @@ export const getUpdates = async (
   userId?: string,
   start: number = 0,
   limit: number = DEFAULT_QUERY_LIMIT,
-): Promise<Update[]> => {
+) => {
   return await pool
     .query(
       `SELECT
@@ -33,22 +34,30 @@ export const getUpdates = async (
         AND ($2::uuid IS NULL OR updates.user_id=$2)
       ORDER BY created DESC
       OFFSET $3 LIMIT $4`,
-      [projectId, userId, start, limit],
+      [projectId, userId, start, limit + 1],
     )
     .then((results) => {
       if (results?.rows) {
-        return results.rows.map<Update>((row) => ({
-          id: row.id,
-          project: row.project_id
-            ? {
-                id: row.project_id,
-                name: row.project_name,
-              }
-            : undefined,
-          user: remapUser(row),
-          text: row.update_text,
-          created: row.created,
-        }));
+        const { rows, rowCount } = results;
+        if (rowCount! > limit) {
+          rows.pop();
+        }
+        return {
+          hasNext: rowCount! > limit,
+          data: rows.map((row) => ({
+            id: row.id,
+            project: row.project_id
+              ? {
+                  id: row.project_id,
+                  name: row.project_name,
+                }
+              : undefined,
+            user: remapUser(row),
+            text: row.update_text,
+            created: row.created,
+          })),
+          nextCursor: start + limit,
+        } as PageData<Update>;
       } else {
         throw new Error('Get updates failed.');
       }
