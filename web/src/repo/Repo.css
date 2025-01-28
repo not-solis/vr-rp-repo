@@ -5,6 +5,19 @@
   box-sizing: border-box;
 }
 
+#honse {
+  height: 32px;
+  margin-right: -32px;
+  transform: translateX(-18.9px);
+  object-fit: cover;
+  object-position: 36px;
+  transition: object-position 2.5s ease-out;
+}
+
+#honse.show {
+  object-position: 0;
+}
+
 .repo-search-results {
   display: flex;
   flex-wrap: wrap;

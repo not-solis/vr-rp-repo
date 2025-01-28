@@ -177,6 +177,19 @@ export const Repo = () => {
             }}
             value={name}
             size='small'
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <img
+                    id='honse'
+                    src='/honse1.png'
+                    className={
+                      nameFilter.toLowerCase() === 'honse' ? 'show' : ''
+                    }
+                  />
+                ),
+              },
+            }}
           />
           <TagTextField
             label='Tags'
