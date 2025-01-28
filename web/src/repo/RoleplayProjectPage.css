@@ -28,8 +28,7 @@
 #project-info {
   flex: 1 0 450px;
   margin: 0;
-  padding: min(30px, 3vw) min(50px, 5vw);
-  padding-right: 16px;
+  padding: min(30px, 3vw) min(24px, 2.4vw);
   min-width: 300px;
   max-height: 100%;
   display: flex;
@@ -45,12 +44,25 @@
 
 #project-update-panel {
   flex: 0 0 560px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   min-width: 0;
   padding: 20px;
   padding-bottom: 0;
   box-sizing: border-box;
+  box-shadow:
+    -2px 0px 4px -1px rgba(0, 0, 0, 0.2),
+    -4px 0px 5px 0px rgba(0, 0, 0, 0.14),
+    -1px 0px 10px 0px rgba(0, 0, 0, 0.12);
+}
+
+#project-info #project-update-panel {
+  position: relative;
+  padding: 0;
+  padding-top: 16px;
+  height: content;
+  box-shadow: none;
 }
 
 #project-updates {

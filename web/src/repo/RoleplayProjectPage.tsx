@@ -45,7 +45,7 @@ import {
   RoleplayLink,
   RoleplayStatus,
 } from '../model/RoleplayProject';
-import { ResponseError, queryServer } from '../model/ServerResponse';
+import { queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
 
@@ -75,7 +75,7 @@ function clearNulls<T>(obj: T): T {
 
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew = false } = props;
-  const windowWidth = useWindowWidth();
+  const windowWidth = useWindowWidth({ wait: 30 });
   const [isEditing, setEditing] = useState(isNew);
   const [imageFile, setImageFile] = useState<File>();
   const [isPreviewDescription, setPreviewDescription] = useState(false);
@@ -405,10 +405,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const closeStatusMenu = () => setMenuAnchorEl(undefined);
 
   const updatePanel = (
-    <div
-      id='project-update-panel'
-      style={{ height: stackUpdates ? 'content' : '100%' }}
-    >
+    <div id='project-update-panel'>
       <Typography variant='h2'>Updates</Typography>
       <Stack id='project-updates'>
         {canEdit && (
@@ -490,7 +487,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 onClose={() => setAdminInfoAlertOpen(false)}
                 severity='info'
                 style={{
-                  maxWidth: stackUpdates ? 'calc(100% - 240px)' : '100%',
+                  maxWidth:
+                    stackUpdates && canEdit ? 'calc(100% - 240px)' : '100%',
                 }}
               >
                 <AlertTitle>Note:</AlertTitle>
