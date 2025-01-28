@@ -107,6 +107,7 @@ export const Repo = () => {
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,
+    placeholderData: (prev) => prev,
   });
 
   const addTag = (tag: string) => {
