@@ -34,7 +34,7 @@ import {
   REACT_APP_MAX_IMAGE_SIZE,
   REACT_APP_SERVER_BASE_URL,
 } from '../Env';
-import { ResponseData } from '../model/ServerResponse';
+import { queryServer, ResponseData } from '../model/ServerResponse';
 import './UserComponent.css';
 
 export const UserComponent = () => {
@@ -46,7 +46,7 @@ export const UserComponent = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const isMenuOpen = !!menuAnchorEl;
   const queryClient = useQueryClient();
-  const { createSnackbar } = useSnackbar();
+  const { createSnackbar, createErrorSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -62,26 +62,14 @@ export const UserComponent = () => {
 
   const saveName = () => {
     if (name && name !== user?.name) {
-      fetch(`${REACT_APP_SERVER_BASE_URL}/users/name`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      queryServer('/users/name', {
         method: 'PATCH',
-        body: JSON.stringify({ name }),
-        credentials: 'include',
+        body: { name },
+        isJson: true,
+        useAuth: true,
       })
-        .then<ResponseData<string>>((res) => res.json())
-        .then((json) => {
-          if (json.success) {
-            refetchUser();
-          } else {
-            createSnackbar({
-              title: 'User save error',
-              severity: 'error',
-              content: json.errors || [],
-            });
-          }
-        })
+        .then(refetchUser)
+        .catch(createErrorSnackbar)
         .finally(() => setEditingName(false));
     } else {
       cancelNameEdit();
@@ -93,64 +81,35 @@ export const UserComponent = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const imageUrl = await fetch(`${REACT_APP_SERVER_BASE_URL}/users/image`, {
+      const imageUrl = await queryServer<string>('/users/image', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
-      })
-        .then<ResponseData<string>>((res) => res.json())
-        .then((json) => {
-          if (json.success) {
-            return json.data;
-          } else {
-            throw new Error(json.errors ? json.errors[0] : 'Unknown error.');
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          createSnackbar({
-            title: 'Image Upload Error',
-            content: err.message ?? err,
-            severity: 'error',
-            autoHideDuration: 6000,
-          });
-        });
+        useAuth: true,
+      }).catch((err) => {
+        console.error(err);
+        createErrorSnackbar(err);
+      });
 
       if (imageUrl) {
-        fetch(`${REACT_APP_SERVER_BASE_URL}/users/image`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        queryServer('/users/image', {
           method: 'PATCH',
-          body: JSON.stringify({ imageUrl }),
-          credentials: 'include',
+          body: { imageUrl },
+          isJson: true,
+          useAuth: true,
         })
-          .then<ResponseData<unknown>>((res) => res.json())
-          .then((json) => {
-            if (json.success) {
-              refetchUser();
-            } else {
-              throw new Error(json.errors ? json.errors[0] : 'Unknown error.');
-            }
-          })
+          .then(refetchUser)
           .catch((err) => {
             console.error(err);
-            createSnackbar({
-              title: 'User Update Error',
-              content: err.message ?? err,
-              severity: 'error',
-              autoHideDuration: 6000,
-            });
+            createErrorSnackbar(err);
           });
       }
     }
   };
 
   const handleLogout = () => {
-    fetch(`${REACT_APP_SERVER_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    }).then(() => navigate(0));
+    queryServer('/auth/logout', { method: 'POST', useAuth: true }).then(() =>
+      navigate(0),
+    );
     closeMenu();
   };
 

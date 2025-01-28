@@ -37,8 +37,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
-import { REACT_APP_SERVER_BASE_URL } from './Env';
 import { HomePage } from './home/HomePage';
+import { queryServer } from './model/ServerResponse';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
@@ -107,19 +107,7 @@ declare module '@mui/material/Typography' {
 const AuthWrapper = (props: PropsWithChildren) => {
   const { data: user, isLoading: isAuthLoading } = useQuery({
     queryKey: ['auth'],
-    queryFn: () => {
-      return fetch(`${REACT_APP_SERVER_BASE_URL}/auth`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then<User>((json) => {
-          const { user } = json;
-          return user;
-        });
-    },
+    queryFn: () => queryServer<User>('/auth', { useAuth: true }),
     retry: false,
   });
 
@@ -281,6 +269,23 @@ export function App() {
           <SnackbarContext.Provider
             value={{
               createSnackbar: (props) => {
+                setSnackbarProps(props);
+                setSnackbarOpen(true);
+              },
+              createErrorSnackbar: (err) => {
+                const props: SnackbarProps = err.name
+                  ? {
+                      title: err.name,
+                      severity: 'error',
+                      content: err.message,
+                      autoHideDuration: 6000,
+                    }
+                  : {
+                      title: 'Error',
+                      severity: 'error',
+                      content: err,
+                      autoHideDuration: 6000,
+                    };
                 setSnackbarProps(props);
                 setSnackbarOpen(true);
               },

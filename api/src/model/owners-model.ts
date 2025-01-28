@@ -34,7 +34,7 @@ export const createOwnership = async (
   projectId: string,
   userId: string,
   active: boolean = false,
-): Promise<ResponseData<User>> => {
+): Promise<unknown> => {
   return await pool
     .query(
       'INSERT INTO ownership (user_id, project_id, active) VALUES ($1, $2, $3) RETURNING *;',
@@ -44,9 +44,7 @@ export const createOwnership = async (
       if (!results.rowCount) {
         throw new Error('Error creating ownership record.');
       }
-      return {
-        success: true,
-      };
+      return undefined;
     })
     .catch((err) => {
       console.error(err);

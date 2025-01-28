@@ -35,11 +35,11 @@ import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
-import { REACT_APP_SERVER_BASE_URL } from '../Env';
 import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
+import { queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
 
@@ -83,33 +83,27 @@ export const Repo = () => {
       sortBy,
       sortAscending,
     ],
-    queryFn: async ({ pageParam }) => {
-      const url = new URL('/projects', REACT_APP_SERVER_BASE_URL);
-      url.searchParams.append('start', `${pageParam}`);
-      url.searchParams.append('limit', `${PAGE_SIZE}`);
-      url.searchParams.append('sortBy', sortBy);
-      url.searchParams.append('asc', `${sortAscending}`);
-      if (nameFilter) {
-        url.searchParams.append('name', nameFilter);
-      }
-      if (tagFilters && tagFilters.length > 0) {
-        url.searchParams.append('tags', tagFilters.join('|'));
-      }
-      if (showActiveOnly) {
-        url.searchParams.append('active', 'true');
-      }
-      return fetch(url.toString(), {
-        headers: {
-          'Content-Type': 'application/json',
+    queryFn: async ({ pageParam }) =>
+      queryServer<ProjectQueryResponse>('/projects', {
+        queryParams: {
+          start: `${pageParam}`,
+          limit: `${PAGE_SIZE}`,
+          sortBy,
+          asc: `${sortAscending}`,
+          ...(nameFilter ? { name: nameFilter } : {}),
+          ...(tagFilters && tagFilters.length > 0
+            ? { tags: tagFilters.join('|') }
+            : {}),
+          ...(showActiveOnly ? { showActiveOnly: 'true' } : {}),
         },
-      })
-        .then((res) => res.json())
-        .then<ProjectQueryResponse>((json) => {
-          const data = [...json.data];
-          json.data = data.map(remapRoleplayProject);
-          return json;
-        });
-    },
+      }).then<ProjectQueryResponse>((pageData) => {
+        if (!pageData) {
+          throw new Error('Missing page data');
+        }
+        const data = [...pageData.data];
+        pageData.data = data.map(remapRoleplayProject);
+        return pageData;
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,

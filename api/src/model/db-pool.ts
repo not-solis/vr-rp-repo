@@ -43,8 +43,10 @@ export const makeTransaction = (
     })
     .then(transaction)
     .then(async () => await client.query('COMMIT'))
-    .catch(console.error)
-    .catch(onError)
+    .catch((err) => {
+      console.error(err);
+      onError(err);
+    })
     .finally(async () => {
       await client?.query('ROLLBACK');
       client?.release();

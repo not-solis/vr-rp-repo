@@ -11,7 +11,7 @@ import {
 import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth } from './auth-router.js';
-import { ResponseData } from '../index.js';
+import { respondError, respondSuccess, ResponseData } from '../index.js';
 import { getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 
@@ -71,7 +71,11 @@ const validateProject: RequestHandler = (
   });
 
   if (validationErrors.length > 0) {
-    res.status(400).json({ success: false, errors: validationErrors });
+    respondError(res, {
+      name: 'Validation Error',
+      message: validationErrors,
+      code: 400,
+    });
   } else {
     res.locals.project = project;
     next();
@@ -93,9 +97,8 @@ const checkOwnership: RequestHandler = async (
     next();
   }
   if (!userId) {
-    res.status(500).send({
-      success: false,
-      errors: ['Invalid routing middleware: no auth before ownership check.'],
+    respondError(res, {
+      message: 'Invalid routing middleware: no auth before ownership check.',
     });
   }
 
@@ -110,16 +113,17 @@ const checkOwnership: RequestHandler = async (
         if (owner?.userId === user.userId) {
           next();
         } else {
-          res.status(401).send({
-            success: false,
-            errors: ['User is not authorized to modify this project.'],
+          respondError(res, {
+            name: 'Authentication Error',
+            message: 'User is not authorized to modify this project.',
+            code: 401,
           });
         }
       })
       .catch(() =>
-        res.status(500).send({
-          success: false,
-          errors: ['Internal authentication error.'],
+        respondError(res, {
+          name: 'Authentication Error',
+          message: 'Internal authentication error.',
         }),
       );
   }
@@ -140,22 +144,28 @@ router.get('/', (req, res) => {
     asc === 'true',
     active === 'true',
   )
-    .then((response) => {
-      res.status(200).send(response);
+    .then((data) => {
+      respondSuccess(res, data, 206);
     })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .catch((err) =>
+      respondError(res, {
+        name: 'Get Projects Error',
+        message: err.message,
+      }),
     );
 });
 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   getProjectById(id)
-    .then((response) => {
-      res.status(200).send({ success: true, data: response });
+    .then((data) => {
+      respondSuccess(res, data);
     })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .catch((err) =>
+      respondError(res, {
+        name: 'Get Project Error',
+        message: err.message,
+      }),
     );
 });
 
@@ -163,37 +173,51 @@ router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
   const userId = res.locals.userId;
   createOwnership(id, userId)
-    .then((response) => {
-      res.status(200).send(response);
+    .then((data) => {
+      respondSuccess(res, data, 201);
     })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .catch((err) =>
+      respondError(res, {
+        name: 'Update Ownership Error',
+        message: err.message,
+      }),
     );
 });
 
 router.get('/:id/links', (req, res) => {
   const { id } = req.params;
   getRoleplayLinksByProjectId(id)
-    .then((response) => {
-      res.status(200).send({ success: true, data: response });
+    .then((data) => {
+      respondSuccess(res, data);
     })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .catch((err) =>
+      respondError(res, {
+        name: 'Get Links Error',
+        message: err.message,
+      }),
     );
 });
 
-router.post('/', auth, validateProject, async (req, res) => {
-  const project: RoleplayProject = res.locals.project;
-  const userId = res.locals.userId;
-  const user = await getUserById(userId);
-  createProject(user, project)
-    .then((response) => {
-      res.status(200).send(response);
-    })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
-    );
-});
+router.post(
+  '/',
+  auth,
+  validateProject,
+  async (req: Request, res: Response<ResponseData<unknown>>) => {
+    const project: RoleplayProject = res.locals.project;
+    const userId = res.locals.userId;
+    const user = await getUserById(userId);
+    createProject(user, project)
+      .then((data) => {
+        respondSuccess(res, data, 201);
+      })
+      .catch((err) =>
+        respondError(res, {
+          name: 'Create Project Error',
+          message: err.message,
+        }),
+      );
+  },
+);
 
 router.patch(
   '/:id',
@@ -204,11 +228,14 @@ router.patch(
     const { id } = req.params;
     const project: RoleplayProject = res.locals.project;
     updateProject(id, project)
-      .then((response) => {
-        res.status(200).send({ success: true, data: response });
+      .then((data) => {
+        respondSuccess(res, data);
       })
-      .catch((error) =>
-        res.status(500).send({ success: false, errors: [error.message] }),
+      .catch((err) =>
+        respondError(res, {
+          name: 'Update Project Error',
+          message: err.message,
+        }),
       );
   },
 );
@@ -220,11 +247,14 @@ router.delete(
   (req: Request, res: Response<ResponseData<unknown>>) => {
     const { id } = req.params;
     deleteProject(id)
-      .then((response) => {
-        res.status(200).send({ success: true, data: response });
+      .then((data) => {
+        respondSuccess(res, data);
       })
-      .catch((error) =>
-        res.status(500).send({ success: false, errors: [error.message] }),
+      .catch((err) =>
+        respondError(res, {
+          name: 'Delete Project Error',
+          message: err.message,
+        }),
       );
   },
 );

@@ -39,14 +39,13 @@ import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { UpdateComponent } from '../components/UpdateComponent';
 import { useAuth } from '../context/AuthProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
-import { REACT_APP_SERVER_BASE_URL } from '../Env';
 import {
   remapRoleplayProject,
   RoleplayProject,
   RoleplayLink,
   RoleplayStatus,
 } from '../model/RoleplayProject';
-import { ResponseData } from '../model/ServerResponse';
+import { ResponseError, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
 
@@ -95,7 +94,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     windowWidth > SIDEBAR_START_OPEN_WIDTH,
   );
   const { user, isAuthenticated } = useAuth();
-  const { createSnackbar } = useSnackbar();
+  const { createSnackbar, createErrorSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { id } = useParams();
   const queryClient = useQueryClient();
@@ -127,14 +126,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew,
     queryKey: ['project'],
     queryFn: () =>
-      fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((res) => res.json())
-        .then((json) => {
-          const project = json.data;
+      queryServer<RoleplayProject>(`/projects/${id}`)
+        .then((project) => {
           const remappedProject = remapRoleplayProject(project);
           if (!remappedProject.owner) {
             setAdminInfoAlertOpen(true);
@@ -148,33 +141,21 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
     enabled: !isNew,
     queryKey: ['project', 'links'],
-    queryFn: () => {
-      return fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}/links`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then<ResponseData<RoleplayLink[]>>((res) => res.json())
-        .then((json) => json.data)
-        .then(clearNulls);
-    },
+    queryFn: () => queryServer<RoleplayLink[]>(`/projects/${id}/links`),
   });
 
   const { data: updates, isLoading: updatesLoading } = useQuery({
     enabled: !isNew,
     queryKey: ['project', 'updates'],
     queryFn: () => {
-      const url = new URL('/updates', REACT_APP_SERVER_BASE_URL);
-      url.searchParams.append('projectId', id!);
-      return fetch(url)
-        .then<ResponseData<Update[]>>((res) => res.json())
-        .then((json) =>
-          json.data?.map((update) => {
-            const { created, ...rest } = update;
-            return { created: new Date(created), ...rest };
-          }),
-        )
-        .then(clearNulls);
+      return queryServer<Update[]>('/updates', {
+        queryParams: { projectId: id! },
+      }).then((updates) =>
+        updates?.map((update) => {
+          const { created, ...rest } = update;
+          return { created: new Date(created), ...rest };
+        }),
+      );
     },
   });
 
@@ -315,30 +296,22 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const deleteProject = () => {
-    fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
+    queryServer(`/projects/${id}`, {
       method: 'DELETE',
-      credentials: 'include',
+      useAuth: true,
     })
-      .then((res) => {
-        if (res.status === 200) {
-          navigate('/repo');
-          createSnackbar({
-            title: 'Success',
-            content: 'Project successfully deleted!',
-            severity: 'success',
-          });
-        } else {
-          res.json().then((json: ResponseData<unknown>) => {
-            createSnackbar({
-              title: 'Delete Error',
-              content: json.errors ?? [],
-              severity: 'error',
-              autoHideDuration: 5000,
-            });
-          });
-        }
+      .then(() => {
+        navigate('/repo');
+        createSnackbar({
+          title: 'Success',
+          content: 'Project successfully deleted!',
+          severity: 'success',
+        });
       })
-      .catch((e) => console.error(e))
+      .catch((err) => {
+        console.error(err);
+        createErrorSnackbar(err);
+      })
       .finally(() => setErrorDialogOpen(false));
   };
 
@@ -347,121 +320,77 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       const formData = new FormData();
       formData.append('image', imageFile);
 
-      await fetch(`${REACT_APP_SERVER_BASE_URL}/projects/image/${id ?? ''}`, {
+      await queryServer<string>(`/projects/image/${id ?? ''}`, {
         method: 'POST',
         body: formData,
-        credentials: 'include',
-      }).then(async (res) => {
-        if (res.status === 201) {
-          await res.json().then((json: ResponseData<string>) => {
-            project.imageUrl = json.data;
-          });
-        } else {
-          await res.json().then((json: ResponseData<string>) => {
-            createSnackbar({
-              title: 'Image Upload Error',
-              content: json.errors ?? [],
-              severity: 'error',
-              autoHideDuration: 6000,
-            });
-          });
-        }
-      });
+        useAuth: true,
+      })
+        .then((imageUrl) => (project.imageUrl = imageUrl))
+        .catch(createErrorSnackbar);
     }
 
     if (isNew) {
-      fetch(`${REACT_APP_SERVER_BASE_URL}/projects`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      queryServer<string>('/projects', {
         method: 'POST',
-        body: JSON.stringify(project),
-        credentials: 'include',
+        body: project,
+        isJson: true,
+        useAuth: true,
       })
-        .then((res) => {
-          if (res.status === 200) {
-            res.json().then((json) => {
-              setEditing(false);
-              navigate(`/repo/${json.id}`);
-              createSnackbar({
-                title: 'Success',
-                content: 'Project successfully saved!',
-                severity: 'success',
-              });
-            });
-          } else {
-            res.json().then((json: ResponseData<unknown>) => {
-              createSnackbar({
-                title: 'Validation Error',
-                content: json.errors ?? [],
-                severity: 'error',
-                autoHideDuration: 5000,
-              });
-            });
-          }
+        .then((id) => {
+          setEditing(false);
+          navigate(`/repo/${id}`);
+          createSnackbar({
+            title: 'Success',
+            content: 'Project successfully saved!',
+            severity: 'success',
+          });
         })
-        .catch((e) => console.error(e));
+        .catch((err) => {
+          console.error(err);
+          createErrorSnackbar(err);
+        });
     } else {
-      fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      queryServer(`/projects/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(project),
-        credentials: 'include',
+        body: project,
+        isJson: true,
+        useAuth: true,
       })
-        .then((res) => {
-          if (res.status === 200) {
-            refetchProject();
-            setEditing(false);
-            createSnackbar({
-              title: 'Success',
-              content: 'Project successfully saved!',
-              severity: 'success',
-            });
-          } else {
-            res.json().then((json: ResponseData<unknown>) => {
-              createSnackbar({
-                title: 'Validation Error',
-                content: json.errors ?? [],
-                severity: 'error',
-                autoHideDuration: 5000,
-              });
-            });
-          }
+        .then(() => {
+          refetchProject();
+          setEditing(false);
+          createSnackbar({
+            title: 'Success',
+            content: 'Project successfully saved!',
+            severity: 'success',
+          });
         })
-        .catch((e) => console.error(e));
+        .catch((err) => {
+          console.error(err);
+          createErrorSnackbar(err);
+        });
     }
   };
 
   const requestOwnership = () => {
-    fetch(`${REACT_APP_SERVER_BASE_URL}/projects/${id}/owner`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    queryServer(`/projects/${id}/owner`, {
       method: 'POST',
-      body: JSON.stringify(project),
-      credentials: 'include',
+      body: project,
+      isJson: true,
+      useAuth: true,
     })
-      .then((res) => {
-        if (res.status === 200) {
-          createSnackbar({
-            title: 'Success',
-            content: 'Request submitted!',
-            severity: 'success',
-          });
-        } else {
-          res.json().then((json: ResponseData<unknown>) => {
-            createSnackbar({
-              title: 'Error',
-              content: json.errors ?? [],
-              severity: 'error',
-              autoHideDuration: 5000,
-            });
-          });
-        }
+      .then(() =>
+        createSnackbar({
+          title: 'Success',
+          content: 'Request submitted!',
+          severity: 'success',
+        }),
+      )
+      .catch((err) => {
+        console.error(err);
+        createErrorSnackbar(err);
       })
-      .then(() => setOwnershipDialogOpen(false));
+      .finally(() => setOwnershipDialogOpen(false));
   };
 
   const metaName = isNew ? 'New RP Project' : projectData?.name;
@@ -508,11 +437,11 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                       refetchUpdates();
                       setUpdateText('');
                     },
-                    onFailure: (errors) => {
+                    onFailure: (error) => {
                       createSnackbar({
-                        title: 'Post Update Error',
+                        title: error.name,
                         severity: 'error',
-                        content: errors,
+                        content: error.message,
                       });
                     },
                   })

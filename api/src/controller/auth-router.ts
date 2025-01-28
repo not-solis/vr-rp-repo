@@ -12,6 +12,7 @@ import {
   isDev,
   JWT_SECRET,
 } from '../env/config.js';
+import { respondError, respondSuccess } from '../index.js';
 const { sign, verify } = jwt;
 
 const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
@@ -19,29 +20,29 @@ const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
 /**
  * RequestHandler used to preface endpoints that require user authentication.
  */
-export const auth: RequestHandler = (request, response, next) => {
+export const auth: RequestHandler = (req, res, next) => {
   try {
-    const { userToken: token } = request.cookies;
+    const { userToken: token } = req.cookies;
     if (!token) {
-      response.status(401).json();
+      respondError(res, { code: 401 });
     }
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
-    response.locals.userId = jwtToken.id;
+    res.locals.userId = jwtToken.id;
     next();
   } catch (err) {
     console.error(err);
-    response.status(401).json();
+    respondError(res);
   }
 };
 
 const router = Router();
 
-router.get('/', async (request, response) => {
+router.get('/', async (req, res) => {
   try {
-    const { userToken: token } = request.cookies;
+    const { userToken: token } = req.cookies;
     if (!token) {
       console.log('No user token found.');
-      response.json({ authenticated: false });
+      respondSuccess(res, undefined, 204);
       return;
     }
 
@@ -54,25 +55,25 @@ router.get('/', async (request, response) => {
     const user = await getUserById(id);
 
     // Reset token in cookie
-    response.cookie('userToken', newToken, {
+    res.cookie('userToken', newToken, {
       maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
       secure: true,
       sameSite: 'none',
     });
-    response.json({ authenticated: true, user });
+    respondSuccess(res, user);
   } catch (err) {
     console.error(err);
-    response.json({ authenticated: false });
+    respondError(res);
   }
 });
 
 /**
  * Redirect URL for Discord OAuth code workflow.
  */
-router.get('/discord', async (request, response) => {
+router.get('/discord', async (req, res) => {
   const respond = (status: number, result: unknown = {}) => {
-    response.status(status).send(`
+    res.status(status).send(`
       <!DOCTYPE html>
       <html>
         <head></head>
@@ -89,7 +90,7 @@ router.get('/discord', async (request, response) => {
     `);
   };
 
-  const { code } = request.query;
+  const { code } = req.query;
   if (!code) {
     respond(400, { message: 'Authorization code must be provided' });
     return;
@@ -98,7 +99,7 @@ router.get('/discord', async (request, response) => {
   const secure = !isDev;
   const redirectUrl = new URL(
     DISCORD_REDIRECT_PATH,
-    `http${secure ? 's' : ''}://${request.headers.host}`,
+    `http${secure ? 's' : ''}://${req.headers.host}`,
   );
 
   try {
@@ -116,7 +117,7 @@ router.get('/discord', async (request, response) => {
           scope: 'identify',
         }),
       },
-    ).then((res) => res.json() as any);
+    ).then<any>((res) => res.json());
 
     const {
       id: discordId,
@@ -124,17 +125,15 @@ router.get('/discord', async (request, response) => {
       avatar,
     } = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `${token_type} ${access_token}` },
-    }).then((res) => res.json() as any);
+    }).then<any>((res) => res.json());
 
-    let { data: user } = await getUserByDiscordId(discordId);
-    if (!user) {
-      const { data: newUser } = await createUser(
+    const user =
+      (await getUserByDiscordId(discordId)) ??
+      (await createUser(
         discordId,
         global_name,
         `https://cdn.discordapp.com/avatars/${discordId}/${avatar}`,
-      );
-      user = newUser;
-    }
+      ));
     const { userId: id } = user!;
 
     // Sign user JWT
@@ -143,7 +142,7 @@ router.get('/discord', async (request, response) => {
     });
 
     // Set cookie for the user
-    response.cookie('userToken', token, {
+    res.cookie('userToken', token, {
       maxAge: TOKEN_EXPIRATION * 1000,
       httpOnly: true,
       secure: true,
@@ -157,9 +156,10 @@ router.get('/discord', async (request, response) => {
   }
 });
 
-router.post('/logout', (_, response) => {
+router.post('/logout', (_, res) => {
   // clear cookie
-  response.clearCookie('userToken').json({ message: 'Logged out' });
+  res.clearCookie('userToken');
+  respondSuccess(res);
 });
 
 export { router as authRouter };

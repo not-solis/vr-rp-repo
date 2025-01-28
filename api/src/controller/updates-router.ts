@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getUpdates, postUpdate } from '../model/updates-model.js';
 import { auth } from './auth-router.js';
+import { respondError, respondSuccess } from '../index.js';
 
 const router = Router();
 
@@ -12,11 +13,12 @@ router.get('/', (req, res) => {
     parseInt(start as string) || undefined,
     parseInt(limit as string) || undefined,
   )
-    .then((response) => {
-      res.status(200).send({ success: true, data: response });
-    })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .then((data) => respondSuccess(res, data))
+    .catch((err) =>
+      respondError(res, {
+        name: 'Get Updates Error',
+        message: err.message,
+      }),
     );
 });
 
@@ -25,11 +27,12 @@ router.post('/', auth, (req, res) => {
   const { projectId } = req.query;
   const { text } = req.body;
   postUpdate(text, userId, projectId as string)
-    .then((response) => {
-      res.status(200).send({ success: true, data: response });
-    })
-    .catch((error) =>
-      res.status(500).send({ success: false, errors: [error.message] }),
+    .then((data) => respondSuccess(res, data))
+    .catch((err) =>
+      respondError(res, {
+        name: 'Post Update Error',
+        message: err.message,
+      }),
     );
 });
 

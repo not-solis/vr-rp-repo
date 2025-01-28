@@ -1,5 +1,5 @@
 import { del, put } from '@vercel/blob';
-import { BLOB_READ_WRITE_TOKEN, isDev } from '../env/config.js';
+import { BLOB_READ_WRITE_TOKEN } from '../env/config.js';
 
 export const uploadImage = async (
   fileName: string,

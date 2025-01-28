@@ -1,5 +1,4 @@
-import express from 'express';
-import mung from 'express-mung';
+import express, { Response } from 'express';
 import { projectRouter } from './controller/project-router.js';
 import { authRouter } from './controller/auth-router.js';
 import cors, { CorsOptions } from 'cors';
@@ -10,8 +9,13 @@ import cookieParser from 'cookie-parser';
 
 export interface ResponseData<T> {
   success: boolean;
-  errors?: string[];
+  error?: ResponseError;
   data?: T;
+}
+
+interface ResponseError {
+  name: string;
+  message: string | string[];
 }
 
 const app = express();
@@ -42,19 +46,20 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  mung.json((body) => {
-    const remapJson = (obj: any) => {
-      Object.entries(obj).forEach(([k, v]) => {
-        if (v instanceof Date) {
-          obj[k] = new Date(v).getTime();
-        }
-      });
-      return obj;
-    };
-    return remapJson(body);
-  }),
-);
+interface ErrorResponse {
+  name?: string;
+  message?: string | string[];
+  code?: number;
+}
+
+export const respondSuccess = <T>(res: Response, data?: T, status = 200) =>
+  res.status(status).json({ success: true, data });
+export const respondError = (res: Response, error: ErrorResponse = {}) => {
+  const { name = 'Internal Server Error', message, code = 500 } = error;
+  res
+    .status(code)
+    .json({ success: false, error: message ? { name, message } : undefined });
+};
 
 app.get('/', (_, res) => {
   res.status(200).json({ message: 'Hello world!' });

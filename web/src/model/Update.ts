@@ -1,6 +1,5 @@
-import { REACT_APP_SERVER_BASE_URL } from '../Env';
 import { RoleplayProject } from './RoleplayProject';
-import { ResponseData } from './ServerResponse';
+import { queryServer, ResponseError } from './ServerResponse';
 import { User } from './User';
 
 export interface Update {
@@ -11,35 +10,24 @@ export interface Update {
   created: Date;
 }
 
-interface PostUpdateProps<T> {
+interface PostUpdateProps {
   text: string;
   projectId?: string;
-  onSuccess: (data?: T) => void;
-  onFailure: (errors: string[]) => void;
+  onSuccess: (data?: string) => void;
+  onFailure: (error: ResponseError) => void;
 }
 
-export function postUpdate<T>(update: PostUpdateProps<T>) {
+export function postUpdate(update: PostUpdateProps) {
   const { text, projectId, onSuccess, onFailure } = update;
   if (text) {
-    const url = new URL('/updates', REACT_APP_SERVER_BASE_URL);
-    if (projectId) {
-      url.searchParams.append('projectId', projectId);
-    }
-    fetch(url.toString(), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    queryServer<string>('/updates', {
       method: 'POST',
-      body: JSON.stringify({ text }),
-      credentials: 'include',
+      body: { text },
+      isJson: true,
+      queryParams: projectId ? { projectId } : {},
+      useAuth: true,
     })
-      .then<ResponseData<T>>((res) => res.json())
-      .then((json) => {
-        if (json.success) {
-          onSuccess(json.data);
-        } else if (json.errors) {
-          onFailure(json.errors);
-        }
-      });
+      .then(onSuccess)
+      .catch(onFailure);
   }
 }

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import fileUpload, { UploadedFile } from 'express-fileupload';
-import { ResponseData } from '../index.js';
+import { respondError, respondSuccess, ResponseData } from '../index.js';
 import { deleteImage, uploadImage } from '../model/image-model.js';
 import { isDev } from '../env/config.js';
 
@@ -22,7 +22,11 @@ export const limitImageUpload = fileUpload({
 export const handleImageUploadRequest =
   (path: string) => (req: Request, res: Response<ResponseData<string>>) => {
     if (!req.files) {
-      res.status(400).send({ success: false, errors: ['No image provided.'] });
+      respondError(res, {
+        name: 'Image Upload Error',
+        message: 'No image provided.',
+        code: 400,
+      });
       return;
     }
 
@@ -40,12 +44,12 @@ export const handleImageUploadRequest =
           // Clean up, no need to wait for response
           deleteImage(old);
         }
-        res.status(201).json({
-          success: true,
-          data: blob.url,
-        });
+        respondSuccess(res, blob.url, 201);
       })
       .catch((err) =>
-        res.status(500).send({ success: false, errors: [err.message] }),
+        respondError(res, {
+          name: 'Image Upload Error',
+          message: err.message,
+        }),
       );
   };

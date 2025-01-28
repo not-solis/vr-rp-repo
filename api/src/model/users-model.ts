@@ -1,4 +1,3 @@
-import { ResponseData } from '../index.js';
 import { pool } from './db-pool.js';
 
 export enum UserRole {
@@ -52,7 +51,7 @@ export const getUserById = async (id: string) => {
 
 export const getUserByDiscordId = async (
   id: string,
-): Promise<ResponseData<User>> => {
+): Promise<User | undefined> => {
   return await pool
     .query(
       `
@@ -68,10 +67,7 @@ export const getUserByDiscordId = async (
     )
     .then((results) => {
       const success = !!results?.rows;
-      return {
-        success,
-        data: success ? remapUser(results.rows[0]) : undefined,
-      };
+      return success ? remapUser(results.rows[0]) : undefined;
     })
     .catch((err) => {
       console.error(err);
@@ -83,7 +79,7 @@ export const createUser = async (
   id: string,
   name: string,
   imageUrl: string,
-): Promise<ResponseData<User>> => {
+): Promise<User> => {
   return await pool
     .query(
       `
@@ -96,10 +92,7 @@ export const createUser = async (
     .then((results) => {
       const { rows, rowCount } = results;
       if (rows && rowCount) {
-        return {
-          success: true,
-          data: results.rows[0],
-        };
+        return results.rows[0];
       } else {
         throw new Error('No records inserted.');
       }

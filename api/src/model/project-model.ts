@@ -224,13 +224,12 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           }
 
           return Promise.all(queries)
-            .then(() => resolve({ id: projectId }))
+            .then(() => resolve(projectId))
             .catch(reject);
         })
         .catch(reject);
     }, reject);
   });
-  // TODO: update runtimes
 };
 
 export const updateProject = async (id: string, project: RoleplayProject) => {
