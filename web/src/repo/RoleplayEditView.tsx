@@ -60,8 +60,6 @@ export const RoleplayEditView = (props: RoleplayEditViewProps) => {
     otherLinks = [],
   } = project;
 
-  const validateName = (name: string) => !!name;
-
   const addOtherLinkButton = (
     <IconButton
       id='add-other-link-button'

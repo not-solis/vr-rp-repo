@@ -1,24 +1,30 @@
-import { CircularProgress, Stack, Typography } from '@mui/material';
 import './HomePage.css';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { CircularProgress, Stack, Typography } from '@mui/material';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import Slider from 'react-slick';
 
 import { UpdateComponent } from '../components/UpdateComponent';
+import {
+  remapRoleplayProject,
+  RoleplayProject,
+} from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { Update } from '../model/Update';
+import { RoleplayProjectCard } from '../repo/RoleplayProjectCard';
 
 const UPDATE_PAGE_SIZE = 50;
+const PROJECT_CAROUSEL_TOTAL = 10;
 
 export const HomePage = () => {
   const {
-    data: pageData,
-    error,
+    data: updatePageData,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isFetching: isFetchingUpdates,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['updates'],
+    queryKey: ['updates', 'home'],
     queryFn: async ({ pageParam }) =>
       queryServer<PageData<Update>>('/updates', {
         queryParams: {
@@ -40,7 +46,27 @@ export const HomePage = () => {
       lastPage.hasNext ? lastPage.nextCursor : undefined,
   });
 
-  const updates = pageData?.pages.map((p) => p.data).flat();
+  const { data: projects, isLoading: isLoadingProjects } = useQuery({
+    queryKey: ['projects', 'home'],
+    queryFn: () =>
+      queryServer<PageData<RoleplayProject>>('/projects', {
+        queryParams: {
+          start: '0',
+          limit: `${PROJECT_CAROUSEL_TOTAL}`,
+          sortBy: 'created_at',
+          asc: 'false',
+        },
+      }).then((pageData) => {
+        if (!pageData) {
+          throw new Error('Missing page data');
+        }
+        return pageData;
+      }),
+    select: (pageData: PageData<RoleplayProject>) =>
+      pageData.data.map(remapRoleplayProject),
+  });
+
+  const updates = updatePageData?.pages.map((p) => p.data).flat();
 
   return (
     <Stack id='home-page' direction='column'>
@@ -49,24 +75,63 @@ export const HomePage = () => {
           The front page of VR Roleplay
         </Typography>
       </div>
-      <Stack
-        id='home-page-contents'
-        flexGrow={1}
-        minHeight={0}
-        direction='row'
-        boxSizing='border-box'
-      >
-        <Stack style={{ width: 720, padding: '24px 32px 0' }}>
+      <div id='home-page-contents' className='scrollable-y hidden-scrollbar'>
+        <Stack id='home-page-project-bar'>
+          <Typography variant='h3'>Newly Added</Typography>
+          {projects && (
+            <Slider
+              className='project-slider'
+              dots
+              infinite
+              speed={500}
+              slidesToShow={4}
+              slidesToScroll={1}
+              swipe
+              responsive={[
+                {
+                  breakpoint: 2400,
+                  settings: {
+                    slidesToShow: 3,
+                  },
+                },
+                {
+                  breakpoint: 1200,
+                  settings: {
+                    slidesToShow: 2,
+                  },
+                },
+                {
+                  breakpoint: 800,
+                  settings: {
+                    slidesToShow: 1,
+                  },
+                },
+              ]}
+            >
+              {projects
+                .map((project) => ({ ...project, otherLinks: [] }))
+                .map((project) => (
+                  <div key={project.id}>
+                    <RoleplayProjectCard project={project} />
+                  </div>
+                ))}
+            </Slider>
+          )}
+        </Stack>
+        <Stack id='home-page-updates-bar' gap={2}>
           <Typography variant='h3'>Updates</Typography>
-          <div
+          <Stack
             id='all-updates'
             className='scrollable-y hidden-scrollbar'
-            style={{ flexGrow: 1, minHeight: 0, padding: '16px 0' }}
+            gap='16px'
+            minHeight={0}
+            flexGrow={1}
+            paddingBottom={2}
           >
             <InfiniteScroll
               scrollableTarget='all-updates'
               dataLength={updates?.length ?? 0}
-              next={() => !isFetching && fetchNextPage()}
+              next={() => !isFetchingUpdates && fetchNextPage()}
               hasMore={hasNextPage}
               style={{
                 display: 'flex',
@@ -91,9 +156,9 @@ export const HomePage = () => {
                 />
               ))}
             </InfiniteScroll>
-          </div>
+          </Stack>
         </Stack>
-      </Stack>
+      </div>
     </Stack>
   );
 };

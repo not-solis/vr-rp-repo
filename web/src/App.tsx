@@ -38,6 +38,8 @@ import { queryServer } from './model/ServerResponse';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import './App.css';
 
 // FontAwesome icons

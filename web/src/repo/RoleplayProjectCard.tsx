@@ -7,25 +7,33 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import {
+  DetailedHTMLProps,
+  HTMLAttributes,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
 
 import { IconText } from '../components/IconText';
 import { TagChip } from '../components/TagChip';
 import { useAuth } from '../context/AuthProvider';
-import { RoleplayProject, RoleplayStatus } from '../model/RoleplayProject';
+import { RoleplayProject } from '../model/RoleplayProject';
 import './RoleplayProjectCard.css';
 
-export const RoleplayProjectCard = (props: {
-  project: RoleplayProject;
-  addTag: (tag: string) => void;
-}) => {
+export const RoleplayProjectCard = (
+  props: {
+    project: RoleplayProject;
+    addTag?: (tag: string) => void;
+  } & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
+) => {
   const [isTitleOverflowed, setTitleOverflowed] = useState(false);
   const [titleRect, setTitleRect] = useState<DOMRect>();
   const titleRef = useRef<HTMLSpanElement>(null);
   const theme = useTheme();
   const { user } = useAuth();
-  const { project, addTag } = props;
+  const { project, addTag, ...restProps } = props;
   const {
     id,
     name,
@@ -53,7 +61,7 @@ export const RoleplayProjectCard = (props: {
   }, []);
 
   return (
-    <Card variant='outlined' className='project-card'>
+    <Card variant='outlined' className='project-card' {...restProps} ref={null}>
       <CardContent className='full-height'>
         <Box className='project-card-content full-height'>
           <div>
@@ -148,7 +156,9 @@ export const RoleplayProjectCard = (props: {
                       label={tag}
                       onClick={(e: any) => {
                         e.preventDefault();
-                        addTag(tag);
+                        if (addTag) {
+                          addTag(tag);
+                        }
                       }}
                     />
                   ))}
@@ -156,14 +166,12 @@ export const RoleplayProjectCard = (props: {
               )}
 
               {shortDescription && (
-                <Typography variant='body1'>{shortDescription}</Typography>
-              )}
-
-              {/* TODO: make compact date time display */}
-
-              {/* TODO: redesign discord link */}
-              {process.env.NODE_ENV === 'development' && (
-                <p>LAST UPDATED: {lastUpdated?.toISOString()}</p>
+                <Typography
+                  className='project-card-description scrollable-y hidden-scrollbar'
+                  variant='body1'
+                >
+                  {shortDescription}
+                </Typography>
               )}
             </Box>
           </Link>

@@ -5,10 +5,53 @@
 
 #home-page-header {
   width: 100%;
-  padding: 16px 64px;
+  padding: 12px min(48px, 6px + 3vw);
+  box-sizing: border-box;
   box-shadow: var(--mui-shadows-4);
 }
 
+#home-page-header h2 {
+  font-size: min(32px, 8px + 2vw);
+}
+
 #home-page-contents {
-  width: 100vw;
+  flex: 0 1 100px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 300px;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  min-height: 0;
+  padding: 0 5%;
+}
+
+.project-slider {
+  margin: 0 16px;
+}
+
+#home-page-updates-bar {
+  height: 100%;
+  width: 550px;
+  max-width: 100%;
+  padding: 24px 2% 0;
+  box-sizing: border-box;
+}
+
+#home-page-project-bar {
+  flex-grow: 1;
+  flex-basis: 1000px;
+  min-width: 200px;
+  padding: 24px 32px 0;
+}
+
+#home-page-project-bar .slick-dots li.slick-active button:before {
+  color: white;
+  font-size: 12px;
+}
+
+#home-page-project-bar .slick-dots li button:before {
+  color: #bbbbbb;
+  font-size: 8px;
 }

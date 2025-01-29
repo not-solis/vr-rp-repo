@@ -64,6 +64,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
           <Stack
             direction='row'
             alignItems='center'
+            flexWrap='wrap'
             gap={0.5}
             className='update-card-header'
           >
@@ -139,7 +140,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
           </Stack>
           <Typography
             ref={updateTextRef}
-            maxHeight={isReadingMore ? maxHeight : 286}
+            maxHeight={isReadingMore ? maxHeight : 288}
             className='update-text'
           >
             {text}

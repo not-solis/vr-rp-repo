@@ -88,7 +88,7 @@ export const Repo = () => {
           ...(tagFilters && tagFilters.length > 0
             ? { tags: tagFilters.join('|') }
             : {}),
-          ...(showActiveOnly ? { showActiveOnly: 'true' } : {}),
+          ...(showActiveOnly ? { active: 'true' } : {}),
         },
       }).then((pageData) => {
         if (!pageData) {
@@ -205,7 +205,13 @@ export const Repo = () => {
               labelId='repo-sort-by'
               label='Sort by'
               size='small'
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              onChange={(e) => {
+                const newSortBy = e.target.value as SortBy;
+                if (sortBy !== newSortBy) {
+                  setSortBy(newSortBy);
+                  setSortAscending(newSortBy === SortBy.Name);
+                }
+              }}
             >
               <MenuItem value={SortBy.Name}>Name</MenuItem>
               <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
