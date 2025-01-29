@@ -92,6 +92,29 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
                 <Shield color='success' />
               </Tooltip>
             )}
+            {showProject && project && (
+              <Link
+                to={`/repo/${project.id}`}
+                className='update-project-link colorless no-underline'
+                style={{ marginLeft: 16 }}
+              >
+                <Stack
+                  direction='row'
+                  alignItems='center'
+                  borderRadius={1.2}
+                  boxShadow='var(--mui-shadows-3)'
+                  height={32}
+                >
+                  {project.imageUrl && (
+                    <img alt={`${project.name} icon`} src={project.imageUrl} />
+                  )}
+
+                  <Typography variant='body2' padding='12px'>
+                    {project.name}
+                  </Typography>
+                </Stack>
+              </Link>
+            )}
             <Tooltip
               title={created.toLocaleString()}
               placement='top'
@@ -114,9 +137,6 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
               </Typography>
             </Tooltip>
           </Stack>
-          {showProject && project && (
-            <Link to={`/repo/${project.id}`}>{project.name}</Link>
-          )}
           <Typography
             ref={updateTextRef}
             maxHeight={isReadingMore ? maxHeight : 286}

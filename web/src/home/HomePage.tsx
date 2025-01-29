@@ -83,7 +83,12 @@ export const HomePage = () => {
               }
             >
               {updates?.map((update) => (
-                <UpdateComponent key={update.id} update={update} fullWidth />
+                <UpdateComponent
+                  key={update.id}
+                  update={update}
+                  fullWidth
+                  showProject
+                />
               ))}
             </InfiniteScroll>
           </div>

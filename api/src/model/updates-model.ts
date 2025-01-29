@@ -24,14 +24,16 @@ export const getUpdates = async (
       `SELECT
         users.*,
         updates.*,
-        roleplay_projects.name as project_name
+        roleplay_projects.name as project_name,
+        roleplay_projects.image_url as project_image_url
       FROM updates
-        INNER JOIN users ON (updates.user_id = users.user_id AND users.role != 'Banned')
-        LEFT JOIN roleplay_projects
-          ON (updates.project_id = roleplay_projects.id AND roleplay_projects.status != 'Deleted')
+        INNER JOIN users ON updates.user_id = users.user_id
+        LEFT JOIN roleplay_projects ON updates.project_id = roleplay_projects.id
       WHERE
         ($1::uuid IS NULL OR updates.project_id=$1)
         AND ($2::uuid IS NULL OR updates.user_id=$2)
+        AND users.role != 'Banned'
+        AND roleplay_projects.status != 'Deleted'
       ORDER BY created DESC
       OFFSET $3 LIMIT $4`,
       [projectId, userId, start, limit + 1],
@@ -50,6 +52,7 @@ export const getUpdates = async (
               ? {
                   id: row.project_id,
                   name: row.project_name,
+                  imageUrl: row.project_image_url,
                 }
               : undefined,
             user: remapUser(row),

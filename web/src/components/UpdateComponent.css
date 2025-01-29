@@ -20,6 +20,27 @@
   transition: max-height 0.4s;
 }
 
+.update-project-link div {
+  background-color: var(--mui-palette-background-paper);
+  transition: background-color 0.3s;
+}
+
+.update-project-link img {
+  height: 100%;
+  width: min-content;
+  min-width: 32px;
+  max-width: 64px;
+  /* border-right: 1px solid var(--mui-palette-divider); */
+  object-fit: contain;
+  box-shadow:
+    2px 0px 2px -1px rgba(0, 0, 0, 0.12),
+    4px 0px 5px 0px rgba(0, 0, 0, 0.1);
+}
+
+.update-project-link div:hover {
+  background-color: rgb(60, 63, 67);
+}
+
 .read-more-text {
   width: fit-content;
   color: rgb(116, 218, 243);
