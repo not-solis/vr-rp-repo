@@ -182,6 +182,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     : { ...projectData, otherLinks: otherLinks ?? [] };
   const {
     name = '',
+    tags = [],
     description = '',
     shortDescription = '',
     owner,
@@ -393,9 +394,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       .finally(() => setOwnershipDialogOpen(false));
   };
 
-  const metaName = isNew ? 'New RP Project' : projectData?.name;
+  const metaName = `${isNew ? 'New RP Project' : projectData?.name} | VR Roleplay Repo`;
   const metaDescription = isNew
-    ? 'Create a new roleplay project in the Repo'
+    ? 'Create a new roleplay project in the Repo!'
     : projectData?.shortDescription;
 
   const openStatusMenu = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -474,6 +475,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       <Helmet>
         <title>{metaName}</title>
         <meta title={metaName} />
+        <meta name='keywords' content={tags.join(', ')} />
         <meta property='og:title' content={metaName} />
         <meta property='og:image' content={projectData?.imageUrl} />
         <meta property='og:image:alt' content={`${metaName} icon`} />

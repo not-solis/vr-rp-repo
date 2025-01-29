@@ -247,8 +247,22 @@ export function App() {
     </h1>
   );
 
+  const metaName = 'The VR Roleplay Myriad';
+
   return (
     <HelmetProvider>
+      <Helmet>
+        <title>{metaName}</title>
+        <meta title={metaName} />
+        <meta property='og:site_name' content='Myriad' />
+        <meta property='og:title' content={metaName} />
+        {/* <meta property='og:image' content={projectData?.imageUrl} />
+        <meta property='og:image:alt' content={`${metaName} icon`} /> */}
+        <meta
+          property='og:description'
+          content='The front page of VR Roleplay'
+        />
+      </Helmet>
       <ThemeProvider theme={theme}>
         <SnackbarContext.Provider
           value={{
