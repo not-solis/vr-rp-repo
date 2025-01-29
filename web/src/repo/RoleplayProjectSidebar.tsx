@@ -53,6 +53,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   } = props;
   const {
     owner,
+    name,
     imageUrl = '',
     tags = [],
     setting = '',
@@ -180,11 +181,11 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
 
   return (
     <div id='project-sidebar' className={isOpen ? '' : 'closed'}>
-      <div
-        className='scrollable-y hidden-scrollbar'
-        style={{ width: '100%', height: '100%' }}
-      >
-        <div id='project-sidebar-container'>
+      <div style={{ width: '100%', height: '100%' }}>
+        <div
+          id='project-sidebar-container'
+          className='scrollable-y hidden-scrollbar'
+        >
           <div id='project-sidebar-content'>
             {(imageUrl || imageFile) && (
               <CardMedia

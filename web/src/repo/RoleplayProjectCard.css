@@ -93,8 +93,14 @@ div.project-card {
   margin: auto;
 }
 
+@media (max-width: 500px) {
+  div.project-card {
+    --min-card-width: 100%;
+  }
+}
+
 @media (max-width: 720px) {
-  .project-card {
+  div.project-card {
     border-radius: 0 !important;
     border-left: none !important;
     border-right: none !important;
@@ -102,7 +108,7 @@ div.project-card {
 }
 
 @media (max-width: 500px) {
-  .project-card {
+  div.project-card {
     min-width: 100%;
   }
 }

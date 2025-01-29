@@ -41,7 +41,7 @@
 }
 
 #project-sidebar-content {
-  padding: 30px;
+  padding: min(30px, 3vw);
   display: flex;
   flex-direction: column;
   align-items: flex-start;

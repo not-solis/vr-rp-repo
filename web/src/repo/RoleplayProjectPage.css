@@ -73,6 +73,29 @@
   padding-left: 4px;
 }
 
+#edit-action-buttons {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+  top: 12px;
+  right: 12px;
+}
+
+@media (max-width: 500px) {
+  #edit-action-buttons {
+    flex-direction: column-reverse;
+  }
+  #project-info {
+    flex-basis: 100vw;
+  }
+
+  #project-update-panel {
+    flex-basis: 100vw;
+  }
+}
+
 @media (min-width: 800px) {
   #project-content {
     padding-right: var(--project-sidebar-width);

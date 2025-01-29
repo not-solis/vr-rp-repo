@@ -151,7 +151,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       return queryServer<PageData<Update>>('/updates', {
         queryParams: { projectId: id! },
       }).then((pageData) => {
-        console.log(pageData);
         return pageData?.data?.map((update) => {
           const { created, ...rest } = update;
           return { created: new Date(created), ...rest };
@@ -592,18 +591,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
             {!isEditing && stackUpdates && updatePanel}
           </div>
           {!isEditing && !stackUpdates && updatePanel}
-          <Stack
-            direction='row'
-            justifyContent='flex-end'
-            gap={0.6}
-            style={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              display: 'flex',
-              gap: 8,
-            }}
-          >
+          <div id='edit-action-buttons'>
             {!isLoading &&
               !otherLinksLoading &&
               canEdit &&
@@ -651,7 +639,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                   </IconButton>
                 </>
               ))}
-          </Stack>
+          </div>
         </div>
       </div>
 
