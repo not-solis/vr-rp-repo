@@ -79,10 +79,8 @@ div.project-card {
   flex: 0 0 var(--project-image-size);
   width: var(--project-image-size);
   height: var(--project-image-size);
-  border-width: 1.5px;
-  border-style: double;
-  border-color: var(--mui-palette-divider);
   border-radius: 20px;
+  box-shadow: var(--mui-shadows-5);
   overflow: hidden;
   margin-right: 12px;
   display: flex;
