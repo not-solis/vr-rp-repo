@@ -267,7 +267,14 @@ export const Repo = () => {
       <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
         {isFetching && (
           <LinearProgress
-            style={{ position: 'absolute', marginTop: -3, left: 0, right: 0 }}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              height: 6,
+              left: 0,
+              right: 0,
+              zIndex: 2,
+            }}
           />
         )}
         {results}
