@@ -18,6 +18,7 @@ export interface RoleplayProject {
   setting?: string;
   tags?: string[];
   runtime?: string;
+  started?: Date;
   status?: string;
   entryProcess?: string;
   applicationProcess?: string;
@@ -73,7 +74,7 @@ export const getProjects = async (
         LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
       GROUP BY roleplay_projects.id, users.user_id
-      ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'}
+      ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'} NULLS LAST
       ${name || sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
       OFFSET $1 LIMIT $2;
       `;
@@ -138,6 +139,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     description,
     setting,
     runtime,
+    started,
     tags,
     status,
     entryProcess,
@@ -161,6 +163,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           description,
           setting,
           runtime,
+          started,
           tags,
           status,
           entry_process,
@@ -170,7 +173,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           is_quest_compatible,
           discord_url,
           image_url)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
           RETURNING id;
           `,
           [
@@ -179,6 +182,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
             description,
             setting,
             runtime,
+            started,
             tags,
             status,
             entryProcess,
@@ -240,6 +244,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
     description,
     setting,
     runtime,
+    started,
     tags,
     status,
     entryProcess,
@@ -263,16 +268,17 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
           description=$3,
           setting=$4,
           runtime=$5,
-          tags=$6,
-          status=$7,
-          entry_process=$8,
-          application_process=$9,
-          has_support_cast=$10,
-          is_metaverse=$11,
-          is_quest_compatible=$12,
-          discord_url=$13,
-          image_url=$14
-          WHERE id=$15
+          started=$6,
+          tags=$7,
+          status=$8,
+          entry_process=$9,
+          application_process=$10,
+          has_support_cast=$11,
+          is_metaverse=$12,
+          is_quest_compatible=$13,
+          discord_url=$14,
+          image_url=$15
+          WHERE id=$16
           RETURNING id;
           `,
           [
@@ -281,6 +287,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             description,
             setting,
             runtime,
+            started,
             tags,
             status,
             entryProcess,

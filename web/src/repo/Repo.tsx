@@ -47,6 +47,7 @@ enum SortBy {
   Name = 'name',
   LastUpdated = 'last_updated',
   CreatedAt = 'created_at',
+  DateStarted = 'started',
 }
 
 const TITLE = 'The VR Roleplay Repo';
@@ -143,10 +144,13 @@ export const Repo = () => {
   }
 
   const getSortByText = () => {
-    if (sortBy === SortBy.Name) {
-      return sortAscending ? 'A to Z' : 'Z to A';
-    } else if (sortBy === SortBy.LastUpdated || sortBy === SortBy.CreatedAt) {
-      return `${sortAscending ? 'Least' : 'Most'} recent`;
+    switch (sortBy) {
+      case SortBy.Name:
+        return sortAscending ? 'A to Z' : 'Z to A';
+      case SortBy.LastUpdated:
+      case SortBy.CreatedAt:
+      case SortBy.DateStarted:
+        return `${sortAscending ? 'Least' : 'Most'} recent`;
     }
   };
 
@@ -216,6 +220,7 @@ export const Repo = () => {
               <MenuItem value={SortBy.Name}>Name</MenuItem>
               <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
               <MenuItem value={SortBy.CreatedAt}>Date added</MenuItem>
+              <MenuItem value={SortBy.DateStarted}>Date started</MenuItem>
             </Select>
           </FormControl>
 

@@ -1,6 +1,10 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
-import { faClipboard, faClock } from '@fortawesome/free-regular-svg-icons';
+import {
+  faCalendar,
+  faClipboard,
+  faClock,
+} from '@fortawesome/free-regular-svg-icons';
 import {
   faAnglesLeft,
   faAnglesRight,
@@ -21,6 +25,8 @@ import {
   Stack,
   ThemeProvider,
 } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useQuery } from '@tanstack/react-query';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -55,6 +61,7 @@ library.add(faLink);
 library.add(faAnglesRight);
 library.add(faAnglesLeft);
 library.add(faClock);
+library.add(faCalendar);
 
 // react-time-ago default locale
 TimeAgo.addDefaultLocale(en);
@@ -294,63 +301,65 @@ export function App() {
           <AuthContext.Provider
             value={{ user, isAuthLoading, isAuthenticated, hasPermission }}
           >
-            <CookiesProvider>
-              <Helmet>
-                <meta property='og:url' content={window.location.href} />
-              </Helmet>
-              <BrowserRouter>
-                <Box id='app-container'>
-                  <Navbar />
-                  <div style={{ flexGrow: 1, minHeight: 0 }}>
-                    <Routes>
-                      <Route path='/' element={<HomePage />} />
-                      <Route path='/repo' element={<Repo />} />
-                      <Route
-                        path='/repo/new'
-                        element={<RoleplayProjectPage isNew />}
-                      />
-                      <Route
-                        path='/repo/:id'
-                        element={<RoleplayProjectPage />}
-                      />
-                      <Route path='/community' element={comingSoon} />
-                      <Route path='/resources' element={comingSoon} />
-                      <Route path='/about-us' element={comingSoon} />
-                      <Route
-                        path='*'
-                        element={<Navigate to='/' replace={true} />}
-                      />
-                    </Routes>
-                  </div>
-                </Box>
-                <Snackbar
-                  open={snackbarOpen}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
-                  onClose={onSnackbarClose}
-                  disableWindowBlurListener
-                  ClickAwayListenerProps={{ onClickAway: () => null }}
-                >
-                  <Alert
-                    severity={snackbarProps?.severity}
-                    variant='standard'
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <CookiesProvider>
+                <Helmet>
+                  <meta property='og:url' content={window.location.href} />
+                </Helmet>
+                <BrowserRouter>
+                  <Box id='app-container'>
+                    <Navbar />
+                    <div style={{ flexGrow: 1, minHeight: 0 }}>
+                      <Routes>
+                        <Route path='/' element={<HomePage />} />
+                        <Route path='/repo' element={<Repo />} />
+                        <Route
+                          path='/repo/new'
+                          element={<RoleplayProjectPage isNew />}
+                        />
+                        <Route
+                          path='/repo/:id'
+                          element={<RoleplayProjectPage />}
+                        />
+                        <Route path='/community' element={comingSoon} />
+                        <Route path='/resources' element={comingSoon} />
+                        <Route path='/about-us' element={comingSoon} />
+                        <Route
+                          path='*'
+                          element={<Navigate to='/' replace={true} />}
+                        />
+                      </Routes>
+                    </div>
+                  </Box>
+                  <Snackbar
+                    open={snackbarOpen}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    autoHideDuration={snackbarProps?.autoHideDuration ?? 3000}
                     onClose={onSnackbarClose}
-                    style={{ width: '100%' }}
+                    disableWindowBlurListener
+                    ClickAwayListenerProps={{ onClickAway: () => null }}
                   >
-                    <AlertTitle>{snackbarProps?.title}</AlertTitle>
-                    {typeof snackbarProps?.content === 'string' ? (
-                      snackbarProps?.content
-                    ) : (
-                      <Stack spacing={1}>
-                        {snackbarProps?.content.map((c, i) => (
-                          <div key={i}>- {c}</div>
-                        ))}
-                      </Stack>
-                    )}
-                  </Alert>
-                </Snackbar>
-              </BrowserRouter>
-            </CookiesProvider>
+                    <Alert
+                      severity={snackbarProps?.severity}
+                      variant='standard'
+                      onClose={onSnackbarClose}
+                      style={{ width: '100%' }}
+                    >
+                      <AlertTitle>{snackbarProps?.title}</AlertTitle>
+                      {typeof snackbarProps?.content === 'string' ? (
+                        snackbarProps?.content
+                      ) : (
+                        <Stack spacing={1}>
+                          {snackbarProps?.content.map((c, i) => (
+                            <div key={i}>- {c}</div>
+                          ))}
+                        </Stack>
+                      )}
+                    </Alert>
+                  </Snackbar>
+                </BrowserRouter>
+              </CookiesProvider>
+            </LocalizationProvider>
           </AuthContext.Provider>
         </SnackbarContext.Provider>
       </ThemeProvider>

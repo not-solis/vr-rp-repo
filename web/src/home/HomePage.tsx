@@ -1,22 +1,41 @@
 import './HomePage.css';
-import { CircularProgress, Stack, Typography } from '@mui/material';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { Send } from '@mui/icons-material';
+import {
+  CircularProgress,
+  IconButton,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Slider from 'react-slick';
 
 import { UpdateComponent } from '../components/UpdateComponent';
+import { useAuth } from '../context/AuthProvider';
+import { useSnackbar } from '../context/SnackbarProvider';
 import {
   remapRoleplayProject,
   RoleplayProject,
 } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
-import { Update } from '../model/Update';
+import { postUpdate, Update } from '../model/Update';
+import { UserRole } from '../model/User';
 import { RoleplayProjectCard } from '../repo/RoleplayProjectCard';
 
 const UPDATE_PAGE_SIZE = 50;
 const PROJECT_CAROUSEL_TOTAL = 10;
 
 export const HomePage = () => {
+  const queryClient = useQueryClient();
+  const { hasPermission } = useAuth();
+  const [updateText, setUpdateText] = useState('');
+  const { createErrorSnackbar } = useSnackbar();
   const {
     data: updatePageData,
     fetchNextPage,
@@ -67,6 +86,12 @@ export const HomePage = () => {
   });
 
   const updates = updatePageData?.pages.map((p) => p.data).flat();
+
+  const refetchUpdates = () => {
+    queryClient.refetchQueries({
+      queryKey: ['project', 'updates'],
+    });
+  };
 
   return (
     <Stack id='home-page' direction='column'>
@@ -120,6 +145,45 @@ export const HomePage = () => {
         </Stack>
         <Stack id='home-page-updates-bar' gap={2}>
           <Typography variant='h3'>Updates</Typography>
+          {hasPermission(UserRole.Admin) && (
+            <Stack>
+              <TextField
+                value={updateText}
+                onChange={(e) =>
+                  setUpdateText(e.target.value.substring(0, 2048))
+                }
+                fullWidth
+                multiline
+                minRows={4}
+                maxRows={8}
+                helperText='Admin announcements only!'
+                slotProps={{
+                  input: { style: { borderRadius: 8 } },
+                  formHelperText: { style: { maxWidth: 'calc(100% - 24px)' } },
+                }}
+              />
+              <Stack direction='row' justifyContent='flex-end' marginTop={-2}>
+                <IconButton
+                  style={{
+                    borderRadius: 8,
+                  }}
+                  onClick={() =>
+                    postUpdate({
+                      text: updateText,
+                      onSuccess: () => {
+                        refetchUpdates();
+                        setUpdateText('');
+                      },
+                      onFailure: createErrorSnackbar,
+                    })
+                  }
+                >
+                  <Typography>Post</Typography>
+                  <Send style={{ paddingLeft: 8 }} />
+                </IconButton>
+              </Stack>
+            </Stack>
+          )}
           <Stack
             id='all-updates'
             className='scrollable-y hidden-scrollbar'
@@ -136,7 +200,6 @@ export const HomePage = () => {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                paddingLeft: 12,
                 gap: 12,
               }}
               loader={

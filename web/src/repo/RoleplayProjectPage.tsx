@@ -410,7 +410,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       <Typography variant='h2'>Updates</Typography>
       <Stack id='project-updates'>
         {canEdit && (
-          <Stack gap={0.4} paddingRight={4}>
+          <Stack paddingRight={4}>
             <TextField
               value={updateText}
               onChange={(e) => setUpdateText(e.target.value.substring(0, 2048))}
@@ -418,11 +418,12 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
               multiline
               minRows={4}
               maxRows={8}
+              helperText='For major updates! Posts are visible to everyone.'
               slotProps={{
                 input: { style: { borderRadius: 8 } },
               }}
             />
-            <Stack direction='row' justifyContent='flex-end'>
+            <Stack direction='row' justifyContent='flex-end' marginTop={-2}>
               <IconButton
                 style={{
                   borderRadius: 8,

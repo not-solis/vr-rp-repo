@@ -8,6 +8,8 @@ import {
   IconButton,
   Typography,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
@@ -58,6 +60,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     tags = [],
     setting = '',
     runtime = '',
+    started,
     isMetaverse = false,
     entryProcess = '',
     applicationProcess = '',
@@ -316,6 +319,38 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                         setEditProject({ ...project, runtime: e.target.value })
                       }
                       style={{ width: '100%' }}
+                    />
+                  ) : undefined
+                }
+              />
+
+              <IconText
+                tooltip='Date started'
+                tooltipPlacement='left'
+                text={started?.toLocaleDateString(undefined, {
+                  dateStyle: 'long',
+                })}
+                icon='calendar'
+                iconPrefix='far'
+                containerStyle={{ width: '100%' }}
+                component={
+                  isEditing ? (
+                    <DatePicker
+                      label='Date started'
+                      defaultValue={started && dayjs(started)}
+                      format='MMMM Do, YYYY'
+                      onChange={(val) =>
+                        setEditProject({ ...project, started: val?.toDate() })
+                      }
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          variant: 'standard',
+                        },
+                        inputAdornment: {
+                          style: { transform: 'translate(-8px, -3px)' },
+                        },
+                      }}
                     />
                   ) : undefined
                 }
