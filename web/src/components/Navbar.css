@@ -30,7 +30,7 @@
 
 .main-menu h1 {
   margin: 0;
-  font-size: min(2.3em, 1.1em + 1.5vw);
+  font-size: min(2.3em, 1em + 1.4vw);
   font-weight: bold;
 }
 

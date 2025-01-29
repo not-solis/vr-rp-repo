@@ -243,7 +243,7 @@ export function App() {
     setSnackbarOpen(false);
   };
 
-  const comingSoon = (
+  const comingSoon = (what: string) => (
     <h1
       style={{
         margin: '25vh auto',
@@ -252,7 +252,7 @@ export function App() {
         fontSize: 84,
       }}
     >
-      Coming soon!
+      Coming soon: {what}!
     </h1>
   );
 
@@ -321,9 +321,16 @@ export function App() {
                           path='/repo/:id'
                           element={<RoleplayProjectPage />}
                         />
-                        <Route path='/community' element={comingSoon} />
-                        <Route path='/resources' element={comingSoon} />
-                        <Route path='/about-us' element={comingSoon} />
+                        <Route
+                          path='/community'
+                          element={comingSoon('articles, and asset resources')}
+                        />
+                        <Route
+                          path='/about-us'
+                          element={comingSoon(
+                            'info about us, the website, how to contact us and how to report bugs',
+                          )}
+                        />
                         <Route
                           path='*'
                           element={<Navigate to='/' replace={true} />}
