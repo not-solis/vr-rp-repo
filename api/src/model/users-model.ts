@@ -38,7 +38,11 @@ export const getUserById = async (id: string) => {
         user_id,
         name,
         image_url,
-        role
+        role,
+        email,
+        discord_id,
+        google_id,
+        twitch_id
       FROM users
       WHERE user_id=$1`,
       [id],

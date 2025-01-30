@@ -239,7 +239,10 @@ export const UserComponent = () => {
             <Typography>{user.name}</Typography>
           </Stack>
         </li>
-        <Divider />
+        <li style={{ padding: '4px 12px 8px' }}>
+          <Typography variant='subtitle1'>{user.email}</Typography>
+        </li>
+        <Divider variant='middle' />
         <li style={{ padding: '10px 12px' }}>
           <Stack direction='row' alignItems='center' spacing={1}>
             <TextField

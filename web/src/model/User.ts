@@ -9,4 +9,8 @@ export interface User {
   name: string;
   imageUrl?: string;
   role: UserRole;
+  email: string;
+  discordId?: string;
+  googleId?: string;
+  twitchId?: string;
 }

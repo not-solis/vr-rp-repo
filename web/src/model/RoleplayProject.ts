@@ -58,6 +58,7 @@ export const remapRoleplayProject = (project: any): RoleplayProject => {
           id: project.owner_id,
           name: project.owner_name,
           role: project.owner_role,
+          email: project.owner_email,
         }
       : undefined,
     lastUpdated: new Date(project.last_updated),

@@ -12,6 +12,7 @@
   object-fit: cover;
   object-position: 36px;
   transition: object-position 2.5s ease-out;
+  pointer-events: none;
 }
 
 #honse.show {

@@ -62,6 +62,7 @@ export const getProjects = async (
       users.user_id as owner_id,
       users.name as owner_name,
       users.role as owner_role,
+      users.email as owner_email,
       array_agg(
         json_build_object(
           'label', roleplay_links.label,
@@ -110,7 +111,8 @@ export const getProjectById = async (id: string) => {
         roleplay_projects.*,
         users.user_id as owner_id,
         users.name as owner_name,
-        users.role as owner_role
+        users.role as owner_role,
+        users.email as owner_email
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on users.user_id = ownership.user_id
