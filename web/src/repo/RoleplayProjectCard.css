@@ -113,9 +113,10 @@ div.project-card {
   }
 }
 
+/* Slick Slider specific card styling */
 .slick-slider .project-card {
   margin: 16px 20px;
-  height: 360px;
+  height: 366px;
 }
 
 .slick-slider .project-image {
@@ -131,6 +132,7 @@ div.project-card {
 
 .slick-slider .project-header {
   flex-wrap: wrap;
+  width: calc(100% - 52px);
   margin-left: 52px;
   margin-bottom: 12px;
   row-gap: 8px;

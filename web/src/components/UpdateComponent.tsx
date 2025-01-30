@@ -65,7 +65,8 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
             direction='row'
             alignItems='center'
             flexWrap='wrap'
-            gap={0.5}
+            columnGap={0.5}
+            rowGap={1}
             className='update-card-header'
           >
             <Avatar
