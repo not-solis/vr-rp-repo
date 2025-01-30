@@ -16,8 +16,8 @@ export const Navbar = () => {
         alignItems='center'
         flexWrap='wrap'
       >
-        <Link id='myriad-title' to='/' className='no-underline'>
-          <h1>VR Roleplay Myriad</h1>
+        <Link id='repo-title' to='/' className='no-underline'>
+          <h1>VR Roleplay Repo</h1>
         </Link>
         <Stack direction='row' alignItems='center' gap={2.4}>
           {['Repo', 'Community', 'About Us'].map((t) => {

@@ -497,7 +497,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 <AlertTitle>Note:</AlertTitle>
                 <Stack spacing={0.8}>
                   <Typography variant='body1'>
-                    This project was added to the Repo by a Myriad admin. Some
+                    This project was added to the Repo by a Repo admin. Some
                     information may be either missing or inaccurate.
                   </Typography>
                   <Typography variant='body1'>
@@ -734,7 +734,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id='request-ownership-dialog-description'>
-            This request will be reviewed by a Myriad admin. Make sure you're
+            This request will be reviewed by a Repo admin. Make sure you're
             authorized to represent the project before submitting a request.
           </DialogContentText>
         </DialogContent>

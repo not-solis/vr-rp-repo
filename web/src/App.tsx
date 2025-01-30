@@ -256,20 +256,35 @@ export function App() {
     </h1>
   );
 
-  const metaName = 'The VR Roleplay Myriad';
+  const metaName = 'VR Roleplay Repo';
 
   return (
     <HelmetProvider>
       <Helmet>
         <title>{metaName}</title>
         <meta title={metaName} />
-        <meta property='og:site_name' content='Myriad' />
         <meta property='og:title' content={metaName} />
         {/* <meta property='og:image' content={projectData?.imageUrl} />
         <meta property='og:image:alt' content={`${metaName} icon`} /> */}
         <meta
           property='og:description'
           content='The front page of VR Roleplay'
+        />
+        <meta
+          name='keywords'
+          content={[
+            'roleplay',
+            'rp',
+            'larp',
+            'vr',
+            'virtual',
+            'virtual reality',
+            'vrrp',
+            'vrlarp',
+            'vrroleplay',
+            'repo',
+            'myriad',
+          ].join(', ')}
         />
       </Helmet>
       <ThemeProvider theme={theme}>

@@ -22,7 +22,7 @@
   transition: filter 0.3s;
 }
 
-#myriad-title {
+#repo-title {
   display: flex;
   align-items: center;
   color: #b92c69;
@@ -40,7 +40,7 @@
   font-weight: bold;
 }
 
-.main-menu a:hover:not(#myriad-title) {
+.main-menu a:hover:not(#repo-title) {
   filter: brightness(130%);
   cursor: pointer;
 }
