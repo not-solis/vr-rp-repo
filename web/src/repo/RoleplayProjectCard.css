@@ -134,13 +134,23 @@ div.project-card {
   flex-wrap: wrap;
   width: calc(100% - 52px);
   margin-left: 52px;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   row-gap: 8px;
+}
+
+.slick-slider
+  .project-header:not(
+    .slick-slider .project-header:has(+ .MuiTypography-subtitle1)
+  ) {
+  margin-bottom: 44px;
+}
+
+.slick-slider .project-overview .MuiTypography-subtitle1 {
+  transform: translate(52px, -20px);
 }
 
 .slick-slider .project-header h4 {
   font-size: 1.3rem;
-  flex-basis: 100%;
 }
 
 .slick-slider .project-image-footer {

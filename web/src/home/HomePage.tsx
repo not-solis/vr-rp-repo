@@ -25,7 +25,7 @@ import {
 } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
-import { UserRole } from '../model/User';
+import { User, UserRole } from '../model/User';
 import { RoleplayProjectCard } from '../repo/RoleplayProjectCard';
 
 const UPDATE_PAGE_SIZE = 50;
