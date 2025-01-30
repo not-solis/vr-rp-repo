@@ -3,6 +3,9 @@ export const {
   DISCORD_REDIRECT_PATH = '',
   DISCORD_CLIENT_ID = '',
   DISCORD_CLIENT_SECRET = '',
+  GOOGLE_REDIRECT_PATH = '',
+  GOOGLE_CLIENT_ID = '',
+  GOOGLE_CLIENT_SECRET = '',
   JWT_SECRET = '',
   CLIENT_URL = '',
   CLIENT_URL_PATTERN = '',
@@ -15,6 +18,12 @@ if (!DISCORD_REDIRECT_PATH) {
   throw new Error('No DISCORD_CLIENT_ID provided');
 } else if (!DISCORD_CLIENT_SECRET) {
   throw new Error('No DISCORD_CLIENT_SECRET provided');
+} else if (!GOOGLE_REDIRECT_PATH) {
+  throw new Error('No GOOGLE_REDIRECT_PATH provided');
+} else if (!GOOGLE_CLIENT_ID) {
+  throw new Error('No GOOGLE_CLIENT_ID provided');
+} else if (!GOOGLE_CLIENT_SECRET) {
+  throw new Error('No GOOGLE_CLIENT_SECRET provided');
 } else if (!JWT_SECRET) {
   throw new Error('No JWT_SECRET provided');
 } else if (!CLIENT_URL && !CLIENT_URL_PATTERN) {
@@ -24,4 +33,4 @@ if (!DISCORD_REDIRECT_PATH) {
 }
 
 export const isDev = NODE_ENV === 'development';
-export const PORT = parseInt(process.env.PORT ?? '3001');
+export const PORT = process.env.PORT ?? 3001;

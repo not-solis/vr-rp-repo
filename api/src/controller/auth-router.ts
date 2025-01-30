@@ -1,14 +1,20 @@
-import { RequestHandler, Router } from 'express';
+import { RequestHandler, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import {
   createUser,
   getUserByDiscordId,
+  getUserByEmail,
+  getUserByGoogleId,
   getUserById,
+  updateGoogleId,
 } from '../model/users-model.js';
 import {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   DISCORD_REDIRECT_PATH,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_PATH,
   isDev,
   JWT_SECRET,
 } from '../env/config.js';
@@ -33,6 +39,24 @@ export const auth: RequestHandler = (req, res, next) => {
     console.error(err);
     respondError(res);
   }
+};
+
+const oauthRespond = (res: Response, status: number, result: unknown = {}) => {
+  res.status(status).send(`
+    <!DOCTYPE html>
+    <html>
+      <head></head>
+      <body style='background-color: #1f2023'>
+        <script>
+          window.addEventListener("message", function (event) {
+            if (event.data.message === "requestResult") {
+              event.source.postMessage({"message": "deliverResult", result: ${JSON.stringify(result)} }, "*");
+            }
+          });
+        </script>
+      </body>
+    </html>
+  `);
 };
 
 const router = Router();
@@ -73,21 +97,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/discord', async (req, res) => {
   const respond = (status: number, result: unknown = {}) => {
-    res.status(status).send(`
-      <!DOCTYPE html>
-      <html>
-        <head></head>
-        <body style='background-color: #1f2023'>
-          <script>
-            window.addEventListener("message", function (event) {
-              if (event.data.message === "requestResult") {
-                event.source.postMessage({"message": "deliverResult", result: ${JSON.stringify(result)} }, "*");
-              }
-            });
-          </script>
-        </body>
-      </html>
-    `);
+    oauthRespond(res, status, result);
   };
 
   const { code } = req.query;
@@ -123,18 +133,105 @@ router.get('/discord', async (req, res) => {
       id: discordId,
       global_name,
       avatar,
+      email,
     } = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `${token_type} ${access_token}` },
     }).then<any>((res) => res.json());
 
     const user =
       (await getUserByDiscordId(discordId)) ??
+      (await getUserByEmail(email)) ??
       (await createUser(
-        discordId,
         global_name,
         `https://cdn.discordapp.com/avatars/${discordId}/${avatar}`,
+        'discord_id',
+        discordId,
+        email,
       ));
-    const { userId: id } = user!;
+    const { userId: id, discordId: newDiscordId } = user!;
+
+    // Update existing record with ID
+    if (!newDiscordId) {
+      updateGoogleId(id, discordId);
+    }
+
+    // Sign user JWT
+    const token = sign({ id }, JWT_SECRET, {
+      expiresIn: TOKEN_EXPIRATION,
+    });
+
+    // Set cookie for the user
+    res.cookie('userToken', token, {
+      maxAge: TOKEN_EXPIRATION * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+
+    respond(200, user);
+  } catch (error) {
+    console.error(error);
+    respond(500, error);
+  }
+});
+
+router.get('/google', async (req, res) => {
+  const respond = (status: number, result: unknown = {}) => {
+    oauthRespond(res, status, result);
+  };
+
+  const code = req.query.code as string;
+  if (!code) {
+    respond(400, { message: 'Authorization code must be provided' });
+    return;
+  }
+
+  const secure = !isDev;
+  const redirectUrl = new URL(
+    GOOGLE_REDIRECT_PATH,
+    `http${secure ? 's' : ''}://${req.headers.host}`,
+  );
+
+  try {
+    const { access_token, token_type } = await fetch(
+      'https://oauth2.googleapis.com/token',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: GOOGLE_CLIENT_ID,
+          client_secret: GOOGLE_CLIENT_SECRET,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUrl.toString(),
+        }),
+      },
+    ).then<any>((res) => res.json());
+
+    const {
+      id: googleId,
+      email,
+      picture,
+    } = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `${token_type} ${access_token}` },
+    }).then<any>((res) => res.json());
+
+    const user =
+      (await getUserByGoogleId(googleId)) ??
+      (await getUserByEmail(email)) ??
+      (await createUser(
+        (email as string).substring(0, (email as string).indexOf('@')),
+        picture,
+        'google_id',
+        googleId,
+        email,
+      ));
+    const { userId: id, googleId: newGoogleId } = user!;
+
+    // Update existing record with ID
+    if (!newGoogleId) {
+      updateGoogleId(id, googleId);
+    }
 
     // Sign user JWT
     const token = sign({ id }, JWT_SECRET, {

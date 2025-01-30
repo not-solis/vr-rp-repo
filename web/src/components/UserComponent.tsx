@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import { VisuallyHiddenInput } from './VisuallyHiddenInput';
@@ -31,6 +30,8 @@ import { useSnackbar } from '../context/SnackbarProvider';
 import {
   REACT_APP_DISCORD_CLIENT_ID,
   REACT_APP_DISCORD_REDIRECT_PATH,
+  REACT_APP_GOOGLE_CLIENT_ID,
+  REACT_APP_GOOGLE_REDIRECT_PATH,
   REACT_APP_MAX_IMAGE_SIZE,
   REACT_APP_SERVER_BASE_URL,
 } from '../Env';
@@ -118,12 +119,12 @@ export const UserComponent = () => {
     closeMenu();
   };
 
-  const onAuthSuccess = () => {
+  const onDiscordAuthSuccess = () => {
     closeMenu();
     refetchUser();
   };
 
-  const onAuthFailure = (err: Error) => {
+  const onDiscordAuthFailure = (err: Error) => {
     closeMenu();
     console.error(err);
   };
@@ -203,7 +204,7 @@ export const UserComponent = () => {
         }}
         slotProps={{
           root: {
-            style: { display: 'contents' },
+            style: { display: 'contents', width: 'fit-content' },
           },
         }}
       >
@@ -325,21 +326,58 @@ export const UserComponent = () => {
       >
         <li>
           <OAuth2Login
+            authorizationUrl='https://accounts.google.com/o/oauth2/v2/auth'
+            responseType='code'
+            isCrossOrigin
+            clientId={REACT_APP_GOOGLE_CLIENT_ID}
+            redirectUri={new URL(
+              REACT_APP_GOOGLE_REDIRECT_PATH,
+              REACT_APP_SERVER_BASE_URL,
+            ).toString()}
+            scope='email'
+            buttonText='Google'
+            onSuccess={onDiscordAuthSuccess}
+            onFailure={onDiscordAuthFailure}
+            render={({ className, buttonText, children, onClick }) => (
+              <Button
+                style={{
+                  display: 'flex',
+                  backgroundColor: 'white',
+                  color: '#303030',
+                  textTransform: 'none',
+                }}
+                variant='contained'
+                startIcon={
+                  <img
+                    src='https://www.vectorlogo.zone/logos/google/google-icon.svg'
+                    width={20}
+                  />
+                }
+                onClick={onClick}
+              >
+                {buttonText}
+              </Button>
+            )}
+          />
+        </li>
+        <li>
+          <OAuth2Login
             authorizationUrl='https://discord.com/oauth2/authorize'
             responseType='code'
             isCrossOrigin
-            clientId={REACT_APP_DISCORD_CLIENT_ID ?? ''}
+            clientId={REACT_APP_DISCORD_CLIENT_ID}
             redirectUri={new URL(
               REACT_APP_DISCORD_REDIRECT_PATH,
               REACT_APP_SERVER_BASE_URL,
             ).toString()}
-            scope='identify'
+            scope='identify+email'
             buttonText='Discord'
-            onSuccess={onAuthSuccess}
-            onFailure={onAuthFailure}
+            onSuccess={onDiscordAuthSuccess}
+            onFailure={onDiscordAuthFailure}
             render={({ className, buttonText, children, onClick }) => (
               <Button
                 style={{
+                  display: 'flex',
                   backgroundColor: '#5865F2',
                   color: theme.palette.text.primary,
                   textTransform: 'none',
