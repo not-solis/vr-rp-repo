@@ -328,6 +328,37 @@ export const UserComponent = () => {
       >
         <li>
           <OAuth2Login
+            authorizationUrl='https://discord.com/oauth2/authorize'
+            responseType='code'
+            isCrossOrigin
+            clientId={REACT_APP_DISCORD_CLIENT_ID}
+            redirectUri={new URL(
+              REACT_APP_DISCORD_REDIRECT_PATH,
+              REACT_APP_SERVER_BASE_URL,
+            ).toString()}
+            scope='identify+email'
+            buttonText='Discord'
+            onSuccess={onAuthSuccess}
+            onFailure={onAuthFailure}
+            render={({ className, buttonText, children, onClick }) => (
+              <Button
+                style={{
+                  display: 'flex',
+                  backgroundColor: '#5865F2',
+                  color: theme.palette.text.primary,
+                  textTransform: 'none',
+                }}
+                variant='contained'
+                startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
+                onClick={onClick}
+              >
+                {buttonText}
+              </Button>
+            )}
+          />
+        </li>
+        <li>
+          <OAuth2Login
             authorizationUrl='https://accounts.google.com/o/oauth2/v2/auth'
             responseType='code'
             isCrossOrigin
@@ -355,37 +386,6 @@ export const UserComponent = () => {
                     width={20}
                   />
                 }
-                onClick={onClick}
-              >
-                {buttonText}
-              </Button>
-            )}
-          />
-        </li>
-        <li>
-          <OAuth2Login
-            authorizationUrl='https://discord.com/oauth2/authorize'
-            responseType='code'
-            isCrossOrigin
-            clientId={REACT_APP_DISCORD_CLIENT_ID}
-            redirectUri={new URL(
-              REACT_APP_DISCORD_REDIRECT_PATH,
-              REACT_APP_SERVER_BASE_URL,
-            ).toString()}
-            scope='identify+email'
-            buttonText='Discord'
-            onSuccess={onAuthSuccess}
-            onFailure={onAuthFailure}
-            render={({ className, buttonText, children, onClick }) => (
-              <Button
-                style={{
-                  display: 'flex',
-                  backgroundColor: '#5865F2',
-                  color: theme.palette.text.primary,
-                  textTransform: 'none',
-                }}
-                variant='contained'
-                startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
                 onClick={onClick}
               >
                 {buttonText}
