@@ -1,5 +1,9 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faDiscord, faMeta } from '@fortawesome/free-brands-svg-icons';
+import {
+  faDiscord,
+  faMeta,
+  faTwitch,
+} from '@fortawesome/free-brands-svg-icons';
 import {
   faCalendar,
   faClipboard,
@@ -62,6 +66,7 @@ library.add(faAnglesRight);
 library.add(faAnglesLeft);
 library.add(faClock);
 library.add(faCalendar);
+library.add(faTwitch);
 
 // react-time-ago default locale
 TimeAgo.addDefaultLocale(en);

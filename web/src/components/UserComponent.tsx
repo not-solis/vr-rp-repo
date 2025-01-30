@@ -34,6 +34,8 @@ import {
   REACT_APP_GOOGLE_REDIRECT_PATH,
   REACT_APP_MAX_IMAGE_SIZE,
   REACT_APP_SERVER_BASE_URL,
+  REACT_APP_TWITCH_CLIENT_ID,
+  REACT_APP_TWITCH_REDIRECT_PATH,
 } from '../Env';
 import { queryServer } from '../model/ServerResponse';
 import './UserComponent.css';
@@ -119,12 +121,12 @@ export const UserComponent = () => {
     closeMenu();
   };
 
-  const onDiscordAuthSuccess = () => {
+  const onAuthSuccess = () => {
     closeMenu();
     refetchUser();
   };
 
-  const onDiscordAuthFailure = (err: Error) => {
+  const onAuthFailure = (err: Error) => {
     closeMenu();
     console.error(err);
   };
@@ -336,8 +338,8 @@ export const UserComponent = () => {
             ).toString()}
             scope='email'
             buttonText='Google'
-            onSuccess={onDiscordAuthSuccess}
-            onFailure={onDiscordAuthFailure}
+            onSuccess={onAuthSuccess}
+            onFailure={onAuthFailure}
             render={({ className, buttonText, children, onClick }) => (
               <Button
                 style={{
@@ -372,8 +374,8 @@ export const UserComponent = () => {
             ).toString()}
             scope='identify+email'
             buttonText='Discord'
-            onSuccess={onDiscordAuthSuccess}
-            onFailure={onDiscordAuthFailure}
+            onSuccess={onAuthSuccess}
+            onFailure={onAuthFailure}
             render={({ className, buttonText, children, onClick }) => (
               <Button
                 style={{
@@ -381,10 +383,40 @@ export const UserComponent = () => {
                   backgroundColor: '#5865F2',
                   color: theme.palette.text.primary,
                   textTransform: 'none',
-                  marginLeft: 'auto',
                 }}
                 variant='contained'
                 startIcon={<FontAwesomeIcon icon={['fab', 'discord']} />}
+                onClick={onClick}
+              >
+                {buttonText}
+              </Button>
+            )}
+          />
+        </li>
+        <li>
+          <OAuth2Login
+            authorizationUrl='https://id.twitch.tv/oauth2/authorize'
+            responseType='code'
+            isCrossOrigin
+            clientId={REACT_APP_TWITCH_CLIENT_ID}
+            redirectUri={new URL(
+              REACT_APP_TWITCH_REDIRECT_PATH,
+              REACT_APP_SERVER_BASE_URL,
+            ).toString()}
+            scope={encodeURIComponent('user:read:email')}
+            buttonText='Twitch'
+            onSuccess={onAuthSuccess}
+            onFailure={onAuthFailure}
+            render={({ className, buttonText, children, onClick }) => (
+              <Button
+                style={{
+                  display: 'flex',
+                  backgroundColor: '#8956fb',
+                  color: theme.palette.text.primary,
+                  textTransform: 'none',
+                }}
+                variant='contained'
+                startIcon={<FontAwesomeIcon icon={['fab', 'twitch']} />}
                 onClick={onClick}
               >
                 {buttonText}

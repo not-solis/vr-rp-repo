@@ -14,6 +14,7 @@ export interface User {
   email: string;
   discordId?: string;
   googleId?: string;
+  twitchId?: string;
 }
 
 export const remapUser = (user: any): User => {
@@ -25,6 +26,7 @@ export const remapUser = (user: any): User => {
     email: user.email,
     discordId: user.discord_id,
     googleId: user.google_id,
+    twitchId: user.twitch_id,
   };
 };
 
@@ -79,48 +81,12 @@ export const getUserByEmail = async (
     });
 };
 
-export const getUserByDiscordId = async (
+export const getUserByOAuthId = async (
+  idType: string,
   id: string,
 ): Promise<User | undefined> => {
   return await pool
-    .query(
-      `
-      SELECT
-        user_id,
-        name,
-        image_url,
-        role
-      FROM users
-      WHERE discord_id=$1;
-      `,
-      [id],
-    )
-    .then((results) => {
-      const success = results?.rows[0];
-      return success ? remapUser(results.rows[0]) : undefined;
-    })
-    .catch((err) => {
-      console.error(err);
-      throw new Error('Internal server error.');
-    });
-};
-
-export const getUserByGoogleId = async (
-  id: string,
-): Promise<User | undefined> => {
-  return await pool
-    .query(
-      `
-      SELECT
-        user_id,
-        name,
-        image_url,
-        role
-      FROM users
-      WHERE google_id=$1;
-      `,
-      [id],
-    )
+    .query(`SELECT * FROM users WHERE ${idType}=$1;`, [id])
     .then((results) => {
       const success = results?.rows[0];
       return success ? remapUser(results.rows[0]) : undefined;
@@ -143,7 +109,7 @@ export const createUser = async (
       `
       INSERT INTO users (${idType}, name, image_url, email)
       VALUES ($1, $2, $3, $4)
-      RETURNING user_id, discord_id, google_id
+      RETURNING user_id, discord_id, google_id, twitch_id
       `,
       [id, name, imageUrl, email],
     )
@@ -179,36 +145,21 @@ export const updateUserName = async (id: string, name: string) => {
     });
 };
 
-export const updateDiscordId = async (id: string, discordId: string) => {
+export const updateOAuthId = async (
+  idType: string,
+  userId: string,
+  oauthId: string,
+) => {
   return await pool
     .query(
-      'UPDATE users SET discord_id=$1 WHERE user_id=$2 RETURNING discord_id',
-      [discordId, id],
+      `UPDATE users SET ${idType}=$1 WHERE user_id=$2 RETURNING ${idType}`,
+      [oauthId, userId],
     )
     .then((results) => {
       if (results?.rowCount) {
-        return results.rows[0].discordId;
+        return results.rows[0];
       } else {
-        throw new Error('Discord ID update failed.');
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      throw err;
-    });
-};
-
-export const updateGoogleId = async (id: string, googleId: string) => {
-  return await pool
-    .query(
-      'UPDATE users SET google_id=$1 WHERE user_id=$2 RETURNING google_id',
-      [googleId, id],
-    )
-    .then((results) => {
-      if (results?.rowCount) {
-        return results.rows[0].googleId;
-      } else {
-        throw new Error('Google ID update failed.');
+        throw new Error(`${idType} update failed.`);
       }
     })
     .catch((err) => {

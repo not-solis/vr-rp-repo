@@ -2,11 +2,10 @@ import { RequestHandler, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import {
   createUser,
-  getUserByDiscordId,
   getUserByEmail,
-  getUserByGoogleId,
   getUserById,
-  updateGoogleId,
+  getUserByOAuthId,
+  updateOAuthId,
 } from '../model/users-model.js';
 import {
   DISCORD_CLIENT_ID,
@@ -17,6 +16,9 @@ import {
   GOOGLE_REDIRECT_PATH,
   isDev,
   JWT_SECRET,
+  TWITCH_CLIENT_ID,
+  TWITCH_CLIENT_SECRET,
+  TWITCH_REDIRECT_PATH,
 } from '../env/config.js';
 import { respondError, respondSuccess } from '../index.js';
 const { sign, verify } = jwt;
@@ -139,7 +141,7 @@ router.get('/discord', async (req, res) => {
     }).then<any>((res) => res.json());
 
     const user =
-      (await getUserByDiscordId(discordId)) ??
+      (await getUserByOAuthId('discord_id', discordId)) ??
       (await getUserByEmail(email)) ??
       (await createUser(
         global_name,
@@ -152,7 +154,7 @@ router.get('/discord', async (req, res) => {
 
     // Update existing record with ID
     if (!newDiscordId) {
-      updateGoogleId(id, discordId);
+      updateOAuthId('discord_id', id, discordId);
     }
 
     // Sign user JWT
@@ -217,7 +219,7 @@ router.get('/google', async (req, res) => {
     }).then<any>((res) => res.json());
 
     const user =
-      (await getUserByGoogleId(googleId)) ??
+      (await getUserByOAuthId('google_id', googleId)) ??
       (await getUserByEmail(email)) ??
       (await createUser(
         (email as string).substring(0, (email as string).indexOf('@')),
@@ -230,7 +232,86 @@ router.get('/google', async (req, res) => {
 
     // Update existing record with ID
     if (!newGoogleId) {
-      updateGoogleId(id, googleId);
+      updateOAuthId('google_id', id, googleId);
+    }
+
+    // Sign user JWT
+    const token = sign({ id }, JWT_SECRET, {
+      expiresIn: TOKEN_EXPIRATION,
+    });
+
+    // Set cookie for the user
+    res.cookie('userToken', token, {
+      maxAge: TOKEN_EXPIRATION * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+
+    respond(200, user);
+  } catch (error) {
+    console.error(error);
+    respond(500, error);
+  }
+});
+
+router.get('/twitch', async (req, res) => {
+  const respond = (status: number, result: unknown = {}) => {
+    oauthRespond(res, status, result);
+  };
+
+  const code = req.query.code as string;
+  if (!code) {
+    respond(400, { message: 'Authorization code must be provided' });
+    return;
+  }
+
+  const secure = !isDev;
+  const redirectUrl = new URL(
+    TWITCH_REDIRECT_PATH,
+    `http${secure ? 's' : ''}://${req.headers.host}`,
+  );
+
+  try {
+    const { access_token, token_type } = await fetch(
+      'https://id.twitch.tv/oauth2/token',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: TWITCH_CLIENT_ID,
+          client_secret: TWITCH_CLIENT_SECRET,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUrl.toString(),
+        }),
+      },
+    ).then<any>((res) => res.json());
+
+    const tokenType = token_type.charAt(0).toUpperCase() + token_type.slice(1);
+    const { data } = await fetch('https://api.twitch.tv/helix/users', {
+      headers: {
+        Authorization: `${tokenType} ${access_token}`,
+        'Client-Id': TWITCH_CLIENT_ID,
+      },
+    }).then<any>((res) => res.json());
+    const { id: twitchId, display_name, profile_image_url, email } = data[0];
+
+    const user =
+      (await getUserByOAuthId('twitch_id', twitchId)) ??
+      (await getUserByEmail(email)) ??
+      (await createUser(
+        display_name,
+        profile_image_url,
+        'twitch_id',
+        twitchId,
+        email,
+      ));
+    const { userId: id, googleId: newTwitchId } = user!;
+
+    // Update existing record with ID
+    if (!newTwitchId) {
+      updateOAuthId('twitch_id', id, twitchId);
     }
 
     // Sign user JWT

@@ -6,6 +6,8 @@ export const {
   REACT_APP_DISCORD_CLIENT_ID = '',
   REACT_APP_GOOGLE_REDIRECT_PATH = '',
   REACT_APP_GOOGLE_CLIENT_ID = '',
+  REACT_APP_TWITCH_REDIRECT_PATH = '',
+  REACT_APP_TWITCH_CLIENT_ID = '',
 } = process.env;
 
 if (!REACT_APP_SERVER_BASE_URL) {
@@ -18,6 +20,10 @@ if (!REACT_APP_SERVER_BASE_URL) {
   throw new Error('Google redirect URL not configured.');
 } else if (!REACT_APP_GOOGLE_CLIENT_ID) {
   throw new Error('Google client ID not configured.');
+} else if (!REACT_APP_TWITCH_REDIRECT_PATH) {
+  throw new Error('Twitch redirect URL not configured.');
+} else if (!REACT_APP_TWITCH_CLIENT_ID) {
+  throw new Error('Twitch client ID not configured.');
 }
 
 export const REACT_APP_MAX_IMAGE_SIZE =
