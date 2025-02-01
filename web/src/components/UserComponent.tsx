@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   ArrowDropDown,
+  BugReport,
   Close,
   Edit,
   Login,
@@ -210,7 +211,7 @@ export const UserComponent = () => {
           },
         }}
       >
-        <li style={{ paddingBottom: 8, paddingLeft: 16 }}>
+        <li style={{ paddingLeft: 16 }}>
           <Stack direction='row' alignItems='center' spacing={2}>
             <label id='avatar-label'>
               <Avatar id='user-menu-avatar' alt={user.name} src={user.imageUrl}>
@@ -239,11 +240,11 @@ export const UserComponent = () => {
             <Typography>{user.name}</Typography>
           </Stack>
         </li>
-        <li style={{ padding: '4px 12px 8px' }}>
+        <Divider variant='middle' />
+        <li style={{ padding: '4px 12px' }}>
           <Typography variant='subtitle1'>{user.email}</Typography>
         </li>
-        <Divider variant='middle' />
-        <li style={{ padding: '10px 12px' }}>
+        <li style={{ padding: '6px 12px' }}>
           <Stack direction='row' alignItems='center' spacing={1}>
             <TextField
               disabled={!isEditingName}
@@ -254,36 +255,48 @@ export const UserComponent = () => {
               onChange={(e) => setName(e.target.value)}
               slotProps={{
                 input: {
-                  endAdornment: isEditingName && (
+                  endAdornment: isEditingName ? (
                     <IconButton
                       size='small'
-                      style={{ marginRight: -8 }}
+                      style={{ transform: 'translateX(8px)' }}
                       onClick={cancelNameEdit}
                     >
                       <Close fontSize='small' />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      size='small'
+                      style={{ transform: 'translateX(8px)' }}
+                      onClick={() => {
+                        setName(user.name);
+                        setEditingName(true);
+                      }}
+                    >
+                      <Edit fontSize='small' />
                     </IconButton>
                   ),
                 },
               }}
             />
-            {isEditingName ? (
-              <>
-                <IconButton onClick={saveName}>
-                  <Save />
-                </IconButton>
-              </>
-            ) : (
-              <IconButton
-                onClick={() => {
-                  setName(user.name);
-                  setEditingName(true);
-                }}
-              >
-                <Edit />
+            {isEditingName && (
+              <IconButton onClick={saveName}>
+                <Save />
               </IconButton>
             )}
           </Stack>
         </li>
+        <Divider variant='middle' />
+        <MenuItem
+          onClick={() =>
+            window.open(
+              'https://github.com/mfboulos/vr-rp-myriad/issues/new?template=Blank+issue',
+              '_blank',
+            )
+          }
+        >
+          <BugReport style={{ marginRight: 6 }} />
+          Report Bug
+        </MenuItem>
         <MenuItem onClick={handleLogout}>
           <Logout style={{ marginRight: 6 }} />
           Logout

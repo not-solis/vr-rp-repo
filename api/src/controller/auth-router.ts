@@ -6,6 +6,7 @@ import {
   getUserById,
   getUserByOAuthId,
   updateOAuthId,
+  UserRole,
 } from '../model/users-model.js';
 import {
   DISCORD_CLIENT_ID,
@@ -79,6 +80,15 @@ router.get('/', async (req, res) => {
     });
 
     const user = await getUserById(id);
+
+    if (user.role === UserRole.Banned) {
+      res.clearCookie('userToken');
+      respondError(res, {
+        code: 401,
+        name: 'Permission Error',
+        message: 'This user is banned.',
+      });
+    }
 
     // Reset token in cookie
     res.cookie('userToken', newToken, {

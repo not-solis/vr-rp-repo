@@ -20,7 +20,7 @@ export const Navbar = () => {
           <h1>VR Roleplay Repo</h1>
         </Link>
         <Stack direction='row' alignItems='center' gap={2.4}>
-          {['Repo', 'Community', 'About Us'].map((t) => {
+          {['Repo', 'Community', 'About'].map((t) => {
             const hrefPath = `/${t.toLowerCase().replace(' ', '-')}`;
             return (
               <Link

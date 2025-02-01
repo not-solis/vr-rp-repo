@@ -30,6 +30,35 @@ export const remapUser = (user: any): User => {
   };
 };
 
+export const getAdmins = async () => {
+  return await pool
+    .query(
+      `
+      SELECT
+        user_id,
+        name,
+        image_url,
+        role,
+        email,
+        discord_id,
+        google_id,
+        twitch_id
+      FROM users
+      WHERE role='Admin'
+      ORDER BY created_at ASC`,
+    )
+    .then((results) => {
+      if (results?.rows) {
+        return results.rows.map(remapUser);
+      } else {
+        throw new Error('No user found by id.');
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
 export const getUserById = async (id: string) => {
   return await pool
     .query(

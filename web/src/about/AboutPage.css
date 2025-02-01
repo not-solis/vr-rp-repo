@@ -1,0 +1,48 @@
+#about-page {
+  width: min(860px, 100%);
+  height: 100%;
+  padding: 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+#about-repo {
+  padding-right: 15%;
+}
+
+#about-myriad {
+  padding-left: 15%;
+  text-align: right;
+}
+
+.admin-tag {
+  display: flex;
+  border-radius: 20px;
+  background-color: #3bf7f431;
+  gap: 16px;
+  padding: 16px;
+}
+
+.admin-tag > img {
+  --image-size: clamp(50px, 15vw, 100px);
+  object-fit: contain;
+  border-radius: 20%;
+  width: var(--image-size);
+  height: var(--image-size);
+  box-shadow: var(--mui-shadows-3);
+}
+
+.admin-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-info h4 {
+  font-size: min(1.6em, calc(1em + 1.5vw));
+}
+
+.admin-info h6 {
+  font-size: min(0.95em, calc(0.5em + 1vw));
+}

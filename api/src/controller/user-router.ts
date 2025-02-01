@@ -1,10 +1,26 @@
 import { Router } from 'express';
 import { auth } from './auth-router.js';
-import { updateUserImageUrl, updateUserName } from '../model/users-model.js';
+import {
+  getAdmins,
+  updateUserImageUrl,
+  updateUserName,
+} from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 import { respondError, respondSuccess } from '../index.js';
 
 const router = Router();
+
+router.get('/admin', (req, res) => {
+  getAdmins()
+    .then((users) => respondSuccess(res, users))
+    .catch((err) => {
+      console.error(err);
+      respondError(res, {
+        name: 'User Query Error',
+        message: err.message,
+      });
+    });
+});
 
 router.patch('/name', auth, (req, res) => {
   const id = res.locals.userId;

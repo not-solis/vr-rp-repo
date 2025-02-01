@@ -86,3 +86,8 @@
 .toggle-closed {
   transform: rotate(0deg);
 }
+
+#user-menu hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}

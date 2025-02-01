@@ -40,6 +40,7 @@ import { CookiesProvider } from 'react-cookie';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
+import { AboutPage } from './about/AboutPage';
 import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
@@ -345,12 +346,7 @@ export function App() {
                           path='/community'
                           element={comingSoon('articles, and asset resources')}
                         />
-                        <Route
-                          path='/about-us'
-                          element={comingSoon(
-                            'info about us, the website, how to contact us and how to report bugs',
-                          )}
-                        />
+                        <Route path='/about' element={<AboutPage />} />
                         <Route
                           path='*'
                           element={<Navigate to='/' replace={true} />}
