@@ -1,9 +1,14 @@
 import './AboutPage.css';
 import { Stack, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
+import { APP_KEYWORDS, APP_TITLE } from '../App';
 import { queryServer } from '../model/ServerResponse';
 import { User } from '../model/User';
+
+const TITLE = 'About';
 
 export const AboutPage = () => {
   const { data: admins, isLoading: isLoading } = useQuery({
@@ -13,54 +18,71 @@ export const AboutPage = () => {
 
   return (
     <div id='about-page' className='scrollable-y hidden-scrollbar'>
-      <Stack gap={4}>
+      <Helmet>
+        <title>{`${TITLE} | ${APP_TITLE}`}</title>
+        <meta title={`${TITLE} | ${APP_TITLE}`} />
+        <meta property='og:title' content={TITLE} />
+        <meta
+          name='keywords'
+          content={APP_KEYWORDS.concat(['about']).join(', ')}
+        />
+        <meta
+          property='og:description'
+          content='Read more about the VR Roleplay Repo.'
+        />
+      </Helmet>
+      <Stack gap={5}>
         <Stack id='about-repo' gap={2}>
           <Typography variant='h2'>The Repo</Typography>
+          {/* <Typography>
+            In the younger days of VRChat, there were clear hubs for VR roleplay
+            that new and veteran roleplayers could use for learning more about
+            the space. But as the community continues to expand, word of mouth
+            is no longer enough to connect people to the roleplays they might be
+            interested in.
+          </Typography> */}
+          {/* <Typography>
+            First, we created a list of every single VR roleplay, put them in a
+            spreadsheet, and shared that spreadsheet with everyone. Along the
+            way, we realized the scale of the mission - there are far too many
+            roleplays for two people to keep track of, and passing around a
+            spreadsheet doesn't help people share or discover projects. We
+            wanted a platform that helps people discover and learn everything
+            they need to get involved at a glance.
+          </Typography> */}
+          {/* <Typography>
+            It all started with the Repo spreadsheet - a list of all the
+            roleplays we knew about. Passing a spreadsheet around didn't meet
+            our goals for visibility, so we pushed further. We wanted a
+            crowdsourced platform, where people can learn everything they need
+            to get involved in any project, and showrunners can own the way they
+            share their project to the world.
+          </Typography> */}
           <Typography>
-            One day, someone new to VR roleplay asked us where to start. In the
-            younger days of VRChat, this was a solved problem - we had clear
-            entries to the hobby, and everyone knew where to go for what they
-            want. But as the community continues to expand, that's no longer the
-            case, and Discord is no longer enough to connect all these moving
-            pieces together in a way that connect people to projects they might
-            be interested in.
-          </Typography>
-          <Typography>
-            That is where the Repo comes in. The Repo is a unifying platform for
-            people to learn enough about roleplays to get involved, whether from
-            within or outside of the hobby. We made it to support all the
-            roleplays that exist in VR and give their showrunners the platform
-            to share their work without the maintenance overhead of something
-            like the VRChat Legends wiki.
+            The Repo is the unifying platform for newcomers and veterans of the
+            VR Roleplay community to share and discover roleplay experiences.
           </Typography>
         </Stack>
 
         <Stack id='about-myriad' gap={2}>
-          <Typography variant='h2' marginLeft='auto'>
-            The Myriad
+          <Typography variant='h2'>The Myriad</Typography>
+          <Typography>
+            The Myriad is a forum for roleplay theory and discussion, and the
+            origin space of the Repo. We value healthy and productive critique
+            as an essential part of engaging with VR roleplay as an art form.
+            Above all, we love VR roleplay, and want to make it easier for
+            people to share their love for the hobby with each other.
           </Typography>
           <Typography>
-            The Myriad is the origin space of the Repo. We are a forum for
-            roleplay theory and discussion, where healthy and productive
-            critique is valued as an essential value of engaging with VR
-            roleplay as an art form. Above all, we love VR roleplay, and want to
-            make it easier for people to share that love for the hobby with each
-            other.
-          </Typography>
-          <Typography>
-            That is where the Repo comes in. The Repo is a unifying platform for
-            people to learn enough about roleplays to get involved, whether from
-            within or outside of the hobby. We made it to support all the
-            roleplays that exist in VR and give their showrunners the platform
-            to share their work without the maintenance overhead of something
-            like the VRChat Legends wiki.
+            To learn more, join the{' '}
+            <Link to='https://discord.gg/27gpREAa2Q'>Discord</Link>.
           </Typography>
         </Stack>
         <Stack gap={2}>
           <Typography variant='h2'>Admins</Typography>
           <Stack id='admins' direction='row'>
             {admins?.map((admin) => (
-              <div className='admin-tag'>
+              <div key={admin.name} className='admin-tag'>
                 <img src={admin.imageUrl} />
                 <div className='admin-info'>
                   <Typography variant='h4'>{admin.name}</Typography>

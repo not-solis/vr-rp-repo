@@ -95,6 +95,7 @@ declare module '@mui/material/styles' {
   }
 
   interface TypeBackground {
+    light: string;
     dark: string;
   }
 }
@@ -112,6 +113,22 @@ declare module '@mui/material/Typography' {
     text: true;
   }
 }
+
+export const APP_TITLE = 'VR Roleplay Repo';
+export const APP_KEYWORDS = [
+  'roleplay',
+  'rp',
+  'larp',
+  'vr',
+  'virtual',
+  'virtual reality',
+  'vrrp',
+  'vrlarp',
+  'vrroleplay',
+  'repo',
+  'repository',
+  'myriad',
+];
 
 export function App() {
   const { data: user, isLoading: isAuthLoading } = useQuery({
@@ -140,6 +157,7 @@ export function App() {
       mode: 'dark',
       background: {
         default: '#1f2023',
+        light: '#25262a',
         dark: '#191a1d',
         paper: '#2e3034',
       },
@@ -262,36 +280,20 @@ export function App() {
     </h1>
   );
 
-  const metaName = 'VR Roleplay Repo';
-
   return (
     <HelmetProvider>
       <Helmet>
-        <title>{metaName}</title>
-        <meta title={metaName} />
-        <meta property='og:title' content={metaName} />
+        <title>{APP_TITLE}</title>
+        <meta title={APP_TITLE} />
+        <meta property='og:title' content={APP_TITLE} />
         {/* <meta property='og:image' content={projectData?.imageUrl} />
         <meta property='og:image:alt' content={`${metaName} icon`} /> */}
         <meta
           property='og:description'
           content='The front page of VR Roleplay'
         />
-        <meta
-          name='keywords'
-          content={[
-            'roleplay',
-            'rp',
-            'larp',
-            'vr',
-            'virtual',
-            'virtual reality',
-            'vrrp',
-            'vrlarp',
-            'vrroleplay',
-            'repo',
-            'myriad',
-          ].join(', ')}
-        />
+        <meta name='keywords' content={APP_KEYWORDS.join(', ')} />
+        <meta property='og:url' content={window.location.href} />
       </Helmet>
       <ThemeProvider theme={theme}>
         <SnackbarContext.Provider
@@ -324,9 +326,6 @@ export function App() {
           >
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <CookiesProvider>
-                <Helmet>
-                  <meta property='og:url' content={window.location.href} />
-                </Helmet>
                 <BrowserRouter>
                   <Box id='app-container'>
                     <Navbar />

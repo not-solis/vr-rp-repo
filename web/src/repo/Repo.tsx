@@ -32,6 +32,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate } from 'react-router-dom';
 
 import { RoleplayProjectCard } from './RoleplayProjectCard';
+import { APP_KEYWORDS, APP_TITLE } from '../App';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
@@ -50,7 +51,7 @@ enum SortBy {
   DateStarted = 'started',
 }
 
-const TITLE = 'Repo | VR Roleplay Repo';
+const TITLE = 'Repo';
 
 export const Repo = () => {
   const [name, setName] = useState('');
@@ -157,12 +158,16 @@ export const Repo = () => {
   return (
     <Box id='repo-page'>
       <Helmet>
-        <title>{TITLE}</title>
-        <meta title={TITLE} />
+        <title>{`${TITLE} | ${APP_TITLE}`}</title>
+        <meta title={`${TITLE} | ${APP_TITLE}`} />
         <meta property='og:title' content={TITLE} />
         <meta
+          name='keywords'
+          content={APP_KEYWORDS.concat(['search', 'filter']).join(', ')}
+        />
+        <meta
           property='og:description'
-          content='The collection of all roleplays run in VR.'
+          content='The collection of all roleplays that run in VR.'
         />
       </Helmet>
       <Box id='filter-bar'>

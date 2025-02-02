@@ -34,6 +34,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { RoleplayProjectSidebar } from './RoleplayProjectSidebar';
+import { APP_KEYWORDS, APP_TITLE } from '../App';
 import { TagChip } from '../components/TagChip';
 import { ThemedMarkdown } from '../components/ThemedMarkdown';
 import { UpdateComponent } from '../components/UpdateComponent';
@@ -394,11 +395,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
       .finally(() => setOwnershipDialogOpen(false));
   };
 
-  const metaName = `${isNew ? 'New RP Project' : projectData?.name} | VR Roleplay Repo`;
-  const metaDescription = isNew
-    ? 'Create a new roleplay project in the Repo!'
-    : projectData?.shortDescription;
-
   const openStatusMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     setMenuAnchorEl(e.currentTarget);
   };
@@ -471,13 +467,18 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     </div>
   );
 
+  const metaName = isNew ? 'New RP Project' : projectData?.name;
+  const metaDescription = isNew
+    ? 'Create a new roleplay project in the Repo!'
+    : projectData?.shortDescription;
+
   return (
     <div id='project-page'>
       <Helmet>
-        <title>{metaName}</title>
-        <meta title={metaName} />
-        <meta name='keywords' content={tags.join(', ')} />
+        <title>{`${metaName} | ${APP_TITLE}`}</title>
+        <meta title={`${metaName} | ${APP_TITLE}`} />
         <meta property='og:title' content={metaName} />
+        <meta name='keywords' content={APP_KEYWORDS.concat(tags).join(', ')} />
         <meta property='og:image' content={projectData?.imageUrl} />
         <meta property='og:image:alt' content={`${metaName} icon`} />
         <meta property='og:description' content={metaDescription} />
