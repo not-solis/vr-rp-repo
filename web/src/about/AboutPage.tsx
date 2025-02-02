@@ -31,33 +31,9 @@ export const AboutPage = () => {
           content='Read more about the VR Roleplay Repo.'
         />
       </Helmet>
-      <Stack gap={5}>
+      <Stack gap={5} minHeight='100%'>
         <Stack id='about-repo' gap={2}>
           <Typography variant='h2'>The Repo</Typography>
-          {/* <Typography>
-            In the younger days of VRChat, there were clear hubs for VR roleplay
-            that new and veteran roleplayers could use for learning more about
-            the space. But as the community continues to expand, word of mouth
-            is no longer enough to connect people to the roleplays they might be
-            interested in.
-          </Typography> */}
-          {/* <Typography>
-            First, we created a list of every single VR roleplay, put them in a
-            spreadsheet, and shared that spreadsheet with everyone. Along the
-            way, we realized the scale of the mission - there are far too many
-            roleplays for two people to keep track of, and passing around a
-            spreadsheet doesn't help people share or discover projects. We
-            wanted a platform that helps people discover and learn everything
-            they need to get involved at a glance.
-          </Typography> */}
-          {/* <Typography>
-            It all started with the Repo spreadsheet - a list of all the
-            roleplays we knew about. Passing a spreadsheet around didn't meet
-            our goals for visibility, so we pushed further. We wanted a
-            crowdsourced platform, where people can learn everything they need
-            to get involved in any project, and showrunners can own the way they
-            share their project to the world.
-          </Typography> */}
           <Typography>
             The Repo is the unifying platform for newcomers and veterans of the
             VR Roleplay community to share and discover roleplay experiences.
@@ -92,6 +68,12 @@ export const AboutPage = () => {
             ))}
           </Stack>
         </Stack>
+        <div id='about-footer'>
+          <Typography>
+            © 2025 Myriad and contributors. All rights reserved. Source code
+            licensed under the AGPL-3.0 license.
+          </Typography>
+        </div>
       </Stack>
     </div>
   );
