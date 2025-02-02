@@ -1,18 +1,25 @@
 #about-page {
   width: min(860px, 100%);
   height: 100%;
-  padding: 24px;
+  padding: min(36px, calc(9px + 3vw));
   margin: 0 auto;
   box-sizing: border-box;
+  background-color: var(--mui-palette-background-light);
+  box-shadow: var(--mui-shadows-6);
 }
 
 #about-repo {
-  padding-right: 15%;
+  padding-right: 8%;
 }
 
 #about-myriad {
-  padding-left: 15%;
+  padding-left: 8%;
   text-align: right;
+}
+
+#about-repo p,
+#about-myriad p {
+  font-size: 1.3rem;
 }
 
 .admin-tag {

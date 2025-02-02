@@ -31,6 +31,7 @@
 #filter-bar {
   box-shadow: var(--mui-shadows-4);
   z-index: 10;
+  background-color: var(--mui-palette-background-light);
 }
 
 #repo-filters {

@@ -8,6 +8,7 @@
   padding: 12px min(48px, 6px + 3vw);
   box-sizing: border-box;
   box-shadow: var(--mui-shadows-4);
+  background-color: var(--mui-palette-background-light);
 }
 
 #home-page-header h2 {

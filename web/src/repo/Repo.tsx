@@ -50,7 +50,7 @@ enum SortBy {
   DateStarted = 'started',
 }
 
-const TITLE = 'The VR Roleplay Repo';
+const TITLE = 'Repo | VR Roleplay Repo';
 
 export const Repo = () => {
   const [name, setName] = useState('');
