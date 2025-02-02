@@ -50,7 +50,7 @@
     "react-markdown": "^9.0.3",
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.28.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-simple-oauth2-login": "^0.5.4",
     "react-slick": "^0.30.3",
     "react-time-ago": "^7.3.3",
