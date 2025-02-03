@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { auth } from './auth-router.js';
 import {
   getAdmins,
+  updateUserEmail,
   updateUserImageUrl,
   updateUserName,
 } from '../model/users-model.js';
@@ -27,6 +28,19 @@ router.patch('/name', auth, (req, res) => {
   const { name } = req.body;
   updateUserName(id, name)
     .then((name) => respondSuccess(res, name))
+    .catch((err) =>
+      respondError(res, {
+        name: 'Update Username Error',
+        message: err.message,
+      }),
+    );
+});
+
+router.patch('/email', auth, (req, res) => {
+  const id = res.locals.userId;
+  const { email } = req.body;
+  updateUserEmail(id, email)
+    .then((email) => respondSuccess(res, email))
     .catch((err) =>
       respondError(res, {
         name: 'Update Username Error',

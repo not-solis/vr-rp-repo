@@ -208,6 +208,25 @@ export const updateUserName = async (id: string, name: string) => {
     });
 };
 
+export const updateUserEmail = async (id: string, email: string) => {
+  return await pool
+    .query('UPDATE users SET email=$1 WHERE user_id=$2 RETURNING email', [
+      email,
+      id,
+    ])
+    .then((results) => {
+      if (results?.rowCount) {
+        return results.rows[0].email;
+      } else {
+        throw new Error('User email update failed.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      throw err;
+    });
+};
+
 export const updateOAuthId = async (
   idType: string,
   userId: string,

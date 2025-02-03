@@ -45,7 +45,9 @@ export const UserComponent = () => {
   const { user, isAuthLoading } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
   const [isEditingName, setEditingName] = useState(false);
-  const [name, setName] = useState(user?.name);
+  const [name, setName] = useState('');
+  const [isEditingEmail, setEditingEmail] = useState(false);
+  const [email, setEmail] = useState('');
   const buttonRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const isMenuOpen = !!menuAnchorEl;
@@ -67,6 +69,22 @@ export const UserComponent = () => {
     queryClient.resetQueries({
       queryKey: ['auth'],
     });
+  };
+
+  const saveEmail = () => {
+    if (email && email !== user?.email) {
+      queryServer('/users/email', {
+        method: 'PATCH',
+        body: { email },
+        isJson: true,
+        useAuth: true,
+      })
+        .then(refetchUser)
+        .catch(createErrorSnackbar)
+        .finally(() => setEditingEmail(false));
+    } else {
+      cancelEmailEdit();
+    }
   };
 
   const saveName = () => {
@@ -162,6 +180,11 @@ export const UserComponent = () => {
     setEditingName(false);
   };
 
+  const cancelEmailEdit = () => {
+    setEmail(user!.email);
+    setEditingEmail(false);
+  };
+
   return user ? (
     <>
       <div
@@ -241,15 +264,61 @@ export const UserComponent = () => {
           </Stack>
         </li>
         <Divider variant='middle' />
-        <li style={{ padding: '4px 12px' }}>
-          <Typography variant='subtitle1'>{user.email}</Typography>
+        <li
+          style={{ padding: '6px 12px' }}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Stack direction='row' alignItems='center' spacing={1}>
+            <TextField
+              disabled={!isEditingEmail}
+              variant='outlined'
+              size='small'
+              label='Email'
+              value={isEditingEmail ? email : user.email}
+              style={{ width: 200, marginRight: isEditingEmail ? 0 : 44 }}
+              onChange={(e) => setEmail(e.target.value)}
+              slotProps={{
+                input: {
+                  endAdornment: isEditingEmail ? (
+                    <IconButton
+                      size='small'
+                      style={{ transform: 'translateX(8px)' }}
+                      onClick={cancelEmailEdit}
+                    >
+                      <Close fontSize='small' />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      size='small'
+                      style={{ transform: 'translateX(8px)' }}
+                      onClick={() => {
+                        setEmail(user.email);
+                        setEditingEmail(true);
+                      }}
+                    >
+                      <Edit fontSize='small' />
+                    </IconButton>
+                  ),
+                },
+              }}
+            />
+            {isEditingEmail && (
+              <IconButton onClick={saveEmail}>
+                <Save fontSize='small' />
+              </IconButton>
+            )}
+          </Stack>
         </li>
-        <li style={{ padding: '6px 12px' }}>
+        <li
+          style={{ padding: '6px 12px' }}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <Stack direction='row' alignItems='center' spacing={1}>
             <TextField
               disabled={!isEditingName}
               variant='outlined'
               size='small'
+              label='Name'
               value={isEditingName ? name : user.name}
               style={{ width: 160, marginRight: isEditingName ? 0 : 44 }}
               onChange={(e) => setName(e.target.value)}
@@ -289,7 +358,7 @@ export const UserComponent = () => {
         <MenuItem
           onClick={() =>
             window.open(
-              'https://github.com/not-solis/vr-rp-myriad/issues/new?template=bug_report.md',
+              'https://github.com/not-solis/vr-rp-repo/issues/new?template=bug_report.md',
               '_blank',
             )
           }
