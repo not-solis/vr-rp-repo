@@ -191,7 +191,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   } = project;
 
   const canEdit =
-    isAuthenticated && (user?.role == UserRole.Admin || owner?.id === user?.id);
+    isAuthenticated &&
+    (isNew || user?.role == UserRole.Admin || owner?.id === user?.id);
 
   const previewButton = (
     <IconButton
