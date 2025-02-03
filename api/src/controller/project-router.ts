@@ -12,8 +12,10 @@ import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth } from './auth-router.js';
 import { respondError, respondSuccess, ResponseData } from '../index.js';
-import { getUserById, UserRole } from '../model/users-model.js';
+import { getAdmins, getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
+import { sendMail } from '../service/email-service.js';
+import { CLIENT_URL } from '../env/config.js';
 
 const MAX_QUERY = 1000;
 
@@ -173,6 +175,23 @@ router.post('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
   const userId = res.locals.userId;
   createOwnership(id, userId)
+    .then((data) => {
+      getAdmins().then(async (admins) => {
+        const user = await getUserById(userId);
+        const project = await getProjectById(id);
+        admins.forEach((admin) =>
+          sendMail({
+            to: admin.email,
+            subject: `Ownership request pending: ${project.name}`,
+            html: `<p>User <b>${user.name}</b> (id: ${user.userId}) is
+            requesting ownership of <b>${project.name}</b>(id: ${project.id})</p>
+            <p>Review the request: <a href="${CLIENT_URL}/repo/${project.id}">
+            ${project.name}</a></p>`,
+          }),
+        );
+      });
+      return data;
+    })
     .then((data) => {
       respondSuccess(res, data, 201);
     })

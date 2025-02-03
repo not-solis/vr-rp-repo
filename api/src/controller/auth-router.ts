@@ -22,6 +22,7 @@ import {
   TWITCH_REDIRECT_PATH,
 } from '../env/config.js';
 import { respondError, respondSuccess } from '../index.js';
+import { sendMail } from '../service/email-service.js';
 const { sign, verify } = jwt;
 
 const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
@@ -61,6 +62,115 @@ const oauthRespond = (res: Response, status: number, result: unknown = {}) => {
     </html>
   `);
 };
+
+const sendWelcomeEmail = (email: string, name: string) => (user: any) => {
+  sendMail({
+    to: email,
+    subject: 'Welcome to the Repo',
+    html: `
+    <h1>Hello, ${name}!</h1>
+    <p>Your account has been successfully registered as <b>${name}</b>. You
+    can change your account details at any time under the user menu.</p>`,
+  });
+  return user;
+};
+
+interface OAuthUserInfo {
+  id: string;
+  name: string;
+  email: string;
+  imageUrl: string;
+}
+
+interface OAuthHandlerProps {
+  tokenUrl: string;
+  clientId: string;
+  clientSecret: string;
+  redirectPath: string;
+  idType: 'discord_id' | 'google_id' | 'twitch_id';
+  getUserInfo: (tokenType: string, token: string) => Promise<OAuthUserInfo>;
+}
+
+const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
+  (props: OAuthHandlerProps) => async (req, res) => {
+    const {
+      tokenUrl,
+      clientId,
+      clientSecret,
+      redirectPath,
+      idType,
+      getUserInfo,
+    } = props;
+    const respond = (status: number, result: unknown = {}) => {
+      oauthRespond(res, status, result);
+    };
+
+    const code = req.query.code as string;
+    if (!code) {
+      respond(400, { message: 'Authorization code must be provided' });
+      return;
+    }
+
+    const secure = !isDev;
+    const redirectUrl = new URL(
+      redirectPath,
+      `http${secure ? 's' : ''}://${req.headers.host}`,
+    );
+
+    try {
+      const { token_type, access_token } = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUrl.toString(),
+        }),
+      }).then<any>((res) => res.json());
+      const tokenType =
+        token_type.charAt(0).toUpperCase() + token_type.slice(1);
+
+      const {
+        id: oauthId,
+        name,
+        email,
+        imageUrl,
+      } = await getUserInfo(tokenType, access_token);
+
+      const user =
+        (await getUserByOAuthId(idType, oauthId)) ??
+        (await getUserByOAuthEmail(email)) ??
+        (await createUser(name, imageUrl, idType, oauthId, email).then(
+          sendWelcomeEmail(email, name),
+        ));
+      const { userId: id, [idType]: newOAuthId } = user!;
+
+      // Update existing record with ID
+      if (!newOAuthId) {
+        updateOAuthId(idType, id, oauthId);
+      }
+
+      // Sign user JWT
+      const token = sign({ id }, JWT_SECRET, {
+        expiresIn: TOKEN_EXPIRATION,
+      });
+
+      // Set cookie for the user
+      res.cookie('userToken', token, {
+        maxAge: TOKEN_EXPIRATION * 1000,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      });
+
+      respond(200, user);
+    } catch (error) {
+      console.error(error);
+      respond(500, error);
+    }
+  };
 
 const router = Router();
 
@@ -107,242 +217,78 @@ router.get('/', async (req, res) => {
 /**
  * Redirect URL for Discord OAuth code workflow.
  */
-router.get('/discord', async (req, res) => {
-  const respond = (status: number, result: unknown = {}) => {
-    oauthRespond(res, status, result);
-  };
+router.get(
+  '/discord',
+  handleOAuth({
+    clientId: DISCORD_CLIENT_ID,
+    clientSecret: DISCORD_CLIENT_SECRET,
+    redirectPath: DISCORD_REDIRECT_PATH,
+    idType: 'discord_id',
+    tokenUrl: 'https://discord.com/api/oauth2/token',
+    getUserInfo: async (tokenType, accessToken) =>
+      fetch('https://discord.com/api/users/@me', {
+        headers: { Authorization: `${tokenType} ${accessToken}` },
+      })
+        .then<any>((res) => res.json())
+        .then<OAuthUserInfo>((json) => ({
+          id: json.id,
+          name: json.global_name,
+          email: json.email,
+          imageUrl: json.avatar,
+        })),
+  }),
+);
 
-  const { code } = req.query;
-  if (!code) {
-    respond(400, { message: 'Authorization code must be provided' });
-    return;
-  }
+router.get(
+  '/google',
+  handleOAuth({
+    clientId: GOOGLE_CLIENT_ID,
+    clientSecret: GOOGLE_CLIENT_SECRET,
+    redirectPath: GOOGLE_REDIRECT_PATH,
+    idType: 'google_id',
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    getUserInfo: async (tokenType, accessToken) =>
+      fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `${tokenType} ${accessToken}` },
+      })
+        .then<any>((res) => res.json())
+        .then<OAuthUserInfo>((json) => ({
+          id: json.id,
+          name: (json.email as string).substring(
+            0,
+            (json.email as string).indexOf('@'),
+          ),
+          email: json.email,
+          imageUrl: json.picture,
+        })),
+  }),
+);
 
-  const secure = !isDev;
-  const redirectUrl = new URL(
-    DISCORD_REDIRECT_PATH,
-    `http${secure ? 's' : ''}://${req.headers.host}`,
-  );
-
-  try {
-    const { access_token, token_type } = await fetch(
-      'https://discord.com/api/oauth2/token',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: DISCORD_CLIENT_ID,
-          client_secret: DISCORD_CLIENT_SECRET,
-          code: code as string,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUrl.toString(),
-          scope: 'identify',
-        }),
-      },
-    ).then<any>((res) => res.json());
-
-    const {
-      id: discordId,
-      global_name,
-      avatar,
-      email,
-    } = await fetch('https://discord.com/api/users/@me', {
-      headers: { Authorization: `${token_type} ${access_token}` },
-    }).then<any>((res) => res.json());
-
-    const user =
-      (await getUserByOAuthId('discord_id', discordId)) ??
-      (await getUserByOAuthEmail(email)) ??
-      (await createUser(
-        global_name,
-        `https://cdn.discordapp.com/avatars/${discordId}/${avatar}`,
-        'discord_id',
-        discordId,
-        email,
-      ));
-    const { userId: id, discordId: newDiscordId } = user!;
-
-    // Update existing record with ID
-    if (!newDiscordId) {
-      updateOAuthId('discord_id', id, discordId);
-    }
-
-    // Sign user JWT
-    const token = sign({ id }, JWT_SECRET, {
-      expiresIn: TOKEN_EXPIRATION,
-    });
-
-    // Set cookie for the user
-    res.cookie('userToken', token, {
-      maxAge: TOKEN_EXPIRATION * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
-
-    respond(200, user);
-  } catch (error) {
-    console.error(error);
-    respond(500, error);
-  }
-});
-
-router.get('/google', async (req, res) => {
-  const respond = (status: number, result: unknown = {}) => {
-    oauthRespond(res, status, result);
-  };
-
-  const code = req.query.code as string;
-  if (!code) {
-    respond(400, { message: 'Authorization code must be provided' });
-    return;
-  }
-
-  const secure = !isDev;
-  const redirectUrl = new URL(
-    GOOGLE_REDIRECT_PATH,
-    `http${secure ? 's' : ''}://${req.headers.host}`,
-  );
-
-  try {
-    const { access_token, token_type } = await fetch(
-      'https://oauth2.googleapis.com/token',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: GOOGLE_CLIENT_ID,
-          client_secret: GOOGLE_CLIENT_SECRET,
-          code,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUrl.toString(),
-        }),
-      },
-    ).then<any>((res) => res.json());
-
-    const {
-      id: googleId,
-      email,
-      picture,
-    } = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `${token_type} ${access_token}` },
-    }).then<any>((res) => res.json());
-
-    const user =
-      (await getUserByOAuthId('google_id', googleId)) ??
-      (await getUserByOAuthEmail(email)) ??
-      (await createUser(
-        (email as string).substring(0, (email as string).indexOf('@')),
-        picture,
-        'google_id',
-        googleId,
-        email,
-      ));
-    const { userId: id, googleId: newGoogleId } = user!;
-
-    // Update existing record with ID
-    if (!newGoogleId) {
-      updateOAuthId('google_id', id, googleId);
-    }
-
-    // Sign user JWT
-    const token = sign({ id }, JWT_SECRET, {
-      expiresIn: TOKEN_EXPIRATION,
-    });
-
-    // Set cookie for the user
-    res.cookie('userToken', token, {
-      maxAge: TOKEN_EXPIRATION * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
-
-    respond(200, user);
-  } catch (error) {
-    console.error(error);
-    respond(500, error);
-  }
-});
-
-router.get('/twitch', async (req, res) => {
-  const respond = (status: number, result: unknown = {}) => {
-    oauthRespond(res, status, result);
-  };
-
-  const code = req.query.code as string;
-  if (!code) {
-    respond(400, { message: 'Authorization code must be provided' });
-    return;
-  }
-
-  const secure = !isDev;
-  const redirectUrl = new URL(
-    TWITCH_REDIRECT_PATH,
-    `http${secure ? 's' : ''}://${req.headers.host}`,
-  );
-
-  try {
-    const { access_token, token_type } = await fetch(
-      'https://id.twitch.tv/oauth2/token',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: TWITCH_CLIENT_ID,
-          client_secret: TWITCH_CLIENT_SECRET,
-          code,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUrl.toString(),
-        }),
-      },
-    ).then<any>((res) => res.json());
-
-    const tokenType = token_type.charAt(0).toUpperCase() + token_type.slice(1);
-    const { data } = await fetch('https://api.twitch.tv/helix/users', {
-      headers: {
-        Authorization: `${tokenType} ${access_token}`,
-        'Client-Id': TWITCH_CLIENT_ID,
-      },
-    }).then<any>((res) => res.json());
-    const { id: twitchId, display_name, profile_image_url, email } = data[0];
-
-    const user =
-      (await getUserByOAuthId('twitch_id', twitchId)) ??
-      (await getUserByOAuthEmail(email)) ??
-      (await createUser(
-        display_name,
-        profile_image_url,
-        'twitch_id',
-        twitchId,
-        email,
-      ));
-    const { userId: id, googleId: newTwitchId } = user!;
-
-    // Update existing record with ID
-    if (!newTwitchId) {
-      updateOAuthId('twitch_id', id, twitchId);
-    }
-
-    // Sign user JWT
-    const token = sign({ id }, JWT_SECRET, {
-      expiresIn: TOKEN_EXPIRATION,
-    });
-
-    // Set cookie for the user
-    res.cookie('userToken', token, {
-      maxAge: TOKEN_EXPIRATION * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
-
-    respond(200, user);
-  } catch (error) {
-    console.error(error);
-    respond(500, error);
-  }
-});
+router.get(
+  '/twitch',
+  handleOAuth({
+    clientId: TWITCH_CLIENT_ID,
+    clientSecret: TWITCH_CLIENT_SECRET,
+    redirectPath: TWITCH_REDIRECT_PATH,
+    idType: 'twitch_id',
+    tokenUrl: 'https://id.twitch.tv/oauth2/token',
+    getUserInfo: async (tokenType, accessToken) =>
+      fetch('https://api.twitch.tv/helix/users', {
+        headers: {
+          Authorization: `${tokenType} ${accessToken}`,
+          'Client-Id': TWITCH_CLIENT_ID,
+        },
+      })
+        .then<any>((res) => res.json())
+        .then<any>((json) => json.data[0])
+        .then<OAuthUserInfo>((json) => ({
+          id: json.id,
+          name: json.display_name,
+          email: json.email,
+          imageUrl: json.profile_image_url,
+        })),
+  }),
+);
 
 router.post('/logout', (_, res) => {
   // clear cookie
