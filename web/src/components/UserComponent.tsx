@@ -289,7 +289,7 @@ export const UserComponent = () => {
         <MenuItem
           onClick={() =>
             window.open(
-              'https://github.com/mfboulos/vr-rp-myriad/issues/new?template=Blank+issue',
+              'https://github.com/not-solis/vr-rp-myriad/issues/new?template=bug_report.md',
               '_blank',
             )
           }
