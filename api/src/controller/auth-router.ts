@@ -48,14 +48,14 @@ export const auth: RequestHandler = (req, res, next) => {
 
 export const checkPermissions: (role: UserRole) => RequestHandler =
   (role) => async (req, res, next) => {
-    const userId = res.locals.userId;
-    if (!userId) {
-      respondError(res, {
-        message: 'Invalid routing middleware: no auth before ownership check.',
-      });
-    }
-
     try {
+      const userId = res.locals.userId;
+      if (!userId) {
+        throw new Error(
+          'Invalid routing middleware: no auth before ownership check.',
+        );
+      }
+
       const user = await getUserById(userId);
       if (!user) {
         throw new Error('No user found.');
@@ -79,24 +79,6 @@ export const checkPermissions: (role: UserRole) => RequestHandler =
       respondError(res);
     }
   };
-
-const oauthRespond = (res: Response, status: number, result: unknown = {}) => {
-  res.status(status).send(`
-    <!DOCTYPE html>
-    <html>
-      <head></head>
-      <body style='background-color: #1f2023'>
-        <script>
-          window.addEventListener("message", function (event) {
-            if (event.data.message === "requestResult") {
-              event.source.postMessage({"message": "deliverResult", result: ${JSON.stringify(result)} }, "*");
-            }
-          });
-        </script>
-      </body>
-    </html>
-  `);
-};
 
 const sendWelcomeEmail = (email: string, name: string) => (user: User) => {
   sendMail({
@@ -137,7 +119,21 @@ const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
       getUserInfo,
     } = props;
     const respond = (status: number, result: unknown = {}) => {
-      oauthRespond(res, status, result);
+      res.status(status).send(`
+        <!DOCTYPE html>
+        <html>
+          <head></head>
+          <body style='background-color: #1f2023'>
+            <script>
+              window.addEventListener("message", function (event) {
+                if (event.data.message === "requestResult") {
+                  event.source.postMessage({"message": "deliverResult", result: ${JSON.stringify(result)} }, "*");
+                }
+              });
+            </script>
+          </body>
+        </html>
+      `);
     };
 
     const code = req.query.code as string;
@@ -224,7 +220,6 @@ router.get('/', async (req, res) => {
   try {
     const { userToken: token } = req.cookies;
     if (!token) {
-      console.log('No user token found.');
       respondSuccess(res, undefined, 204);
       return;
     }
@@ -244,6 +239,7 @@ router.get('/', async (req, res) => {
         name: 'Permission Error',
         message: 'This user is banned.',
       });
+      return;
     }
 
     // Reset token in cookie

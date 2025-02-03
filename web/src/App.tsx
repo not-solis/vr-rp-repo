@@ -35,7 +35,7 @@ import { useQuery } from '@tanstack/react-query';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import 'javascript-time-ago/load-all-locales';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -45,7 +45,7 @@ import { Navbar } from './components/Navbar';
 import { AuthContext } from './context/AuthProvider';
 import { SnackbarContext, SnackbarProps } from './context/SnackbarProvider';
 import { HomePage } from './home/HomePage';
-import { queryServer } from './model/ServerResponse';
+import { queryServer, ResponseData } from './model/ServerResponse';
 import { User, UserRole } from './model/User';
 import { Repo } from './repo/Repo';
 import { RoleplayProjectPage } from './repo/RoleplayProjectPage';
@@ -131,11 +131,50 @@ export const APP_KEYWORDS = [
 ];
 
 export function App() {
-  const { data: user, isLoading: isAuthLoading } = useQuery({
+  const [snackbarProps, setSnackbarProps] = useState<SnackbarProps>();
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const createSnackbar = (props: SnackbarProps) => {
+    setSnackbarProps(props);
+    setSnackbarOpen(true);
+  };
+  const createErrorSnackbar = (err: any) => {
+    const props: SnackbarProps = err.name
+      ? {
+          title: err.name,
+          severity: 'error',
+          content: err.message,
+          autoHideDuration: 6000,
+        }
+      : {
+          title: 'Error',
+          severity: 'error',
+          content: err,
+          autoHideDuration: 6000,
+        };
+    setSnackbarProps(props);
+    setSnackbarOpen(true);
+  };
+
+  const {
+    data: user,
+    isLoading: isAuthLoading,
+    error,
+  } = useQuery({
     queryKey: ['auth'],
-    queryFn: () => queryServer<User>('/auth', { useAuth: true }),
+    queryFn: () =>
+      queryServer<ResponseData<User>>('/auth', {
+        useAuth: true,
+        returnFullResponse: true,
+      }),
+    select: (userData) => userData?.data,
     retry: false,
   });
+
+  useEffect(() => {
+    if (error) {
+      createErrorSnackbar(error);
+    }
+  }, [error]);
 
   const isAuthenticated = !!user;
   const hasPermission = (role: UserRole = UserRole.User) => {
@@ -149,8 +188,6 @@ export function App() {
     return userOrder <= roleOrder;
   };
 
-  const [snackbarProps, setSnackbarProps] = useState<SnackbarProps>();
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const theme = createTheme({
     cssVariables: true,
     palette: {
@@ -298,27 +335,8 @@ export function App() {
       <ThemeProvider theme={theme}>
         <SnackbarContext.Provider
           value={{
-            createSnackbar: (props) => {
-              setSnackbarProps(props);
-              setSnackbarOpen(true);
-            },
-            createErrorSnackbar: (err) => {
-              const props: SnackbarProps = err.name
-                ? {
-                    title: err.name,
-                    severity: 'error',
-                    content: err.message,
-                    autoHideDuration: 6000,
-                  }
-                : {
-                    title: 'Error',
-                    severity: 'error',
-                    content: err,
-                    autoHideDuration: 6000,
-                  };
-              setSnackbarProps(props);
-              setSnackbarOpen(true);
-            },
+            createSnackbar,
+            createErrorSnackbar,
           }}
         >
           <AuthContext.Provider

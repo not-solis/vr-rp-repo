@@ -23,6 +23,7 @@ interface QueryServerProps {
   body?: any;
   isJson?: boolean;
   useAuth?: boolean;
+  returnFullResponse?: boolean;
 }
 
 export async function queryServer<T>(
@@ -35,6 +36,7 @@ export async function queryServer<T>(
     body,
     isJson = false,
     useAuth = false,
+    returnFullResponse = false,
   } = props ?? {};
   const url = new URL(path, REACT_APP_SERVER_BASE_URL);
   Object.entries(queryParams).forEach(([key, val]) =>
@@ -55,9 +57,11 @@ export async function queryServer<T>(
     fetchParams.credentials = 'include';
   }
   const res = await fetch(url.toString(), fetchParams);
-  const json = await res.json();
+
+  // Status 204 is a success with an empty response.
+  const json = res.status === 204 ? { success: true } : await res.json();
   if (json.success) {
-    return json.data;
+    return returnFullResponse ? json : json.data;
   } else {
     throw json.error;
   }

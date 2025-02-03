@@ -11,7 +11,9 @@ export const getOwnerByProjectId = async (
         users.*
       FROM ownership
         INNER JOIN users on ownership.user_id = users.user_id
-      WHERE ownership.project_id=$1 AND ownership.active;
+      WHERE ownership.project_id=$1
+        AND ownership.active
+        AND users.role != 'Banned';
       `,
       [id],
     )
@@ -32,7 +34,9 @@ export const getPendingOwnersByProjectId = async (
         users.*
       FROM ownership
         INNER JOIN users on ownership.user_id = users.user_id
-      WHERE ownership.project_id=$1 AND NOT ownership.active;
+      WHERE ownership.project_id=$1
+        AND NOT ownership.active
+        AND users.role != 'Banned';
       `,
       [id],
     )
