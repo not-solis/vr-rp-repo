@@ -87,6 +87,7 @@
   #edit-action-buttons {
     flex-direction: column-reverse;
   }
+
   #project-info {
     flex-basis: 100vw;
   }

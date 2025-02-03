@@ -31,9 +31,10 @@
 .admin-tag {
   display: flex;
   border-radius: 20px;
-  background-color: #3bf7f431;
+  background-color: #6cfffd36;
   gap: 16px;
   padding: 16px;
+  box-shadow: var(--mui-shadows-4);
 }
 
 .admin-tag > img {

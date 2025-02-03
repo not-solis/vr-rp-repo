@@ -310,10 +310,10 @@ export function App() {
         margin: '25vh auto',
         alignSelf: 'center',
         textAlign: 'center',
-        fontSize: 84,
+        fontSize: 60,
       }}
     >
-      Coming soon: {what}!
+      Coming soon: {what}
     </h1>
   );
 
@@ -361,7 +361,7 @@ export function App() {
                         />
                         <Route
                           path='/community'
-                          element={comingSoon('articles, and asset resources')}
+                          element={comingSoon('articles and asset resources')}
                         />
                         <Route path='/about' element={<AboutPage />} />
                         <Route
