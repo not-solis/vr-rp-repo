@@ -376,9 +376,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
   const requestOwnership = () => {
     queryServer(`/projects/${id}/owner`, {
-      method: 'POST',
-      body: project,
-      isJson: true,
+      method: 'PATCH',
       useAuth: true,
     })
       .then(() =>

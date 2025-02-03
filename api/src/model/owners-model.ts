@@ -1,29 +1,42 @@
-import { ResponseData } from '../index.js';
 import { pool } from './db-pool.js';
-import { User } from './users-model.js';
+import { remapUser, User } from './users-model.js';
 
 export const getOwnerByProjectId = async (
   id: string,
-): Promise<ResponseData<User>> => {
+): Promise<User | undefined> => {
   return await pool
     .query(
       `
       SELECT
-        users.user_id as user_id,
-        users.name as name,
-        users.discord_id as discord_id
+        users.*
       FROM ownership
         INNER JOIN users on ownership.user_id = users.user_id
       WHERE ownership.project_id=$1 AND ownership.active;
       `,
       [id],
     )
-    .then((results) => {
-      return {
-        success: true,
-        data: results?.rows ? results.rows[0] : undefined,
-      };
-    })
+    .then((results) => (results?.rows ? remapUser(results.rows[0]) : undefined))
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
+    });
+};
+
+export const getPendingOwnersByProjectId = async (
+  id: string,
+): Promise<User[]> => {
+  return await pool
+    .query(
+      `
+      SELECT
+        users.*
+      FROM ownership
+        INNER JOIN users on ownership.user_id = users.user_id
+      WHERE ownership.project_id=$1 AND NOT ownership.active;
+      `,
+      [id],
+    )
+    .then((results) => results?.rows?.map(remapUser) ?? [])
     .catch((err) => {
       console.error(err);
       throw new Error('Internal server error.');
@@ -43,6 +56,48 @@ export const createOwnership = async (
     .then((results) => {
       if (!results.rowCount) {
         throw new Error('Error creating ownership record.');
+      }
+      return undefined;
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
+    });
+};
+
+export const grantOwnership = async (
+  projectId: string,
+  userId: string,
+): Promise<unknown> => {
+  return await pool
+    .query(
+      'UPDATE ownership SET active=true WHERE project_id=$1 AND user_id=$2;',
+      [projectId, userId],
+    )
+    .then((results) => {
+      if (!results.rowCount) {
+        throw new Error('Error granting ownership.');
+      }
+      return undefined;
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
+    });
+};
+
+export const rejectOwnership = async (
+  projectId: string,
+  userId: string,
+): Promise<unknown> => {
+  return await pool
+    .query('DELETE FROM ownership WHERE project_id=$1 AND user_id=$2;', [
+      projectId,
+      userId,
+    ])
+    .then((results) => {
+      if (!results.rowCount) {
+        throw new Error('Error deleting from ownership.');
       }
       return undefined;
     })

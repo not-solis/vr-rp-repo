@@ -153,7 +153,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     imageUrl,
     otherLinks = [],
   } = project;
-  const { userId, role } = user;
+  const { id: userId, role } = user;
   return await new Promise((resolve, reject) => {
     makeTransaction((client: PoolClient) => {
       client

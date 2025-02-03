@@ -6,6 +6,7 @@ import {
   getUserByOAuthEmail,
   getUserByOAuthId,
   updateOAuthId,
+  User,
   UserRole,
 } from '../model/users-model.js';
 import {
@@ -45,6 +46,40 @@ export const auth: RequestHandler = (req, res, next) => {
   }
 };
 
+export const checkPermissions: (role: UserRole) => RequestHandler =
+  (role) => async (req, res, next) => {
+    const userId = res.locals.userId;
+    if (!userId) {
+      respondError(res, {
+        message: 'Invalid routing middleware: no auth before ownership check.',
+      });
+    }
+
+    try {
+      const user = await getUserById(userId);
+      if (!user) {
+        throw new Error('No user found.');
+      }
+
+      const order = [UserRole.Admin, UserRole.User, UserRole.Banned];
+      const userOrder = order.indexOf(user.role);
+      const roleOrder = order.indexOf(role);
+      const success =
+        userOrder !== -1 && roleOrder !== -1 && userOrder <= roleOrder;
+
+      if (!success) {
+        throw new Error(
+          'User does not have the permission level to access this endpoint.',
+        );
+      }
+
+      next();
+    } catch (err) {
+      console.error(err);
+      respondError(res);
+    }
+  };
+
 const oauthRespond = (res: Response, status: number, result: unknown = {}) => {
   res.status(status).send(`
     <!DOCTYPE html>
@@ -63,7 +98,7 @@ const oauthRespond = (res: Response, status: number, result: unknown = {}) => {
   `);
 };
 
-const sendWelcomeEmail = (email: string, name: string) => (user: any) => {
+const sendWelcomeEmail = (email: string, name: string) => (user: User) => {
   sendMail({
     to: email,
     subject: 'Welcome to the Repo',
@@ -145,7 +180,18 @@ const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
         (await createUser(name, imageUrl, idType, oauthId, email).then(
           sendWelcomeEmail(email, name),
         ));
-      const { userId: id, [idType]: newOAuthId } = user!;
+
+      const idAsProperty = () => {
+        switch (idType) {
+          case 'discord_id':
+            return 'discordId';
+          case 'google_id':
+            return 'googleId';
+          case 'twitch_id':
+            return 'twitchId';
+        }
+      };
+      const { id, [idAsProperty()]: newOAuthId } = user!;
 
       // Update existing record with ID
       if (!newOAuthId) {

@@ -8,9 +8,15 @@ import {
   getImageUrlByProjectId,
   deleteProject,
 } from '../model/project-model.js';
-import { createOwnership, getOwnerByProjectId } from '../model/owners-model.js';
+import {
+  createOwnership,
+  getOwnerByProjectId,
+  getPendingOwnersByProjectId,
+  grantOwnership,
+  rejectOwnership,
+} from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
-import { auth } from './auth-router.js';
+import { auth, checkPermissions } from './auth-router.js';
 import { respondError, respondSuccess, ResponseData } from '../index.js';
 import { getAdmins, getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
@@ -110,9 +116,8 @@ const checkOwnership: RequestHandler = async (
     next();
   } else if (user.role === UserRole.User) {
     getOwnerByProjectId(id)
-      .then((results) => results.data)
       .then((owner) => {
-        if (owner?.userId === user.userId) {
+        if (owner && owner.id === user.id) {
           next();
         } else {
           respondError(res, {
@@ -171,7 +176,94 @@ router.get('/:id', (req, res) => {
     );
 });
 
-router.post('/:id/owner', auth, (req, res) => {
+router.get(
+  '/:id/owner/pending',
+  auth,
+  checkPermissions(UserRole.Admin),
+  (req, res) => {
+    const { id } = req.params;
+    getPendingOwnersByProjectId(id)
+      .then((data) => {
+        respondSuccess(res, data, 201);
+      })
+      .catch((err) =>
+        respondError(res, {
+          name: 'Get Ownership Error',
+          message: err.message,
+        }),
+      );
+  },
+);
+
+router.post(
+  '/:id/owner',
+  auth,
+  checkPermissions(UserRole.Admin),
+  (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+    grantOwnership(id, userId)
+      .then(async (data) => {
+        const user = await getUserById(userId);
+        const project = await getProjectById(id);
+        sendMail({
+          to: user.email,
+          subject: `Ownership request accepted: ${project.name}`,
+          html: `<p>Congratulations! Your ownership request for
+          <a href="${CLIENT_URL}/repo/${project.id}">
+            <b>${project.name}</b>
+          </a> has been accepted. You are now able to edit and
+          post updates to <b>${project.name}</b>.</p>`,
+        });
+        return data;
+      })
+      .then((data) => {
+        respondSuccess(res, data, 201);
+      })
+      .catch((err) =>
+        respondError(res, {
+          name: 'Get Ownership Error',
+          message: err.message,
+        }),
+      );
+  },
+);
+
+router.delete(
+  '/:id/owner',
+  auth,
+  checkPermissions(UserRole.Admin),
+  (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+    rejectOwnership(id, userId)
+      .then(async (data) => {
+        const user = await getUserById(userId);
+        const project = await getProjectById(id);
+        sendMail({
+          to: user.email,
+          subject: `Ownership request declined: ${project.name}`,
+          html: `<p>Your ownership request for
+        <a href="${CLIENT_URL}/repo/${project.id}">
+          <b>${project.name}</b>
+        </a> has been declined. Please contact a Repo admin if this you
+        believe this decision was made in error.</p>`,
+        });
+        return data;
+      })
+      .then((data) => {
+        respondSuccess(res, data, 201);
+      })
+      .catch((err) =>
+        respondError(res, {
+          name: 'Get Ownership Error',
+          message: err.message,
+        }),
+      );
+  },
+);
+
+router.patch('/:id/owner', auth, (req, res) => {
   const { id } = req.params;
   const userId = res.locals.userId;
   createOwnership(id, userId)
@@ -183,8 +275,8 @@ router.post('/:id/owner', auth, (req, res) => {
           sendMail({
             to: admin.email,
             subject: `Ownership request pending: ${project.name}`,
-            html: `<p>User <b>${user.name}</b> (id: ${user.userId}) is
-            requesting ownership of <b>${project.name}</b>(id: ${project.id})</p>
+            html: `<p>User <b>${user.name}</b> (id: ${user.id}) is
+            requesting ownership of <b>${project.name}</b> (id: ${project.id})</p>
             <p>Review the request: <a href="${CLIENT_URL}/repo/${project.id}">
             ${project.name}</a></p>`,
           }),

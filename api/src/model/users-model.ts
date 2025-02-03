@@ -7,7 +7,7 @@ export enum UserRole {
 }
 
 export interface User {
-  userId: string;
+  id: string;
   name: string;
   imageUrl?: string;
   role: UserRole;
@@ -20,7 +20,7 @@ export interface User {
 
 export const remapUser = (user: any): User => {
   return {
-    userId: user.user_id,
+    id: user.user_id,
     name: user.name,
     imageUrl: user.image_url,
     role: user.role,

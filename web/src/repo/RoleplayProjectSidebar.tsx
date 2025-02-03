@@ -1,14 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Add, Delete, Upload } from '@mui/icons-material';
+import { Add, Check, Close, Delete, Upload } from '@mui/icons-material';
 import {
   Button,
   CardMedia,
   Checkbox,
   FormControlLabel,
   IconButton,
+  Stack,
   Typography,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
@@ -26,6 +28,8 @@ import {
   RoleplayLink,
   RoleplayProject,
 } from '../model/RoleplayProject';
+import { queryServer } from '../model/ServerResponse';
+import { User, UserRole } from '../model/User';
 
 import './RoleplayProjectSidebar.css';
 
@@ -41,8 +45,9 @@ interface RoleplayProjectSidebarProps {
 }
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
-  const { isAuthenticated } = useAuth();
-  const { createSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  const { isAuthenticated, hasPermission } = useAuth();
+  const { createSnackbar, createErrorSnackbar } = useSnackbar();
   const {
     isOpen,
     isEditing = false,
@@ -54,6 +59,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     openOwnershipDialog,
   } = props;
   const {
+    id,
     owner,
     name,
     imageUrl = '',
@@ -69,6 +75,65 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     discordUrl = '',
     otherLinks = [],
   } = project;
+
+  const refetchProject = () => {
+    queryClient.refetchQueries({
+      queryKey: ['project'],
+    });
+  };
+
+  const { data: pendingOwners = [] } = useQuery({
+    enabled: hasPermission(UserRole.Admin) && !owner,
+    queryKey: ['project', 'pendingOwners'],
+    queryFn: () =>
+      queryServer<User[]>(`/projects/${id}/owner/pending`, {
+        queryParams: { pending: 'true' },
+        useAuth: true,
+      }),
+  });
+
+  const acceptOwnershipRequest = (user: User) => () => {
+    queryServer(`projects/${id}/owner`, {
+      method: 'POST',
+      body: { userId: user.id },
+      isJson: true,
+      useAuth: true,
+    })
+      .then(() =>
+        createSnackbar({
+          title: 'Success',
+          content: 'Ownership request accepted!',
+          severity: 'success',
+        }),
+      )
+      .catch((err) => {
+        console.error(err);
+        createErrorSnackbar(err);
+      })
+      .finally(refetchProject);
+  };
+
+  const rejectOwnershipRequest = (user: User) => () => {
+    console.log(user);
+    queryServer(`projects/${id}/owner`, {
+      method: 'DELETE',
+      body: { userId: user.id },
+      isJson: true,
+      useAuth: true,
+    })
+      .then(() =>
+        createSnackbar({
+          title: 'Success',
+          content: 'Ownership request rejected.',
+          severity: 'success',
+        }),
+      )
+      .catch((err) => {
+        console.error(err);
+        createErrorSnackbar(err);
+      })
+      .finally(refetchProject);
+  };
 
   const sidebarLinks = [];
   if (isEditing || discordUrl) {
@@ -289,7 +354,40 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 />
               ) : (
                 isAuthenticated &&
-                !isEditing && (
+                !isEditing &&
+                (hasPermission(UserRole.Admin) ? (
+                  <div>
+                    <Typography paddingBottom={0.5}>
+                      Ownership requests: {pendingOwners.length === 0 && 'None'}
+                    </Typography>
+                    <Stack paddingLeft={2}>
+                      {pendingOwners.map((user) => (
+                        <Stack
+                          key={user.name}
+                          direction='row'
+                          alignItems='center'
+                          gap={1}
+                        >
+                          <Typography paddingRight={1}>{user.name}</Typography>
+                          <IconButton
+                            size='small'
+                            color='error'
+                            onClick={rejectOwnershipRequest(user)}
+                          >
+                            <Close />
+                          </IconButton>
+                          <IconButton
+                            size='small'
+                            color='success'
+                            onClick={acceptOwnershipRequest(user)}
+                          >
+                            <Check />
+                          </IconButton>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </div>
+                ) : (
                   <Button
                     color='plain'
                     variant='outlined'
@@ -298,7 +396,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                   >
                     Request Ownership
                   </Button>
-                )
+                ))
               )}
 
               <IconText
