@@ -31,7 +31,7 @@ export const AboutPage = () => {
           content='Read more about the VR Roleplay Repo.'
         />
       </Helmet>
-      <Stack gap={5} minHeight='100%'>
+      <Stack id='about-page-content' gap={5}>
         <Stack id='about-repo' gap={2}>
           <Typography variant='h2'>The Repo</Typography>
           <Typography>

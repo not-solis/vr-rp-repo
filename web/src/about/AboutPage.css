@@ -1,11 +1,17 @@
 #about-page {
   width: min(860px, 100%);
   height: 100%;
-  padding: min(36px, calc(9px + 3vw));
   margin: 0 auto;
   box-sizing: border-box;
   background-color: var(--mui-palette-background-light);
   box-shadow: var(--mui-shadows-6);
+}
+
+#about-page-content {
+  min-height: 100%;
+  padding: min(36px, calc(9px + 3vw));
+  padding-bottom: 24px;
+  box-sizing: border-box;
 }
 
 #about-repo {
