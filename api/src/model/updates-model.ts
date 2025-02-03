@@ -33,7 +33,7 @@ export const getUpdates = async (
         ($1::uuid IS NULL OR updates.project_id=$1)
         AND ($2::uuid IS NULL OR updates.user_id=$2)
         AND users.role != 'Banned'
-        AND roleplay_projects.status != 'Deleted'
+        AND (roleplay_projects.status IS NULL OR roleplay_projects.status != 'Deleted')
       ORDER BY created DESC
       OFFSET $3 LIMIT $4`,
       [projectId, userId, start, limit + 1],

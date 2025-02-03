@@ -1,3 +1,4 @@
+import './UpdateComponent.css';
 import { Shield } from '@mui/icons-material';
 import {
   Avatar,
@@ -12,9 +13,9 @@ import { Link } from 'react-router-dom';
 import { useTimeAgo } from 'react-time-ago';
 
 import { getLocale } from '../App';
+import { AutoLink } from './AutoLink';
 import { Update } from '../model/Update';
 import { UserRole } from '../model/User';
-import './UpdateComponent.css';
 
 interface UpdateComponentProps {
   update: Update;
@@ -144,7 +145,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
             maxHeight={isReadingMore ? maxHeight : 288}
             className='update-text'
           >
-            {text}
+            <AutoLink text={text} />
           </Typography>
           {isTruncated && (
             <Typography
