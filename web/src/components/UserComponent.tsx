@@ -251,7 +251,7 @@ export const UserComponent = () => {
               variant='outlined'
               size='small'
               value={isEditingName ? name : user.name}
-              style={{ width: 160 }}
+              style={{ width: 160, marginRight: isEditingName ? 0 : 44 }}
               onChange={(e) => setName(e.target.value)}
               slotProps={{
                 input: {
@@ -280,7 +280,7 @@ export const UserComponent = () => {
             />
             {isEditingName && (
               <IconButton onClick={saveName}>
-                <Save />
+                <Save fontSize='small' />
               </IconButton>
             )}
           </Stack>
