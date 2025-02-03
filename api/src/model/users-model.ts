@@ -12,6 +12,7 @@ export interface User {
   imageUrl?: string;
   role: UserRole;
   email: string;
+  oauthEmail: string;
   discordId?: string;
   googleId?: string;
   twitchId?: string;
@@ -24,6 +25,7 @@ export const remapUser = (user: any): User => {
     imageUrl: user.image_url,
     role: user.role,
     email: user.email,
+    oauthEmail: user.oauth_email,
     discordId: user.discord_id,
     googleId: user.google_id,
     twitchId: user.twitch_id,
@@ -40,6 +42,7 @@ export const getAdmins = async () => {
         image_url,
         role,
         email,
+        oauth_email,
         discord_id,
         google_id,
         twitch_id
@@ -69,6 +72,7 @@ export const getUserById = async (id: string) => {
         image_url,
         role,
         email,
+        oauth_email,
         discord_id,
         google_id,
         twitch_id
@@ -130,6 +134,32 @@ export const getUserByOAuthId = async (
     });
 };
 
+export const getUserByOAuthEmail = async (
+  email: string,
+): Promise<User | undefined> => {
+  return await pool
+    .query(
+      `
+      SELECT
+        user_id,
+        name,
+        image_url,
+        role
+      FROM users
+      WHERE oauth_email=$1;
+      `,
+      [email],
+    )
+    .then((results) => {
+      const success = results?.rows[0];
+      return success ? remapUser(results.rows[0]) : undefined;
+    })
+    .catch((err) => {
+      console.error(err);
+      throw new Error('Internal server error.');
+    });
+};
+
 export const createUser = async (
   name: string,
   imageUrl: string,
@@ -140,8 +170,8 @@ export const createUser = async (
   return await pool
     .query(
       `
-      INSERT INTO users (${idType}, name, image_url, email)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO users (${idType}, name, image_url, email, oauth_email)
+      VALUES ($1, $2, $3, $4, $4)
       RETURNING user_id, discord_id, google_id, twitch_id
       `,
       [id, name, imageUrl, email],

@@ -2,8 +2,8 @@ import { RequestHandler, Response, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import {
   createUser,
-  getUserByEmail,
   getUserById,
+  getUserByOAuthEmail,
   getUserByOAuthId,
   updateOAuthId,
   UserRole,
@@ -152,7 +152,7 @@ router.get('/discord', async (req, res) => {
 
     const user =
       (await getUserByOAuthId('discord_id', discordId)) ??
-      (await getUserByEmail(email)) ??
+      (await getUserByOAuthEmail(email)) ??
       (await createUser(
         global_name,
         `https://cdn.discordapp.com/avatars/${discordId}/${avatar}`,
@@ -230,7 +230,7 @@ router.get('/google', async (req, res) => {
 
     const user =
       (await getUserByOAuthId('google_id', googleId)) ??
-      (await getUserByEmail(email)) ??
+      (await getUserByOAuthEmail(email)) ??
       (await createUser(
         (email as string).substring(0, (email as string).indexOf('@')),
         picture,
@@ -309,7 +309,7 @@ router.get('/twitch', async (req, res) => {
 
     const user =
       (await getUserByOAuthId('twitch_id', twitchId)) ??
-      (await getUserByEmail(email)) ??
+      (await getUserByOAuthEmail(email)) ??
       (await createUser(
         display_name,
         profile_image_url,
