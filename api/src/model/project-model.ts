@@ -29,6 +29,13 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
+const validSortByKeys = new Set([
+  'name',
+  'last_updated',
+  'created_at',
+  'started',
+]);
+
 export const getProjects = async (
   start = 0,
   limit = DEFAULT_QUERY_LIMIT,
@@ -43,8 +50,13 @@ export const getProjects = async (
   const addedQueryParams: (string | number)[] = [];
   const where = ["roleplay_projects.status != 'Deleted'"];
   if (name) {
-    sortBy = `levenshtein_less_equal(LOWER('${name}'), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
+    addedQueryParams.push(name);
+    sortBy = `levenshtein_less_equal(LOWER($3), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
     asc = true;
+  } else {
+    if (!validSortByKeys.has(sortBy)) {
+      throw new Error('Invalid sort key.');
+    }
   }
 
   const hasTags = tags && tags.length > 0;
