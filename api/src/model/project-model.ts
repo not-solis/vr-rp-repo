@@ -10,6 +10,7 @@ const DEFAULT_QUERY_LIMIT = 1000;
 export interface RoleplayProject {
   id: string;
   name: string;
+  urlName: string;
   owner?: User;
   lastUpdated?: Date;
   imageUrl?: string;
@@ -28,6 +29,39 @@ export interface RoleplayProject {
   discordUrl?: string;
   otherLinks?: RoleplayLink[];
 }
+
+const remapRoleplayProject = (project: any): RoleplayProject => {
+  return {
+    id: project.id,
+    name: project.name,
+    urlName: project.url_name,
+    owner: project.owner_id
+      ? {
+          id: project.owner_id,
+          name: project.owner_name,
+          role: project.owner_role,
+          email: project.owner_email,
+          oauthEmail: project.owner_oauth_email,
+        }
+      : undefined,
+    lastUpdated: new Date(project.last_updated),
+    imageUrl: project.image_url,
+    shortDescription: project.short_description,
+    description: project.description,
+    setting: project.setting,
+    tags: project.tags,
+    runtime: project.runtime,
+    started: project.started && new Date(project.started),
+    status: project.status,
+    entryProcess: project.entry_process,
+    applicationProcess: project.application_process,
+    hasSupportingCast: project.has_support_cast,
+    isMetaverse: project.is_metaverse,
+    isQuestCompatible: project.is_quest_compatible,
+    discordUrl: project.discord_url,
+    otherLinks: project.other_links,
+  };
+};
 
 const validSortByKeys = new Set([
   'name',
@@ -102,7 +136,7 @@ export const getProjects = async (
         }
         return {
           hasNext: rowCount > limit,
-          data: rows,
+          data: rows.map(remapRoleplayProject),
           nextCursor: start + limit,
         } as PageData<RoleplayProject>;
       } else {
@@ -116,6 +150,14 @@ export const getProjects = async (
 };
 
 export const getProjectById = async (id: string) => {
+  return internalGetProject('id', id);
+};
+
+export const getProjectByUrlName = async (urlName: string) => {
+  return internalGetProject('url_name', urlName);
+};
+
+const internalGetProject = async (field: string, value: string) => {
   return await pool
     .query(
       `
@@ -128,14 +170,14 @@ export const getProjectById = async (id: string) => {
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on users.user_id = ownership.user_id
-      WHERE roleplay_projects.id=$1 AND roleplay_projects.status != 'Deleted'
+      WHERE roleplay_projects.${field}=$1 AND roleplay_projects.status != 'Deleted'
       ;
       `,
-      [id],
+      [value],
     )
     .then((results) => {
       if (results?.rows) {
-        return results.rows[0] as RoleplayProject;
+        return remapRoleplayProject(results.rows[0]);
       } else {
         throw new Error('No results found.');
       }
@@ -188,7 +230,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           discord_url,
           image_url)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-          RETURNING id;
+          RETURNING id, url_name;
           `,
           [
             name,
@@ -214,7 +256,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           }
 
           const newProject = results.rows[0];
-          const projectId = newProject.id;
+          const { id: projectId, url_name: urlName } = newProject;
 
           const queries = [];
           if (role === UserRole.User) {
@@ -243,7 +285,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           }
 
           return Promise.all(queries)
-            .then(() => resolve(projectId))
+            .then(() => resolve(urlName))
             .catch(reject);
         })
         .catch(reject);
@@ -293,7 +335,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
           discord_url=$14,
           image_url=$15
           WHERE id=$16
-          RETURNING id;
+          RETURNING url_name;
           `,
           [
             name,
@@ -319,7 +361,9 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             throw new Error('Update project failed.');
           }
 
-          updateRoleplayLinks(id, otherLinks).then(resolve).catch(reject);
+          updateRoleplayLinks(id, otherLinks)
+            .then(() => resolve(results.rows[0].url_name))
+            .catch(reject);
         })
         .catch(reject);
     }, reject);

@@ -30,7 +30,6 @@
   width: min-content;
   min-width: 32px;
   max-width: 64px;
-  /* border-right: 1px solid var(--mui-palette-divider); */
   object-fit: contain;
   box-shadow:
     2px 0px 2px -1px rgba(0, 0, 0, 0.12),

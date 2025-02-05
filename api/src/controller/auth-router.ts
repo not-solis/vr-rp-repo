@@ -1,11 +1,8 @@
-import { RequestHandler, Response, Router } from 'express';
+import { RequestHandler, Router } from 'express';
 import jwt from 'jsonwebtoken';
 import {
-  createUser,
+  upsertUser,
   getUserById,
-  getUserByOAuthEmail,
-  getUserByOAuthId,
-  updateOAuthId,
   User,
   UserRole,
 } from '../model/users-model.js';
@@ -170,30 +167,18 @@ const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
         imageUrl,
       } = await getUserInfo(tokenType, access_token);
 
-      const user =
-        (await getUserByOAuthId(idType, oauthId)) ??
-        (await getUserByOAuthEmail(email)) ??
-        (await createUser(name, imageUrl, idType, oauthId, email).then(
-          sendWelcomeEmail(email, name),
-        ));
-
-      const idAsProperty = () => {
-        switch (idType) {
-          case 'discord_id':
-            return 'discordId';
-          case 'google_id':
-            return 'googleId';
-          case 'twitch_id':
-            return 'twitchId';
-        }
-      };
-      const { id, [idAsProperty()]: newOAuthId } = user!;
-
-      // Update existing record with ID
-      if (!newOAuthId) {
-        updateOAuthId(idType, id, oauthId);
+      const { user, isNew } = await upsertUser(
+        name,
+        imageUrl,
+        idType,
+        oauthId,
+        email,
+      );
+      if (isNew) {
+        sendWelcomeEmail(email, name);
       }
 
+      const { id } = user;
       // Sign user JWT
       const token = sign({ id }, JWT_SECRET, {
         expiresIn: TOKEN_EXPIRATION,

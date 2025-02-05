@@ -81,7 +81,7 @@ export const getUserById = async (id: string) => {
       [id],
     )
     .then((results) => {
-      if (results?.rows) {
+      if (results?.rowCount) {
         return remapUser(results.rows[0]);
       } else {
         throw new Error('No user found by id.');
@@ -118,68 +118,29 @@ export const getUserByEmail = async (
     });
 };
 
-export const getUserByOAuthId = async (
-  idType: string,
-  id: string,
-): Promise<User | undefined> => {
-  return await pool
-    .query(`SELECT * FROM users WHERE ${idType}=$1;`, [id])
-    .then((results) => {
-      const success = results?.rows[0];
-      return success ? remapUser(results.rows[0]) : undefined;
-    })
-    .catch((err) => {
-      console.error(err);
-      throw new Error('Internal server error.');
-    });
-};
-
-export const getUserByOAuthEmail = async (
-  email: string,
-): Promise<User | undefined> => {
-  return await pool
-    .query(
-      `
-      SELECT
-        user_id,
-        name,
-        image_url,
-        role
-      FROM users
-      WHERE oauth_email=$1;
-      `,
-      [email],
-    )
-    .then((results) => {
-      const success = results?.rows[0];
-      return success ? remapUser(results.rows[0]) : undefined;
-    })
-    .catch((err) => {
-      console.error(err);
-      throw new Error('Internal server error.');
-    });
-};
-
-export const createUser = async (
+export const upsertUser = async (
   name: string,
   imageUrl: string,
   idType: string,
   id: string,
   email: string,
-): Promise<User> => {
+): Promise<{ user: User; isNew: boolean }> => {
   return await pool
     .query(
       `
       INSERT INTO users (${idType}, name, image_url, email, oauth_email)
       VALUES ($1, $2, $3, $4, $4)
-      RETURNING user_id, discord_id, google_id, twitch_id
+      ON CONFLICT (oauth_email) DO UPDATE
+        SET ${idType}=$1, updated=CURRENT_TIMESTAMP
+      RETURNING user_id, name, image_url, email, oauth_email, updated IS NULL as new
       `,
       [id, name, imageUrl, email],
     )
     .then((results) => {
       const { rows, rowCount } = results;
       if (rows && rowCount) {
-        return remapUser(results.rows[0]);
+        const { new: isNew, ...user } = results.rows[0];
+        return { user: remapUser(user), isNew };
       } else {
         throw new Error('No records inserted.');
       }
@@ -219,29 +180,6 @@ export const updateUserEmail = async (id: string, email: string) => {
         return results.rows[0].email;
       } else {
         throw new Error('User email update failed.');
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      throw err;
-    });
-};
-
-export const updateOAuthId = async (
-  idType: string,
-  userId: string,
-  oauthId: string,
-) => {
-  return await pool
-    .query(
-      `UPDATE users SET ${idType}=$1 WHERE user_id=$2 RETURNING ${idType}`,
-      [oauthId, userId],
-    )
-    .then((results) => {
-      if (results?.rowCount) {
-        return results.rows[0];
-      } else {
-        throw new Error(`${idType} update failed.`);
       }
     })
     .catch((err) => {

@@ -38,6 +38,12 @@ export const AboutPage = () => {
             The Repo is the unifying platform for newcomers and veterans of the
             VR Roleplay community to share and discover roleplay experiences.
           </Typography>
+          <Typography>
+            Our goal is to connect players to roleplays. We want to give you
+            everything you need to get through the door to the roleplay that
+            interests you. To achieve this, we're committed to making all
+            roleplays as visible and discoverable as possible.
+          </Typography>
         </Stack>
 
         <Stack id='about-myriad' gap={2}>

@@ -37,6 +37,7 @@ export const RoleplayProjectCard = (
   const {
     id,
     name,
+    urlName,
     lastUpdated,
     owner,
     imageUrl,
@@ -97,7 +98,7 @@ export const RoleplayProjectCard = (
             </div>
           </div>
 
-          <Link id='card-link' to={`/repo/${id}`} className='no-underline'>
+          <Link id='card-link' to={`/repo/${urlName}`} className='no-underline'>
             <Box className='project-overview'>
               <Box className='project-header'>
                 <Tooltip

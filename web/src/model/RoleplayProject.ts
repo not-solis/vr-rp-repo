@@ -30,6 +30,7 @@ export interface RoleplayLink {
 export interface RoleplayProject {
   id: string;
   name: string;
+  urlName: string;
   owner?: User;
   lastUpdated: Date;
   imageUrl?: string;
@@ -49,33 +50,10 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
-export const remapRoleplayProject = (project: any): RoleplayProject => {
+export const getProjectDates = (project: RoleplayProject) => {
   return {
-    id: project.id,
-    name: project.name,
-    owner: project.owner_id
-      ? {
-          id: project.owner_id,
-          name: project.owner_name,
-          role: project.owner_role,
-          email: project.owner_email,
-        }
-      : undefined,
-    lastUpdated: new Date(project.last_updated),
-    imageUrl: project.image_url,
-    shortDescription: project.short_description,
-    description: project.description,
-    setting: project.setting,
-    tags: project.tags,
-    runtime: project.runtime,
+    ...project,
+    lastUpdated: new Date(project.lastUpdated),
     started: project.started && new Date(project.started),
-    status: project.status,
-    entryProcess: project.entry_process,
-    applicationProcess: project.application_process,
-    hasSupportingCast: project.has_support_cast,
-    isMetaverse: project.is_metaverse,
-    isQuestCompatible: project.is_quest_compatible,
-    discordUrl: project.discord_url,
-    otherLinks: project.other_links,
   };
 };

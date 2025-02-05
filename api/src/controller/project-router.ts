@@ -7,6 +7,7 @@ import {
   updateProject,
   getImageUrlByProjectId,
   deleteProject,
+  getProjectByUrlName,
 } from '../model/project-model.js';
 import {
   createOwnership,
@@ -165,6 +166,20 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   getProjectById(id)
+    .then((data) => {
+      respondSuccess(res, data);
+    })
+    .catch((err) =>
+      respondError(res, {
+        name: 'Get Project Error',
+        message: err.message,
+      }),
+    );
+});
+
+router.get('/name/:name', (req, res) => {
+  const { name } = req.params;
+  getProjectByUrlName(name)
     .then((data) => {
       respondSuccess(res, data);
     })

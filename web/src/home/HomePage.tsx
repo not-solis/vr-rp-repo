@@ -19,10 +19,7 @@ import Slider from 'react-slick';
 import { UpdateComponent } from '../components/UpdateComponent';
 import { useAuth } from '../context/AuthProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
-import {
-  remapRoleplayProject,
-  RoleplayProject,
-} from '../model/RoleplayProject';
+import { getProjectDates, RoleplayProject } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
@@ -82,7 +79,7 @@ export const HomePage = () => {
         return pageData;
       }),
     select: (pageData: PageData<RoleplayProject>) =>
-      pageData.data.map(remapRoleplayProject),
+      pageData.data.map(getProjectDates),
   });
 
   const updates = updatePageData?.pages.map((p) => p.data).flat();

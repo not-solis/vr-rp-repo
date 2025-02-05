@@ -356,7 +356,7 @@ export function App() {
                           element={<RoleplayProjectPage isNew />}
                         />
                         <Route
-                          path='/repo/:id'
+                          path='/repo/:urlName'
                           element={<RoleplayProjectPage />}
                         />
                         <Route

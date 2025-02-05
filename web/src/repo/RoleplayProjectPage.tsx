@@ -41,10 +41,10 @@ import { UpdateComponent } from '../components/UpdateComponent';
 import { useAuth } from '../context/AuthProvider';
 import { useSnackbar } from '../context/SnackbarProvider';
 import {
-  remapRoleplayProject,
   RoleplayProject,
   RoleplayLink,
   RoleplayStatus,
+  getProjectDates,
 } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
@@ -97,7 +97,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { user, isAuthenticated } = useAuth();
   const { createSnackbar, createErrorSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { urlName } = useParams();
   const queryClient = useQueryClient();
 
   if (isNew && !isEditing) {
@@ -125,29 +125,37 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     isLoading,
   } = useQuery({
     enabled: !isNew,
-    queryKey: ['project'],
+    queryKey: ['project', urlName],
     queryFn: () =>
-      queryServer<RoleplayProject>(`/projects/${id}`)
+      queryServer<RoleplayProject>(`/projects/name/${urlName}`)
         .then((project) => {
-          const remappedProject = remapRoleplayProject(project);
-          if (!remappedProject.owner) {
+          if (!project) {
+            throw new Error(`No project by name ${urlName}`);
+          }
+          if (!project.owner) {
             setAdminInfoAlertOpen(true);
           }
-          return remappedProject;
+          return project;
         })
-        .then(clearNulls)
-        .catch(() => navigate('/repo')),
+        .then(clearNulls),
+    select: getProjectDates,
   });
 
+  if (error) {
+    navigate('/repo');
+  }
+
+  const id = projectData?.id;
+
   const { data: otherLinks, isLoading: otherLinksLoading } = useQuery({
-    enabled: !isNew,
-    queryKey: ['project', 'links'],
+    enabled: !isNew && id !== undefined,
+    queryKey: ['project', 'links', urlName],
     queryFn: () => queryServer<RoleplayLink[]>(`/projects/${id}/links`),
   });
 
   const { data: updates, isLoading: updatesLoading } = useQuery({
-    enabled: !isNew,
-    queryKey: ['project', 'updates'],
+    enabled: !isNew && id !== undefined,
+    queryKey: ['project', 'updates', urlName],
     queryFn: () => {
       return queryServer<PageData<Update>>('/updates', {
         queryParams: { projectId: id! },
@@ -339,9 +347,9 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         isJson: true,
         useAuth: true,
       })
-        .then((id) => {
+        .then((urlName) => {
           setEditing(false);
-          navigate(`/repo/${id}`);
+          navigate(`/repo/${urlName}`);
           createSnackbar({
             title: 'Success',
             content: 'Project successfully saved!',
@@ -359,8 +367,12 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         isJson: true,
         useAuth: true,
       })
-        .then(() => {
-          refetchProject();
+        .then((newUrlName) => {
+          if (newUrlName !== urlName) {
+            navigate(`/repo/${newUrlName}`);
+          } else {
+            refetchProject();
+          }
           setEditing(false);
           createSnackbar({
             title: 'Success',
