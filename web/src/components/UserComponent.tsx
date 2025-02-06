@@ -4,6 +4,7 @@ import {
   BugReport,
   Close,
   Edit,
+  GitHub,
   Login,
   Logout,
   Save,
@@ -40,6 +41,34 @@ import {
 } from '../Env';
 import { queryServer } from '../model/ServerResponse';
 import './UserComponent.css';
+
+const ReportBugMenuItem = () => (
+  <MenuItem
+    onClick={() =>
+      window.open(
+        'https://github.com/not-solis/vr-rp-repo/issues/new?template=bug_report.md',
+        '_blank',
+      )
+    }
+  >
+    <BugReport style={{ marginRight: 6 }} />
+    Report Bug
+  </MenuItem>
+);
+
+const RequestFeatureMenuItem = () => (
+  <MenuItem
+    onClick={() =>
+      window.open(
+        'https://github.com/not-solis/vr-rp-repo/issues/new?template=feature_request.md',
+        '_blank',
+      )
+    }
+  >
+    <GitHub style={{ marginRight: 6 }} />
+    Request Feature
+  </MenuItem>
+);
 
 export const UserComponent = () => {
   const { user, isAuthLoading } = useAuth();
@@ -355,17 +384,8 @@ export const UserComponent = () => {
           </Stack>
         </li>
         <Divider variant='middle' />
-        <MenuItem
-          onClick={() =>
-            window.open(
-              'https://github.com/not-solis/vr-rp-repo/issues/new?template=bug_report.md',
-              '_blank',
-            )
-          }
-        >
-          <BugReport style={{ marginRight: 6 }} />
-          Report Bug
-        </MenuItem>
+        <RequestFeatureMenuItem />
+        <ReportBugMenuItem />
         <MenuItem onClick={handleLogout}>
           <Logout style={{ marginRight: 6 }} />
           Logout
@@ -403,7 +423,6 @@ export const UserComponent = () => {
         onClose={() => setMenuAnchorEl(undefined)}
         MenuListProps={{
           'aria-labelledby': 'login-button',
-          style: { padding: 8 },
         }}
         slotProps={{
           root: {
@@ -411,6 +430,9 @@ export const UserComponent = () => {
           },
         }}
       >
+        <li>
+          <Typography paddingLeft={1}>Login with:</Typography>
+        </li>
         <li>
           <OAuth2Login
             authorizationUrl='https://discord.com/oauth2/authorize'
@@ -509,6 +531,9 @@ export const UserComponent = () => {
             )}
           />
         </li>
+        <Divider variant='middle' />
+        <RequestFeatureMenuItem />
+        <ReportBugMenuItem />
       </Menu>
     </>
   );
