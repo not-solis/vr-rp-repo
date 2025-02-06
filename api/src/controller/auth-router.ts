@@ -23,17 +23,19 @@ import { respondError, respondSuccess } from '../index.js';
 import { sendMail } from '../service/email-service.js';
 const { sign, verify } = jwt;
 
-const TOKEN_EXPIRATION = parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
+export const TOKEN_EXPIRATION =
+  parseInt(process.env.TOKEN_EXPIRATION!) ?? 36000;
 
 /**
  * RequestHandler used to preface endpoints that require user authentication.
  */
 export const auth: RequestHandler = (req, res, next) => {
   try {
-    const { userToken: token } = req.cookies;
-    if (!token) {
+    if (!req.session || !req.session.token) {
       respondError(res, { code: 401 });
+      return;
     }
+    const { token } = req.session;
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
     res.locals.userId = jwtToken.id;
     next();
@@ -184,13 +186,9 @@ const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
         expiresIn: TOKEN_EXPIRATION,
       });
 
-      // Set cookie for the user
-      res.cookie('userToken', token, {
-        maxAge: TOKEN_EXPIRATION * 1000,
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-      });
+      if (req.session) {
+        req.session.token = token;
+      }
 
       respond(200, user);
     } catch (error) {
@@ -203,12 +201,13 @@ const router = Router();
 
 router.get('/', async (req, res) => {
   try {
-    const { userToken: token } = req.cookies;
-    if (!token) {
+    if (!req.session || !req.session.token) {
       respondSuccess(res, undefined, 204);
       return;
     }
 
+    console.log(req.session);
+    const { token } = req.session;
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
     const id = jwtToken.id;
     const newToken = sign({ id }, JWT_SECRET, {
@@ -218,7 +217,7 @@ router.get('/', async (req, res) => {
     const user = await getUserById(id);
 
     if (user.role === UserRole.Banned) {
-      res.clearCookie('userToken');
+      req.session = null;
       respondError(res, {
         code: 401,
         name: 'Permission Error',
@@ -228,12 +227,7 @@ router.get('/', async (req, res) => {
     }
 
     // Reset token in cookie
-    res.cookie('userToken', newToken, {
-      maxAge: TOKEN_EXPIRATION * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-    });
+    req.session.token = newToken;
     respondSuccess(res, user);
   } catch (err) {
     console.error(err);
@@ -317,9 +311,9 @@ router.get(
   }),
 );
 
-router.post('/logout', (_, res) => {
-  // clear cookie
-  res.clearCookie('userToken');
+router.post('/logout', (req, res) => {
+  // clear session
+  req.session = null;
   respondSuccess(res);
 });
 

@@ -1,11 +1,12 @@
 import express, { Response } from 'express';
 import { projectRouter } from './controller/project-router.js';
-import { authRouter } from './controller/auth-router.js';
+import { authRouter, TOKEN_EXPIRATION } from './controller/auth-router.js';
 import cors, { CorsOptions } from 'cors';
-import { CLIENT_URL, CLIENT_URL_PATTERN, PORT } from './env/config.js';
+import { CLIENT_URL, CLIENT_URL_PATTERN, isDev, PORT } from './env/config.js';
 import { userRouter } from './controller/user-router.js';
 import { updatesRouter } from './controller/updates-router.js';
 import cookieParser from 'cookie-parser';
+import cookieSession from 'cookie-session';
 
 export interface ResponseData<T> {
   success: boolean;
@@ -43,6 +44,16 @@ const corsOptions: CorsOptions = {
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
+app.set('trust proxy', 1);
+app.use(
+  cookieSession({
+    keys: ['key1'],
+    maxAge: TOKEN_EXPIRATION * 1000,
+    httpOnly: true,
+    sameSite: isDev ? 'strict' : 'none',
+    secure: !isDev,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
