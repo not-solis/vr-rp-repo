@@ -226,8 +226,8 @@ router.post(
           subject: `Ownership request accepted: ${project.name}`,
           html: `<p>Congratulations! Your ownership request for
           <a href="${CLIENT_URL}/repo/${project.urlName}">
-            <b>${project.name}</b>
-          </a> has been accepted. You are now able to edit and
+            <b>${project.name}</b></a>
+          has been accepted. You are now able to edit and
           post updates to <b>${project.name}</b>.</p>`,
         });
         return data;
@@ -260,8 +260,8 @@ router.delete(
           subject: `Ownership request declined: ${project.name}`,
           html: `<p>Your ownership request for
         <a href="${CLIENT_URL}/repo/${project.urlName}">
-          <b>${project.name}</b>
-        </a> has been declined. Please contact a Repo admin if this you
+          <b>${project.name}</b></a>
+        has been declined. Please contact a Repo admin if this you
         believe this decision was made in error.</p>`,
         });
         return data;

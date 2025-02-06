@@ -62,7 +62,7 @@ export const AboutPage = () => {
         </Stack>
         <Stack gap={2}>
           <Typography variant='h2'>Admins</Typography>
-          <Stack id='admins' direction='row'>
+          <Stack id='admins' direction='row' gap={2}>
             {admins?.map((admin) => (
               <div key={admin.name} className='admin-tag'>
                 <img src={admin.imageUrl} />
