@@ -206,7 +206,6 @@ router.get('/', async (req, res) => {
       return;
     }
 
-    console.log(req.session);
     const { token } = req.session;
     const jwtToken = verify(token, JWT_SECRET) as jwt.JwtPayload;
     const id = jwtToken.id;
