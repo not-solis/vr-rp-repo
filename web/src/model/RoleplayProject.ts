@@ -50,6 +50,32 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
+// Accessibility:
+// quest
+// mute
+// desktop
+
+/*
+Runtime proposal:
+const runtime = {
+    // periodic, consistent weektime, calendar, one shot
+    scheduling: 'periodic',
+
+    // only if runType periodic
+    weeks: 2,
+    calendarLink: "",
+
+    // on client time zone when presented
+    runtimes: [
+        {
+            // use actual date time to handle periodic week > 1
+            start: "start time",
+            end: "end time"
+        }
+    ],
+}
+*/
+
 export const getProjectDates = (project: RoleplayProject) => {
   return {
     ...project,

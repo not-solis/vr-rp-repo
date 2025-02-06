@@ -85,7 +85,7 @@ export const getProjects = async (
   const where = ["roleplay_projects.status != 'Deleted'"];
   if (name) {
     addedQueryParams.push(name);
-    sortBy = `levenshtein_less_equal(LOWER($3), LOWER(roleplay_projects.name), 1, 20, 9, 50)`;
+    sortBy = `levenshtein_less_equal(LOWER($3), LOWER(roleplay_projects.name), 0, 20, 9, 50)`;
     asc = true;
   } else {
     if (!validSortByKeys.has(sortBy)) {
@@ -117,12 +117,12 @@ export const getProjects = async (
       ) filter (where roleplay_links.url is not null) as other_links
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
-        LEFT JOIN users on users.user_id = ownership.user_id
+        LEFT JOIN users on (users.user_id = ownership.user_id and users.role != 'Banned')
         LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
       GROUP BY roleplay_projects.id, users.user_id
       ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'} NULLS LAST
-      ${name || sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
+      ${!name && sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
       OFFSET $1 LIMIT $2;
       `;
 
@@ -169,7 +169,7 @@ const internalGetProject = async (field: string, value: string) => {
         users.email as owner_email
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
-        LEFT JOIN users on users.user_id = ownership.user_id
+        LEFT JOIN users on (users.user_id = ownership.user_id and users.role != 'Banned')
       WHERE roleplay_projects.${field}=$1 AND roleplay_projects.status != 'Deleted'
       ;
       `,

@@ -25,6 +25,7 @@ export const getUpdates = async (
         users.*,
         updates.*,
         roleplay_projects.name as project_name,
+        roleplay_projects.url_name as project_url_name,
         roleplay_projects.image_url as project_image_url
       FROM updates
         INNER JOIN users ON updates.user_id = users.user_id
@@ -52,6 +53,7 @@ export const getUpdates = async (
               ? {
                   id: row.project_id,
                   name: row.project_name,
+                  urlName: row.project_url_name,
                   imageUrl: row.project_image_url,
                 }
               : undefined,

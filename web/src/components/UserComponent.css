@@ -10,10 +10,16 @@
   transition-duration: 0.08s;
   background-color: var(--mui-palette-background-default);
   font-size: 1rem;
+  min-width: 0;
 }
 
 #user-button svg {
   font-size: 1.2rem;
+}
+
+#user-button p {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 #user-button:hover {

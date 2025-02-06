@@ -86,7 +86,7 @@ export const HomePage = () => {
 
   const refetchUpdates = () => {
     queryClient.refetchQueries({
-      queryKey: ['project', 'updates'],
+      queryKey: ['updates'],
     });
   };
 

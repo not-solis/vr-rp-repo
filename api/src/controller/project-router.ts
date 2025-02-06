@@ -225,7 +225,7 @@ router.post(
           to: user.email,
           subject: `Ownership request accepted: ${project.name}`,
           html: `<p>Congratulations! Your ownership request for
-          <a href="${CLIENT_URL}/repo/${project.id}">
+          <a href="${CLIENT_URL}/repo/${project.urlName}">
             <b>${project.name}</b>
           </a> has been accepted. You are now able to edit and
           post updates to <b>${project.name}</b>.</p>`,
@@ -259,7 +259,7 @@ router.delete(
           to: user.email,
           subject: `Ownership request declined: ${project.name}`,
           html: `<p>Your ownership request for
-        <a href="${CLIENT_URL}/repo/${project.id}">
+        <a href="${CLIENT_URL}/repo/${project.urlName}">
           <b>${project.name}</b>
         </a> has been declined. Please contact a Repo admin if this you
         believe this decision was made in error.</p>`,
@@ -292,7 +292,7 @@ router.patch('/:id/owner', auth, (req, res) => {
             subject: `Ownership request pending: ${project.name}`,
             html: `<p>User <b>${user.name}</b> (id: ${user.id}) is
             requesting ownership of <b>${project.name}</b> (id: ${project.id})</p>
-            <p>Review the request: <a href="${CLIENT_URL}/repo/${project.id}">
+            <p>Review the request: <a href="${CLIENT_URL}/repo/${project.urlName}">
             ${project.name}</a></p>`,
           }),
         );

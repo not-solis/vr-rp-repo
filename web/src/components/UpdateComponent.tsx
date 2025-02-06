@@ -97,7 +97,7 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
             )}
             {showProject && project && (
               <Link
-                to={`/repo/${project.id}`}
+                to={`/repo/${project.urlName}`}
                 className='update-project-link colorless no-underline'
                 style={{ marginLeft: 16 }}
               >
