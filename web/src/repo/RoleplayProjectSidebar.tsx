@@ -46,7 +46,7 @@ interface RoleplayProjectSidebarProps {
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   const queryClient = useQueryClient();
-  const { isAuthenticated, hasPermission } = useAuth();
+  const { isAuthenticated, user, hasPermission } = useAuth();
   const { createSnackbar, createErrorSnackbar } = useSnackbar();
   const {
     isOpen,
@@ -92,6 +92,24 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
       }),
   });
 
+  const becomeOwner = () => {
+    if (!user) {
+      console.error('User is not authenticated.');
+      return;
+    }
+
+    acceptOwnershipRequest(user)();
+  };
+
+  const removeOwner = () => {
+    if (!owner) {
+      console.error('No owner to remove.');
+      return;
+    }
+
+    rejectOwnershipRequest(owner)();
+  };
+
   const acceptOwnershipRequest = (user: User) => () => {
     queryServer(`projects/${id}/owner`, {
       method: 'POST',
@@ -114,7 +132,6 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   };
 
   const rejectOwnershipRequest = (user: User) => () => {
-    console.log(user);
     queryServer(`projects/${id}/owner`, {
       method: 'DELETE',
       body: { userId: user.id },
@@ -345,6 +362,27 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 width: '100%',
               }}
             >
+              {isAuthenticated &&
+                hasPermission(UserRole.Admin) &&
+                (owner ? (
+                  <Button
+                    color='error'
+                    variant='outlined'
+                    onClick={removeOwner}
+                    style={{ borderRadius: 6, marginBottom: 8 }}
+                  >
+                    Remove Owner
+                  </Button>
+                ) : (
+                  <Button
+                    color='warning'
+                    variant='outlined'
+                    onClick={becomeOwner}
+                    style={{ borderRadius: 6, marginBottom: 8 }}
+                  >
+                    Become Owner
+                  </Button>
+                ))}
               {owner ? (
                 <IconText
                   tooltip={'Owner'}

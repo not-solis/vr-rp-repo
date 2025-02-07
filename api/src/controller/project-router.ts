@@ -14,7 +14,7 @@ import {
   getOwnerByProjectId,
   getPendingOwnersByProjectId,
   grantOwnership,
-  rejectOwnership,
+  removeOwnership,
 } from '../model/owners-model.js';
 import { getRoleplayLinksByProjectId } from '../model/roleplay-links-model.js';
 import { auth, checkPermissions } from './auth-router.js';
@@ -215,16 +215,17 @@ router.post(
   auth,
   checkPermissions(UserRole.Admin),
   (req, res) => {
-    const { id } = req.params;
+    const { id: projectId } = req.params;
     const { userId } = req.body;
-    grantOwnership(id, userId)
+    grantOwnership(projectId, userId)
+      .catch(() => createOwnership(projectId, userId, true))
       .then(async (data) => {
         const user = await getUserById(userId);
-        const project = await getProjectById(id);
+        const project = await getProjectById(projectId);
         sendMail({
           to: user.email,
-          subject: `Ownership request accepted: ${project.name}`,
-          html: `<p>Congratulations! Your ownership request for
+          subject: `Ownership granted: ${project.name}`,
+          html: `<p>Congratulations! Your ownership for
           <a href="${CLIENT_URL}/repo/${project.urlName}">
             <b>${project.name}</b></a>
           has been accepted. You are now able to edit and
@@ -235,12 +236,13 @@ router.post(
       .then((data) => {
         respondSuccess(res, data, 201);
       })
-      .catch((err) =>
+      .catch((err) => {
+        console.error(err);
         respondError(res, {
-          name: 'Get Ownership Error',
+          name: 'Grant Ownership Error',
           message: err.message,
-        }),
-      );
+        });
+      });
   },
 );
 
@@ -251,20 +253,20 @@ router.delete(
   (req, res) => {
     const { id } = req.params;
     const { userId } = req.body;
-    rejectOwnership(id, userId)
-      .then(async (data) => {
+    removeOwnership(id, userId)
+      .then(async (wasOwner) => {
         const user = await getUserById(userId);
         const project = await getProjectById(id);
         sendMail({
           to: user.email,
-          subject: `Ownership request declined: ${project.name}`,
-          html: `<p>Your ownership request for
-        <a href="${CLIENT_URL}/repo/${project.urlName}">
-          <b>${project.name}</b></a>
-        has been declined. Please contact a Repo admin if this you
-        believe this decision was made in error.</p>`,
+          subject: `Ownership ${wasOwner ? 'removed' : 'request declined'}: ${project.name}`,
+          html: `<p>Your ownership${wasOwner ? '' : ' request'} for
+          <a href="${CLIENT_URL}/repo/${project.urlName}">
+            <b>${project.name}</b></a> has been ${wasOwner ? 'removed' : 'declined'}.
+          Please contact a Repo admin if this you believe this decision was
+          made in error.</p>`,
         });
-        return data;
+        return wasOwner;
       })
       .then((data) => {
         respondSuccess(res, data, 201);

@@ -80,30 +80,26 @@ export const grantOwnership = async (
     )
     .then((results) => {
       if (!results.rowCount) {
-        throw new Error('Error granting ownership.');
+        throw new Error('No existing ownership to update.');
       }
       return undefined;
-    })
-    .catch((err) => {
-      console.error(err);
-      throw new Error('Internal server error.');
     });
 };
 
-export const rejectOwnership = async (
+export const removeOwnership = async (
   projectId: string,
   userId: string,
-): Promise<unknown> => {
+): Promise<boolean> => {
   return await pool
-    .query('DELETE FROM ownership WHERE project_id=$1 AND user_id=$2;', [
-      projectId,
-      userId,
-    ])
+    .query(
+      'DELETE FROM ownership WHERE project_id=$1 AND user_id=$2 RETURNING active;',
+      [projectId, userId],
+    )
     .then((results) => {
       if (!results.rowCount) {
         throw new Error('Error deleting from ownership.');
       }
-      return undefined;
+      return results.rows[0].active;
     })
     .catch((err) => {
       console.error(err);
