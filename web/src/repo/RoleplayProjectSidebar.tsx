@@ -4,6 +4,11 @@ import {
   Button,
   CardMedia,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControlLabel,
   IconButton,
   Stack,
@@ -12,6 +17,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
@@ -45,6 +51,13 @@ interface RoleplayProjectSidebarProps {
 }
 
 export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
+  const [isBecomeOwnershipDialogOpen, setBecomeOwnershipDialogOpen] =
+    useState(false);
+  const [isRemoveOwnershipDialogOpen, setRemoveOwnershipDialogOpen] =
+    useState(false);
+  const [respondUser, setRespondUser] = useState<User>();
+  const [isAccepting, setAccepting] = useState(true);
+  const isOwnershipResponseDialogOpen = respondUser !== undefined;
   const queryClient = useQueryClient();
   const { isAuthenticated, user, hasPermission } = useAuth();
   const { createSnackbar, createErrorSnackbar } = useSnackbar();
@@ -98,7 +111,9 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
       return;
     }
 
-    acceptOwnershipRequest(user)();
+    acceptOwnershipRequest(user)().then(() =>
+      setBecomeOwnershipDialogOpen(false),
+    );
   };
 
   const removeOwner = () => {
@@ -107,10 +122,12 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
       return;
     }
 
-    rejectOwnershipRequest(owner)();
+    rejectOwnershipRequest(owner)().then(() =>
+      setRemoveOwnershipDialogOpen(false),
+    );
   };
 
-  const acceptOwnershipRequest = (user: User) => () => {
+  const acceptOwnershipRequest = (user: User) => () =>
     queryServer(`projects/${id}/owner`, {
       method: 'POST',
       body: { userId: user.id },
@@ -124,14 +141,14 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
           severity: 'success',
         }),
       )
+      .then(() => setRespondUser(undefined))
       .catch((err) => {
         console.error(err);
         createErrorSnackbar(err);
       })
       .finally(refetchProject);
-  };
 
-  const rejectOwnershipRequest = (user: User) => () => {
+  const rejectOwnershipRequest = (user: User) => () =>
     queryServer(`projects/${id}/owner`, {
       method: 'DELETE',
       body: { userId: user.id },
@@ -145,12 +162,12 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
           severity: 'success',
         }),
       )
+      .then(() => setRespondUser(undefined))
       .catch((err) => {
         console.error(err);
         createErrorSnackbar(err);
       })
       .finally(refetchProject);
-  };
 
   const sidebarLinks = [];
   if (isEditing || discordUrl) {
@@ -368,7 +385,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                   <Button
                     color='error'
                     variant='outlined'
-                    onClick={removeOwner}
+                    onClick={() => setRemoveOwnershipDialogOpen(true)}
                     style={{ borderRadius: 6, marginBottom: 8 }}
                   >
                     Remove Owner
@@ -377,7 +394,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                   <Button
                     color='warning'
                     variant='outlined'
-                    onClick={becomeOwner}
+                    onClick={() => setBecomeOwnershipDialogOpen(true)}
                     style={{ borderRadius: 6, marginBottom: 8 }}
                   >
                     Become Owner
@@ -410,14 +427,20 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                           <IconButton
                             size='small'
                             color='error'
-                            onClick={rejectOwnershipRequest(user)}
+                            onClick={() => {
+                              setAccepting(false);
+                              setRespondUser(user);
+                            }}
                           >
                             <Close />
                           </IconButton>
                           <IconButton
                             size='small'
                             color='success'
-                            onClick={acceptOwnershipRequest(user)}
+                            onClick={() => {
+                              setAccepting(true);
+                              setRespondUser(user);
+                            }}
                           >
                             <Check />
                           </IconButton>
@@ -701,6 +724,98 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
           />
         </div>
       </div>
+      <Dialog
+        id='respond-owner-dialog'
+        open={isOwnershipResponseDialogOpen}
+        onClose={() => setRespondUser(undefined)}
+        aria-labelledby='respond-owner-dialog-title'
+        aria-describedby='respond-owner-dialog-description'
+      >
+        <DialogTitle id='respond-owner-dialog-title'>
+          {isAccepting ? 'Accept' : 'Reject'} {respondUser?.name}'s ownership
+          request for {project.name}?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='respond-owner-dialog-description'>
+            This will also notify {respondUser?.name} of the decision.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color='plain'
+            onClick={() => setRespondUser(undefined)}
+            autoFocus
+          >
+            Back
+          </Button>
+          <Button
+            color={isAccepting ? 'success' : 'error'}
+            onClick={
+              isAccepting
+                ? acceptOwnershipRequest(respondUser!)
+                : rejectOwnershipRequest(respondUser!)
+            }
+          >
+            {isAccepting ? 'Accept' : 'Reject'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        id='become-owner-dialog'
+        open={isBecomeOwnershipDialogOpen}
+        onClose={() => setBecomeOwnershipDialogOpen(false)}
+        aria-labelledby='become-owner-dialog-title'
+        aria-describedby='become-owner-dialog-description'
+      >
+        <DialogTitle id='become-owner-dialog-title'>
+          Become owner of {project.name}?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='become-owner-dialog-description'>
+            As an admin, you already have global edit privileges, so this just
+            confirms that you represent the project.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color='plain'
+            onClick={() => setBecomeOwnershipDialogOpen(false)}
+          >
+            Back
+          </Button>
+          <Button color='success' onClick={becomeOwner} autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        id='remove-owner-dialog'
+        open={isRemoveOwnershipDialogOpen}
+        onClose={() => setRemoveOwnershipDialogOpen(false)}
+        aria-labelledby='remove-owner-dialog-title'
+        aria-describedby='remove-owner-dialog-description'
+      >
+        <DialogTitle id='remove-owner-dialog-title'>
+          Remove {owner?.name} as owner of {project.name}?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='remove-owner-dialog-description'>
+            This will also notify {owner?.name} of their removal.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color='plain'
+            onClick={() => setRemoveOwnershipDialogOpen(false)}
+            autoFocus
+          >
+            Back
+          </Button>
+          <Button color='error' onClick={removeOwner}>
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
