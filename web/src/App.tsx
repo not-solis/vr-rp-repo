@@ -322,15 +322,18 @@ export function App() {
       <Helmet>
         <title>{APP_TITLE}</title>
         <meta title={APP_TITLE} />
-        <meta property='og:title' content={APP_TITLE} />
-        {/* <meta property='og:image' content={projectData?.imageUrl} />
-        <meta property='og:image:alt' content={`${metaName} icon`} /> */}
+        <meta name='description' content='The front page of VR Roleplay' />
         <meta
           property='og:description'
           content='The front page of VR Roleplay'
         />
-        <meta name='keywords' content={APP_KEYWORDS.join(', ')} />
+        <meta property='og:type' content='website' />
+        <meta property='og:title' content={APP_TITLE} />
+        <meta property='og:site_name' content={APP_TITLE} />
+        <meta property='og:image' content='%PUBLIC_URL%/myriad_logo.jpg' />
+        <meta property='og:image:alt' content={`${APP_TITLE} icon`} />
         <meta property='og:url' content={window.location.href} />
+        <meta name='keywords' content={APP_KEYWORDS.join(', ')} />
       </Helmet>
       <ThemeProvider theme={theme}>
         <SnackbarContext.Provider
