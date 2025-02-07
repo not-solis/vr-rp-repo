@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { MouseEvent as ReactMouseEvent, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import OAuth2Login from 'react-simple-oauth2-login';
 
 import { VisuallyHiddenInput } from './VisuallyHiddenInput';
@@ -43,31 +44,35 @@ import { queryServer } from '../model/ServerResponse';
 import './UserComponent.css';
 
 const ReportBugMenuItem = () => (
-  <MenuItem
-    onClick={() =>
-      window.open(
-        'https://github.com/not-solis/vr-rp-repo/issues/new?template=bug_report.md',
-        '_blank',
-      )
-    }
+  <Link
+    className='colorless no-underline'
+    to='https://github.com/not-solis/vr-rp-repo/issues/new?template=bug_report.md'
+    target='_blank'
+    rel='noreferrer noopener'
   >
-    <BugReport style={{ marginRight: 6 }} />
-    Report Bug
-  </MenuItem>
+    <MenuItem>
+      <BugReport style={{ marginRight: 6 }} />
+      Report Bug
+    </MenuItem>
+  </Link>
 );
 
 const RequestFeatureMenuItem = () => (
-  <MenuItem
-    onClick={() =>
-      window.open(
-        'https://github.com/not-solis/vr-rp-repo/issues/new?template=feature_request.md',
-        '_blank',
-      )
-    }
+  <Link
+    className='colorless no-underline'
+    to='https://github.com/not-solis/vr-rp-repo/issues/new?template=feature_request.md'
+    target='_blank'
+    rel='noreferrer noopener'
   >
-    <GitHub style={{ marginRight: 6 }} />
-    Request Feature
-  </MenuItem>
+    <MenuItem
+      href='https://github.com/not-solis/vr-rp-repo/issues/new?template=feature_request.md'
+      target='_blank'
+      rel='noreferrer noopener'
+    >
+      <GitHub style={{ marginRight: 6 }} />
+      Request Feature
+    </MenuItem>
+  </Link>
 );
 
 export const UserComponent = () => {
