@@ -13,16 +13,23 @@ const transporter = createTransport({
   },
 });
 
-export const sendMail = (options: MailOptions) => {
+export const sendMail = async (options: MailOptions) => {
   if (!EMAIL_USER) {
     return Promise.reject(new Error('No email configured.'));
   }
 
-  return transporter.sendMail({
-    from: {
-      name: 'VR Roleplay Repo',
-      address: EMAIL_USER,
-    },
-    ...options,
-  });
+  return await transporter
+    .sendMail({
+      from: {
+        name: 'VR Roleplay Repo',
+        address: EMAIL_USER,
+      },
+      ...options,
+    })
+    .then((message) => {
+      if (message.rejected) {
+        throw new Error(`Email rejected.`);
+      }
+    })
+    .catch((err) => console.log(err));
 };
