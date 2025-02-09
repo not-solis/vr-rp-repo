@@ -18,7 +18,7 @@ export const sendMail = async (options: MailOptions) => {
     return Promise.reject(new Error('No email configured.'));
   }
 
-  return await transporter
+  return transporter
     .sendMail({
       from: {
         name: 'VR Roleplay Repo',

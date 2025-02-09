@@ -177,7 +177,7 @@ const handleOAuth: (props: OAuthHandlerProps) => RequestHandler =
         email,
       );
       if (isNew) {
-        sendWelcomeEmail(email, name);
+        await sendWelcomeEmail(email, name);
       }
 
       const { id } = user;

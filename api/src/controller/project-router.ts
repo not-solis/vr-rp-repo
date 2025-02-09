@@ -222,7 +222,7 @@ router.post(
       .then(async (data) => {
         const user = await getUserById(userId);
         const project = await getProjectById(projectId);
-        sendMail({
+        await sendMail({
           to: user.email,
           subject: `Ownership granted: ${project.name}`,
           html: `<p>Congratulations! Your ownership for
@@ -257,7 +257,7 @@ router.delete(
       .then(async (wasOwner) => {
         const user = await getUserById(userId);
         const project = await getProjectById(id);
-        sendMail({
+        await sendMail({
           to: user.email,
           subject: `Ownership ${wasOwner ? 'removed' : 'request declined'}: ${project.name}`,
           html: `<p>Your ownership${wasOwner ? '' : ' request'} for
@@ -288,16 +288,16 @@ router.patch('/:id/owner', auth, (req, res) => {
       getAdmins().then(async (admins) => {
         const user = await getUserById(userId);
         const project = await getProjectById(id);
-        admins.forEach((admin) =>
-          sendMail({
+        admins.forEach(async (admin) => {
+          await sendMail({
             to: admin.email,
             subject: `Ownership request pending: ${project.name}`,
             html: `<p>User <b>${user.name}</b> (id: ${user.id}) is
             requesting ownership of <b>${project.name}</b> (id: ${project.id})</p>
             <p>Review the request: <a href="${CLIENT_URL}/repo/${project.urlName}">
             ${project.name}</a></p>`,
-          }),
-        );
+          });
+        });
       });
       return data;
     })
