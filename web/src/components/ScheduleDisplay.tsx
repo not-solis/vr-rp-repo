@@ -14,12 +14,13 @@ import { ReactNode } from 'react';
 
 import { IconText, IconTextProps } from './IconText';
 import { StringEnumSelector } from './StringEnumSelector';
+import { TagChip } from './TagChip';
 import {
   RoleplaySchedule,
   ScheduleRegion,
   ScheduleType,
 } from '../model/RoleplayScheduling';
-import { getRegionString, getTimezoneName } from '../util/Time';
+import { getTimezoneName } from '../util/Time';
 
 const empty = <></>;
 
@@ -37,14 +38,16 @@ const RegionComponent = (props: RegionComponentProps) => {
         includeEmptyValue
         value={region || ''}
         enumType={ScheduleRegion}
-        onChange={(e) => onChange(e.target.value as ScheduleRegion)}
+        onChange={(e) =>
+          onChange((e.target.value as ScheduleRegion) || undefined)
+        }
         slotProps={{ root: { style: { minWidth: 46 } } }}
-        style={{ position: 'relative' }}
       />
       {extraComponent}
     </span>
   ) : (
-    <>{region && getRegionString(region)}</>
+    // <>{region && getRegionString(region)}</>
+    <>{region && <TagChip className='region-tag' label={region} />}</>
   );
 };
 
@@ -498,7 +501,7 @@ export const ScheduleDisplay = (
                   <TextField
                     variant='standard'
                     label='Schedule link'
-                    value={scheduleLink}
+                    value={scheduleLink ?? ''}
                     onChange={(e) =>
                       setSchedule({ ...schedule, scheduleLink: e.target.value })
                     }
@@ -511,16 +514,13 @@ export const ScheduleDisplay = (
                   <TextField
                     variant='standard'
                     label='Description'
-                    value={otherText}
+                    value={otherText ?? ''}
                     onChange={(e) =>
                       setSchedule({ ...schedule, otherText: e.target.value })
                     }
                   />
                 ) : (
-                  <Typography>
-                    {region && getRegionString(region) + ' '}
-                    {otherText}
-                  </Typography>
+                  <Typography>{otherText}</Typography>
                 ))}
             </div>
           </>

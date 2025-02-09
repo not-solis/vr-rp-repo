@@ -23,6 +23,7 @@ import { getAdmins, getUserById, UserRole } from '../model/users-model.js';
 import { handleImageUploadRequest, limitImageUpload } from './image-router.js';
 import { sendMail } from '../service/email-service.js';
 import { CLIENT_URL } from '../env/config.js';
+import { ScheduleRegion } from '../model/schedule-model.js';
 
 const MAX_QUERY = 1000;
 
@@ -140,18 +141,19 @@ const checkOwnership: RequestHandler = async (
 const router = Router();
 
 router.get('/', (req, res) => {
-  const { start, limit, sortBy, name, tags, asc, active } = req.query;
-  getProjects(
-    parseInt(start as string) ?? 0,
-    parseInt(limit as string) ?? MAX_QUERY,
-    sortBy as string,
-    name as string,
-    Array.isArray(tags)
+  const { start, limit, region, sortBy, name, tags, asc, active } = req.query;
+  getProjects({
+    start: parseInt(start as string) ?? 0,
+    limit: parseInt(limit as string) ?? MAX_QUERY,
+    region: region as ScheduleRegion,
+    sortBy: sortBy as string,
+    name: name as string,
+    tags: Array.isArray(tags)
       ? (tags as string[])
       : ((tags as string)?.split('|') ?? []),
-    asc === 'true',
-    active === 'true',
-  )
+    asc: asc === 'true',
+    activeOnly: active === 'true',
+  })
     .then((data) => {
       respondSuccess(res, data, 206);
     })

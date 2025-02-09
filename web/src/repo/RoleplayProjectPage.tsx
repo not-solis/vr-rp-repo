@@ -196,6 +196,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     shortDescription = '',
     owner,
     status,
+    schedule,
   } = project;
 
   const canEdit =
@@ -327,6 +328,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const saveProject = async () => {
+    console.log(project);
     if (imageFile) {
       const formData = new FormData();
       formData.append('image', imageFile);
@@ -519,7 +521,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 </Stack>
               </Alert>
             </Grow>
-            <Stack direction='row' gap={4} alignItems='center'>
+            <Stack direction='row' gap={1.5} alignItems='center'>
               {isEditing ? (
                 <>
                   <TextField
@@ -532,7 +534,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                         name: e.currentTarget.value,
                       })
                     }
-                    style={{ width: 'calc(500px)' }}
+                    style={{ width: 500 }}
                     sx={{
                       '.MuiInputLabel-shrink': {
                         fontSize: '1.6rem !important',
@@ -581,9 +583,19 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
                 </>
               ) : (
                 <>
-                  <Typography variant='title'>{name}</Typography>
+                  <Typography variant='title' paddingRight={2}>
+                    {name}
+                  </Typography>
+                  {schedule?.region && (
+                    <TagChip
+                      label={schedule.region}
+                      className='region-tag'
+                      style={{ fontSize: 26, padding: '2px 8px' }}
+                    />
+                  )}
                 </>
               )}
+
               <TagChip
                 label={status || 'Unknown'}
                 className={status?.toLowerCase() || 'inactive'}

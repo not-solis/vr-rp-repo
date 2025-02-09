@@ -6,7 +6,6 @@ import {
   CardMedia,
   Tooltip,
   Typography,
-  useTheme,
 } from '@mui/material';
 import {
   DetailedHTMLProps,
@@ -20,7 +19,6 @@ import { Link } from 'react-router-dom';
 import { IconText } from '../components/IconText';
 import { ScheduleDisplay } from '../components/ScheduleDisplay';
 import { TagChip } from '../components/TagChip';
-import { useAuth } from '../context/AuthProvider';
 import { RoleplayProject } from '../model/RoleplayProject';
 
 export const RoleplayProjectCard = (
@@ -30,16 +28,11 @@ export const RoleplayProjectCard = (
   } & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
 ) => {
   const [isTitleOverflowed, setTitleOverflowed] = useState(false);
-  const [titleRect, setTitleRect] = useState<DOMRect>();
   const titleRef = useRef<HTMLSpanElement>(null);
-  const theme = useTheme();
-  const { user } = useAuth();
   const { project, addTag, ...restProps } = props;
   const {
-    id,
     name,
     urlName,
-    lastUpdated,
     owner,
     imageUrl,
     status,
@@ -49,18 +42,6 @@ export const RoleplayProjectCard = (
     discordUrl,
     otherLinks,
   } = project;
-
-  useEffect(() => {
-    if (!titleRef.current) {
-      setTitleOverflowed(false);
-      setTitleRect(undefined);
-      return;
-    }
-    setTitleOverflowed(
-      titleRef.current.scrollWidth > titleRef.current.clientWidth,
-    );
-    setTitleRect(titleRef.current.getBoundingClientRect());
-  }, []);
 
   return (
     <Card variant='outlined' className='project-card' {...restProps} ref={null}>
@@ -121,6 +102,10 @@ export const RoleplayProjectCard = (
                     {name}
                   </Typography>
                 </Tooltip>
+                {schedule?.region && (
+                  <TagChip className='region-tag' label={schedule.region} />
+                )}
+
                 <TagChip
                   label={status || 'Unknown'}
                   className={status?.toLowerCase() || 'inactive'}

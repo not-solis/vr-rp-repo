@@ -34,9 +34,11 @@ import { useNavigate } from 'react-router-dom';
 import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { APP_KEYWORDS, APP_TITLE } from '../App';
 import { BlurrableTextField } from '../components/BlurrableTextField';
+import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
 import { mapProject, RoleplayProject } from '../model/RoleplayProject';
+import { ScheduleRegion } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
@@ -54,6 +56,7 @@ export const Repo = () => {
   const [name, setName] = useState('');
   const [nameFilter, setNameFilter] = useState('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [regionFilter, setRegionFilter] = useState<ScheduleRegion>();
   const [sortBy, setSortBy] = useState(SortBy.Name);
   const [sortAscending, setSortAscending] = useState(true);
   const [showActiveOnly, setShowActiveOnly] = useState(false);
@@ -72,6 +75,7 @@ export const Repo = () => {
       'projects',
       nameFilter,
       tagFilters,
+      regionFilter,
       showActiveOnly,
       sortBy,
       sortAscending,
@@ -83,6 +87,7 @@ export const Repo = () => {
           limit: `${PAGE_SIZE}`,
           sortBy,
           asc: `${sortAscending}`,
+          ...(regionFilter ? { region: regionFilter } : {}),
           ...(nameFilter ? { name: nameFilter } : {}),
           ...(tagFilters && tagFilters.length > 0
             ? { tags: tagFilters.join('|') }
@@ -200,6 +205,26 @@ export const Repo = () => {
             tags={tagFilters}
             onTagClick={removeTag}
           />
+
+          <FormControl style={{ minWidth: 100 }}>
+            <InputLabel size='small' id='repo-region-filter'>
+              Region
+            </InputLabel>
+            <StringEnumSelector
+              includeEmptyValue
+              enumType={ScheduleRegion}
+              value={regionFilter ?? ''}
+              labelId='repo-region-filter'
+              label='Region'
+              size='small'
+              onChange={(e) => {
+                const newRegion = e.target.value as ScheduleRegion;
+                if (regionFilter !== newRegion) {
+                  setRegionFilter(newRegion);
+                }
+              }}
+            />
+          </FormControl>
 
           <FormControl disabled={!!nameFilter} style={{ minWidth: 100 }}>
             <InputLabel size='small' id='repo-sort-by'>

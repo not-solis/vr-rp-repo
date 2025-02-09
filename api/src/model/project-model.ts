@@ -8,6 +8,7 @@ import {
   getScheduleByProjectId,
   RoleplaySchedule,
   saveSchedule,
+  ScheduleRegion,
 } from './schedule-model.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
@@ -81,15 +82,26 @@ const validSortByKeys = new Set([
   'started',
 ]);
 
-export const getProjects = async (
-  start = 0,
-  limit = DEFAULT_QUERY_LIMIT,
-  sortBy = 'name',
-  name = '',
-  tags: string[] = [],
-  asc = true,
-  activeOnly = false,
-) => {
+interface ProjectSearchParams {
+  start?: number;
+  limit?: number;
+  region?: ScheduleRegion;
+  sortBy?: string;
+  name?: string;
+  tags: string[];
+  asc?: boolean;
+  activeOnly?: boolean;
+}
+export const getProjects = async (params: ProjectSearchParams) => {
+  const {
+    start = 0,
+    limit = DEFAULT_QUERY_LIMIT,
+    region,
+    tags = [],
+    name = '',
+    activeOnly = false,
+  } = params;
+  let { sortBy = 'name', asc = true } = params;
   // using limit + 1 to see if there are any remaining
   const queryParams: (string | number)[] = [start, limit + 1];
   const addedQueryParams: (string | number)[] = [];
@@ -102,6 +114,16 @@ export const getProjects = async (
     if (!validSortByKeys.has(sortBy)) {
       throw new Error('Invalid sort key.');
     }
+  }
+
+  if (region) {
+    addedQueryParams.push(region);
+    const param = `$${addedQueryParams.length + queryParams.length}`;
+    where.push(`(schedules.region = ${param}
+      OR EXISTS (
+        SELECT region FROM runtimes
+        WHERE project_id=roleplay_projects.id
+          AND region = ${param}))`);
   }
 
   const hasTags = tags && tags.length > 0;

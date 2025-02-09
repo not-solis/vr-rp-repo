@@ -1,7 +1,7 @@
 import { IPostgresInterval } from 'postgres-interval';
 import { makeTransaction, pool } from './db-pool.js';
 
-enum ScheduleRegion {
+export enum ScheduleRegion {
   NA = 'NA',
   EU = 'EU',
   OCE = 'OCE',

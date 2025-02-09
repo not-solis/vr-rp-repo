@@ -1,13 +1,30 @@
+.schedule-display,
+#add-runtime-button {
+  --schedule-color: #d0d0aa;
+}
+
 #add-runtime-button,
 .schedule-display:not(a.icon-text-link .schedule-display),
 .schedule-display svg:not(a.icon-text-link .schedule-display svg),
 .schedule-display .MuiInputBase-root:not(a.icon-text-link .MuiInputBase-root) {
-  color: #d0d0aa;
+  color: var(--schedule-color);
 }
 
 .schedule-display .MuiOutlinedInput-input {
   padding: 4px 6px 2px;
   padding-right: 16px !important;
+}
+
+.schedule-display div.tag.region-tag {
+  transform: translateY(-2px);
+  border-radius: 5px !important;
+  color: var(--mui-palette-background-dark);
+  background-color: var(--schedule-color);
+}
+
+.schedule-display div.tag span {
+  font-weight: 600;
+  padding: 1.5px 4.5px 0;
 }
 
 .runtime-date-picker .MuiOutlinedInput-input,

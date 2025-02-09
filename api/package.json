@@ -5,8 +5,7 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "npx -y tsx src/index.ts",
-    "start:local": "npx -y tsx src/index.ts --env-file=.env",
+    "start": "npx -y tsx src/index.ts --env-file=.env",
     "start:dev": "npx -y tsx src/index.ts --env-file=.env.development.local",
     "dev": "cross-env PORT=3002 npm run start:local",
     "build": "tsc",
