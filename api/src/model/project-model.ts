@@ -4,6 +4,11 @@ import { User, UserRole } from './users-model.js';
 import { RoleplayLink, updateRoleplayLinks } from './roleplay-links-model.js';
 import { createOwnership } from './owners-model.js';
 import { PageData } from '../data/PageData.js';
+import {
+  getScheduleByProjectId,
+  RoleplaySchedule,
+  saveSchedule,
+} from './schedule-model.js';
 
 const DEFAULT_QUERY_LIMIT = 1000;
 
@@ -18,7 +23,7 @@ export interface RoleplayProject {
   description?: string;
   setting?: string;
   tags?: string[];
-  runtime?: string;
+  schedule?: RoleplaySchedule;
   started?: Date;
   status?: string;
   entryProcess?: string;
@@ -50,7 +55,13 @@ const remapRoleplayProject = (project: any): RoleplayProject => {
     description: project.description,
     setting: project.setting,
     tags: project.tags,
-    runtime: project.runtime,
+    schedule: project.schedule_type && {
+      type: project.schedule_type,
+      region: project.schedule_region,
+      scheduleLink: project.schedule_link,
+      otherText: project.schedule_other_text,
+      runtimes: project.runtimes,
+    },
     started: project.started && new Date(project.started),
     status: project.status,
     entryProcess: project.entry_process,
@@ -104,23 +115,40 @@ export const getProjects = async (
   }
 
   const queryString = `
-      SELECT roleplay_projects.*,
-      users.user_id as owner_id,
-      users.name as owner_name,
-      users.role as owner_role,
-      users.email as owner_email,
-      array_agg(
-        json_build_object(
-          'label', roleplay_links.label,
-          'url', roleplay_links.url
-        )
-      ) filter (where roleplay_links.url is not null) as other_links
+      SELECT
+        roleplay_projects.*,
+        users.user_id as owner_id,
+        users.name as owner_name,
+        users.role as owner_role,
+        users.email as owner_email,
+        array_agg(
+          json_build_object(
+            'label', roleplay_links.label,
+            'url', roleplay_links.url
+          )
+        ) filter (where roleplay_links.url is not null) as other_links,
+        min(schedules.schedule_type) as schedule_type,
+        min(schedules.region) as schedule_region,
+        min(schedules.schedule_link) as schedule_link,
+        min(schedules.other_text) as schedule_other_text,
+        array_agg(
+          json_build_object(
+            'region', runtimes.region,
+            'start', runtimes.start,
+            'end', runtimes.end,
+            'between', runtimes.between
+          )
+        ) filter (where runtimes.start is not null) as runtimes
       FROM roleplay_projects
         LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
         LEFT JOIN users on (users.user_id = ownership.user_id and users.role != 'Banned')
         LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
+        LEFT JOIN schedules ON roleplay_projects.id = schedules.project_id
+        LEFT JOIN runtimes ON roleplay_projects.id = runtimes.project_id
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
-      GROUP BY roleplay_projects.id, users.user_id
+      GROUP BY
+        roleplay_projects.id,
+        users.user_id
       ORDER BY ${sortBy} ${asc ? 'ASC' : 'DESC'} NULLS LAST
       ${!name && sortBy === 'name' ? '' : ', roleplay_projects.name ASC'}
       OFFSET $1 LIMIT $2;
@@ -175,9 +203,11 @@ const internalGetProject = async (field: string, value: string) => {
       `,
       [value],
     )
-    .then((results) => {
+    .then(async (results) => {
       if (results?.rows) {
-        return remapRoleplayProject(results.rows[0]);
+        const project = remapRoleplayProject(results.rows[0]);
+        project.schedule = await getScheduleByProjectId(project.id);
+        return project;
       } else {
         throw new Error('No results found.');
       }
@@ -194,7 +224,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
     shortDescription,
     description,
     setting,
-    runtime,
+    schedule,
     started,
     tags,
     status,
@@ -218,7 +248,6 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           short_description,
           description,
           setting,
-          runtime,
           started,
           tags,
           status,
@@ -229,7 +258,7 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           is_quest_compatible,
           discord_url,
           image_url)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
           RETURNING id, url_name;
           `,
           [
@@ -237,7 +266,6 @@ export const createProject = async (user: User, project: RoleplayProject) => {
             shortDescription,
             description,
             setting,
-            runtime,
             started,
             tags,
             status,
@@ -261,6 +289,10 @@ export const createProject = async (user: User, project: RoleplayProject) => {
           const queries = [];
           if (role === UserRole.User) {
             queries.push(createOwnership(projectId, userId, true));
+          }
+
+          if (schedule) {
+            queries.push(saveSchedule(projectId, schedule));
           }
 
           if (otherLinks.length > 0) {
@@ -299,7 +331,7 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
     shortDescription,
     description,
     setting,
-    runtime,
+    schedule,
     started,
     tags,
     status,
@@ -323,18 +355,17 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
           short_description=$2,
           description=$3,
           setting=$4,
-          runtime=$5,
-          started=$6,
-          tags=$7,
-          status=$8,
-          entry_process=$9,
-          application_process=$10,
-          has_support_cast=$11,
-          is_metaverse=$12,
-          is_quest_compatible=$13,
-          discord_url=$14,
-          image_url=$15
-          WHERE id=$16
+          started=$5,
+          tags=$6,
+          status=$7,
+          entry_process=$8,
+          application_process=$9,
+          has_support_cast=$10,
+          is_metaverse=$11,
+          is_quest_compatible=$12,
+          discord_url=$13,
+          image_url=$14
+          WHERE id=$15
           RETURNING url_name;
           `,
           [
@@ -342,7 +373,6 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             shortDescription,
             description,
             setting,
-            runtime,
             started,
             tags,
             status,
@@ -356,14 +386,18 @@ export const updateProject = async (id: string, project: RoleplayProject) => {
             id,
           ],
         )
-        .then((results) => {
+        .then(async (results) => {
           if (!results?.rowCount) {
             throw new Error('Update project failed.');
           }
 
-          updateRoleplayLinks(id, otherLinks)
-            .then(() => resolve(results.rows[0].url_name))
-            .catch(reject);
+          await updateRoleplayLinks(id, otherLinks);
+
+          if (schedule) {
+            await saveSchedule(id, schedule);
+          }
+
+          resolve(results.rows[0].url_name);
         })
         .catch(reject);
     }, reject);

@@ -36,7 +36,7 @@ import { APP_KEYWORDS, APP_TITLE } from '../App';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { TagTextField } from '../components/TagTextField';
 import { useAuth } from '../context/AuthProvider';
-import { getProjectDates, RoleplayProject } from '../model/RoleplayProject';
+import { mapProject, RoleplayProject } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
@@ -93,7 +93,7 @@ export const Repo = () => {
         if (!pageData) {
           throw new Error('Missing page data');
         }
-        pageData.data.forEach(getProjectDates);
+        pageData.data = pageData.data.map(mapProject);
         return pageData;
       }),
     initialPageParam: 0,

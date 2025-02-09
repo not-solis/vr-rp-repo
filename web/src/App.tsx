@@ -72,10 +72,6 @@ library.add(faTwitch);
 // react-time-ago default locale
 TimeAgo.addDefaultLocale(en);
 
-export const getLocale = () => {
-  return navigator.languages ? navigator.languages[0] : navigator.language;
-};
-
 declare module '@mui/material/styles' {
   interface Palette {
     plain: PaletteColorOptions;

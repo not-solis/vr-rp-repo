@@ -1,3 +1,4 @@
+import './RoleplayProjectCard.css';
 import {
   Box,
   Card,
@@ -17,10 +18,10 @@ import {
 import { Link } from 'react-router-dom';
 
 import { IconText } from '../components/IconText';
+import { ScheduleDisplay } from '../components/ScheduleDisplay';
 import { TagChip } from '../components/TagChip';
 import { useAuth } from '../context/AuthProvider';
 import { RoleplayProject } from '../model/RoleplayProject';
-import './RoleplayProjectCard.css';
 
 export const RoleplayProjectCard = (
   props: {
@@ -44,7 +45,7 @@ export const RoleplayProjectCard = (
     status,
     tags,
     shortDescription,
-    runtime,
+    schedule,
     discordUrl,
     otherLinks,
   } = project;
@@ -130,15 +131,12 @@ export const RoleplayProjectCard = (
                 <Typography variant='subtitle1'>{owner.name}</Typography>
               )}
 
-              {runtime && (
-                <IconText
-                  text={runtime}
+              {schedule && (
+                <ScheduleDisplay
+                  schedule={schedule}
                   icon='clock'
                   iconPrefix='far'
                   iconPadding={6}
-                  containerStyle={{
-                    color: '#d0d0aa',
-                  }}
                 />
               )}
 

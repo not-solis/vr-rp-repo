@@ -1,3 +1,4 @@
+import { RoleplaySchedule, Runtime, ScheduleType } from './RoleplayScheduling';
 import { User } from './User';
 
 export enum RoleplayStatus {
@@ -38,7 +39,7 @@ export interface RoleplayProject {
   description?: string;
   setting?: string;
   tags?: string[];
-  runtime?: string;
+  schedule?: RoleplaySchedule;
   started?: Date;
   status?: string;
   entryProcess?: string;
@@ -50,36 +51,52 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
-// Accessibility:
+// TODO: Accessibility
 // quest
 // mute
 // desktop
 
-/*
-Runtime proposal:
-const runtime = {
-    // periodic, consistent weektime, calendar, one shot
-    scheduling: 'periodic',
+export const mapProject = (project: RoleplayProject): RoleplayProject => {
+  const scheduleType = project.schedule?.type;
+  const runtimes =
+    project.schedule?.runtimes?.map<Runtime>((runtime) => ({
+      ...runtime,
+      start: new Date(runtime.start),
+      end: runtime.end && new Date(runtime.end),
+    })) ?? [];
+  runtimes.sort((a, b) => {
+    const { start: startA } = a;
+    const { start: startB } = b;
+    if (scheduleType === ScheduleType.Periodic) {
+      const weekStartA = new Date(startA);
+      weekStartA.setHours(0, 0, 0, 0);
+      weekStartA.setDate(
+        weekStartA.getDate() - ((weekStartA.getDay() + 6) % 7),
+      );
 
-    // only if runType periodic
-    weeks: 2,
-    calendarLink: "",
+      const weekStartB = new Date(startB);
+      weekStartB.setHours(0, 0, 0, 0);
+      weekStartB.setDate(
+        weekStartB.getDate() - ((weekStartB.getDay() + 6) % 7),
+      );
 
-    // on client time zone when presented
-    runtimes: [
-        {
-            // use actual date time to handle periodic week > 1
-            start: "start time",
-            end: "end time"
-        }
-    ],
-}
-*/
+      const diffA = startA.getDate() - weekStartA.getDate();
+      const diffB = startB.getDate() - weekStartB.getDate();
 
-export const getProjectDates = (project: RoleplayProject) => {
+      return diffA - diffB;
+    } else if (scheduleType === ScheduleType.OneShot) {
+      return startA.getDate() - startB.getDate();
+    } else {
+      return 0;
+    }
+  });
   return {
     ...project,
     lastUpdated: new Date(project.lastUpdated),
     started: project.started && new Date(project.started),
+    schedule: project.schedule && {
+      ...project.schedule,
+      runtimes,
+    },
   };
 };

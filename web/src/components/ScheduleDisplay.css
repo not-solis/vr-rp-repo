@@ -1,0 +1,67 @@
+#add-runtime-button,
+.schedule-display:not(a.icon-text-link .schedule-display),
+.schedule-display svg:not(a.icon-text-link .schedule-display svg),
+.schedule-display .MuiInputBase-root:not(a.icon-text-link .MuiInputBase-root) {
+  color: #d0d0aa;
+}
+
+.schedule-display .MuiOutlinedInput-input {
+  padding: 4px 6px 2px;
+  padding-right: 16px !important;
+}
+
+.runtime-date-picker .MuiOutlinedInput-input,
+.runtime-time-picker .MuiOutlinedInput-input,
+.runtime-weeks-input .MuiOutlinedInput-input,
+.runtime-time-picker .MuiOutlinedInput-root {
+  padding-right: 0 !important;
+}
+
+.runtime-time-picker .MuiOutlinedInput-input {
+  cursor: pointer;
+}
+
+.runtime-date-picker .MuiInputAdornment-sizeSmall {
+  margin: 0;
+  height: 24px;
+}
+
+.runtime-time-picker .MuiOutlinedInput-input {
+  width: 82px;
+}
+
+.runtime-time-picker label:not(.MuiFormLabel-filled) {
+  transform: translate(8px, 4px);
+}
+
+.runtime-date-picker svg,
+.runtime-time-picker svg {
+  height: 18px;
+  width: 18px;
+}
+
+.schedule-display .MuiSelect-icon {
+  top: 5.5px;
+  width: 18px;
+  height: 18px;
+  right: 0;
+}
+
+.schedule-display hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.periodic-schedule-display {
+  position: relative;
+}
+
+button.runtime-remove-button {
+  position: absolute;
+  top: -6px;
+  left: -36px;
+}
+
+button.runtime-remove-button svg {
+  color: var(--mui-palette-error) !important;
+}

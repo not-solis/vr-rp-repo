@@ -1,3 +1,4 @@
+import './RoleplayProjectSidebar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Add, Check, Close, Delete, Upload } from '@mui/icons-material';
 import {
@@ -21,6 +22,7 @@ import { useState } from 'react';
 
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { IconText } from '../components/IconText';
+import { ScheduleDisplay } from '../components/ScheduleDisplay';
 import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagChip } from '../components/TagChip';
 import { TagTextField } from '../components/TagTextField';
@@ -34,10 +36,9 @@ import {
   RoleplayLink,
   RoleplayProject,
 } from '../model/RoleplayProject';
+import { ScheduleRegion, ScheduleType } from '../model/RoleplayScheduling';
 import { queryServer } from '../model/ServerResponse';
 import { User, UserRole } from '../model/User';
-
-import './RoleplayProjectSidebar.css';
 
 interface RoleplayProjectSidebarProps {
   isOpen: boolean;
@@ -78,7 +79,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     imageUrl = '',
     tags = [],
     setting = '',
-    runtime = '',
+    schedule,
     started,
     isMetaverse = false,
     entryProcess = '',
@@ -96,7 +97,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
   };
 
   const { data: pendingOwners = [] } = useQuery({
-    enabled: hasPermission(UserRole.Admin) && !owner,
+    enabled: !!id && hasPermission(UserRole.Admin) && !owner,
     queryKey: ['project', 'pendingOwners'],
     queryFn: () =>
       queryServer<User[]>(`/projects/${id}/owner/pending`, {
@@ -181,20 +182,19 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
         iconPrefix='fab'
         url={isEditing ? '' : discordUrl}
         containerStyle={{ width: '100%' }}
-        component={
-          isEditing ? (
-            <BlurrableTextField
-              label='Discord URL'
-              variant='standard'
-              size='small'
-              value={discordUrl ?? ''}
-              type='url'
-              onChange={(e) =>
-                setEditProject({ ...project, discordUrl: e.target.value })
-              }
-              style={{ width: '74%' }}
-            />
-          ) : undefined
+        isEditing={isEditing}
+        editComponent={
+          <BlurrableTextField
+            label='Discord URL'
+            variant='standard'
+            size='small'
+            value={discordUrl ?? ''}
+            type='url'
+            onChange={(e) =>
+              setEditProject({ ...project, discordUrl: e.target.value })
+            }
+            style={{ width: '74%' }}
+          />
         }
       />,
     );
@@ -210,59 +210,58 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
         icon='link'
         url={isEditing ? '' : url}
         containerStyle={{ width: '100%' }}
-        component={
-          isEditing ? (
+        isEditing={isEditing}
+        editComponent={
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
+                flexDirection: 'column',
+                gap: 8,
                 width: '100%',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                  width: '100%',
-                }}
-              >
-                <BlurrableTextField
-                  label='Label'
-                  variant='standard'
-                  size='small'
-                  value={label}
-                  onChange={(e) => {
-                    otherLinks[i].label = e.target.value;
-                    setEditProject({ ...project, otherLinks: otherLinks });
-                  }}
-                  style={{ width: '60%' }}
-                />
-                <BlurrableTextField
-                  label='URL'
-                  variant='standard'
-                  size='small'
-                  value={url}
-                  type='url'
-                  onChange={(e) => {
-                    otherLinks[i].url = e.target.value;
-                    setEditProject({ ...project, otherLinks: otherLinks });
-                  }}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <IconButton
-                size='large'
-                onClick={() => {
-                  otherLinks.splice(i, 1);
+              <BlurrableTextField
+                label='Label'
+                variant='standard'
+                size='small'
+                value={label}
+                onChange={(e) => {
+                  otherLinks[i].label = e.target.value;
                   setEditProject({ ...project, otherLinks: otherLinks });
                 }}
-              >
-                <Delete style={{ fontSize: 24 }} />
-              </IconButton>
+                style={{ width: '60%' }}
+              />
+              <BlurrableTextField
+                label='URL'
+                variant='standard'
+                size='small'
+                value={url}
+                type='url'
+                onChange={(e) => {
+                  otherLinks[i].url = e.target.value;
+                  setEditProject({ ...project, otherLinks: otherLinks });
+                }}
+                style={{ width: '100%' }}
+              />
             </div>
-          ) : undefined
+            <IconButton
+              size='large'
+              onClick={() => {
+                otherLinks.splice(i, 1);
+                setEditProject({ ...project, otherLinks: otherLinks });
+              }}
+            >
+              <Delete style={{ fontSize: 24 }} />
+            </IconButton>
+          </div>
         }
       />,
     );
@@ -460,28 +459,18 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 ))
               )}
 
-              <IconText
-                tooltip='Runtime'
-                tooltipPlacement='left'
-                text={runtime}
-                icon='clock'
-                iconPrefix='far'
-                containerStyle={{ width: '100%' }}
-                component={
-                  isEditing ? (
-                    <BlurrableTextField
-                      label='Runtime'
-                      variant='standard'
-                      size='small'
-                      value={runtime}
-                      onChange={(e) =>
-                        setEditProject({ ...project, runtime: e.target.value })
-                      }
-                      style={{ width: '100%' }}
-                    />
-                  ) : undefined
-                }
-              />
+              {(schedule || isEditing) && (
+                <ScheduleDisplay
+                  schedule={schedule}
+                  isEditing={isEditing}
+                  setSchedule={(schedule) =>
+                    setEditProject({ ...project, schedule })
+                  }
+                  tooltip='Schedule'
+                  tooltipPlacement='left'
+                  containerStyle={{ width: '100%', alignItems: 'start' }}
+                />
+              )}
 
               <IconText
                 tooltip='Date started'
@@ -492,26 +481,25 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 icon='calendar'
                 iconPrefix='far'
                 containerStyle={{ width: '100%' }}
-                component={
-                  isEditing ? (
-                    <DatePicker
-                      label='Date started'
-                      defaultValue={started && dayjs(started)}
-                      format='MMMM Do, YYYY'
-                      onChange={(val) =>
-                        setEditProject({ ...project, started: val?.toDate() })
-                      }
-                      slotProps={{
-                        textField: {
-                          size: 'small',
-                          variant: 'standard',
-                        },
-                        inputAdornment: {
-                          style: { transform: 'translate(-8px, -3px)' },
-                        },
-                      }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <DatePicker
+                    label='Date started'
+                    defaultValue={started && dayjs(started)}
+                    format='MMMM Do, YYYY'
+                    onChange={(val) =>
+                      setEditProject({ ...project, started: val?.toDate() })
+                    }
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        variant: 'standard',
+                      },
+                      inputAdornment: {
+                        style: { transform: 'translate(-8px, -3px)' },
+                      },
+                    }}
+                  />
                 }
               />
 
@@ -521,20 +509,19 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 text={setting}
                 icon='earth-americas'
                 containerStyle={{ width: '100%' }}
-                component={
-                  isEditing ? (
-                    <BlurrableTextField
-                      label='Setting'
-                      variant='standard'
-                      size='small'
-                      value={setting}
-                      multiline
-                      onChange={(e) =>
-                        setEditProject({ ...project, setting: e.target.value })
-                      }
-                      style={{ width: '100%' }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <BlurrableTextField
+                    label='Setting'
+                    variant='standard'
+                    size='small'
+                    value={setting}
+                    multiline
+                    onChange={(e) =>
+                      setEditProject({ ...project, setting: e.target.value })
+                    }
+                    style={{ width: '100%' }}
+                  />
                 }
               />
 
@@ -543,24 +530,23 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 tooltipPlacement='left'
                 text={entryProcess}
                 icon='door-open'
-                component={
-                  isEditing ? (
-                    <StringEnumSelector
-                      enumType={RoleplayEntryProcess}
-                      includeEmptyValue
-                      label='Entry Process'
-                      value={entryProcess}
-                      size='small'
-                      variant='standard'
-                      onChange={(e) =>
-                        setEditProject({
-                          ...project,
-                          entryProcess: e.target.value as RoleplayEntryProcess,
-                        })
-                      }
-                      slotProps={{ root: { style: { minWidth: 69 } } }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <StringEnumSelector
+                    enumType={RoleplayEntryProcess}
+                    includeEmptyValue
+                    label='Entry Process'
+                    value={entryProcess}
+                    size='small'
+                    variant='standard'
+                    onChange={(e) =>
+                      setEditProject({
+                        ...project,
+                        entryProcess: e.target.value as RoleplayEntryProcess,
+                      })
+                    }
+                    slotProps={{ root: { style: { minWidth: 69 } } }}
+                  />
                 }
               />
 
@@ -570,25 +556,24 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 text={applicationProcess}
                 icon='clipboard'
                 iconPrefix='far'
-                component={
-                  isEditing ? (
-                    <StringEnumSelector
-                      enumType={RoleplayApplicationProcess}
-                      includeEmptyValue
-                      label='Application Process'
-                      value={applicationProcess}
-                      size='small'
-                      variant='standard'
-                      onChange={(e) =>
-                        setEditProject({
-                          ...project,
-                          applicationProcess: e.target
-                            .value as RoleplayApplicationProcess,
-                        })
-                      }
-                      slotProps={{ root: { style: { minWidth: 69 } } }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <StringEnumSelector
+                    enumType={RoleplayApplicationProcess}
+                    includeEmptyValue
+                    label='Application Process'
+                    value={applicationProcess}
+                    size='small'
+                    variant='standard'
+                    onChange={(e) =>
+                      setEditProject({
+                        ...project,
+                        applicationProcess: e.target
+                          .value as RoleplayApplicationProcess,
+                      })
+                    }
+                    slotProps={{ root: { style: { minWidth: 69 } } }}
+                  />
                 }
               />
 
@@ -597,26 +582,25 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 tooltipPlacement='left'
                 text={metaverseText}
                 icon='globe'
-                component={
-                  isEditing ? (
-                    <FormControlLabel
-                      value={isMetaverse}
-                      control={
-                        <Checkbox
-                          checked={isMetaverse}
-                          onChange={(e) =>
-                            setEditProject({
-                              ...project,
-                              isMetaverse: e.currentTarget.checked,
-                            })
-                          }
-                          style={{ padding: 0, paddingRight: 8 }}
-                        />
-                      }
-                      label={metaverseText}
-                      style={{ margin: 0, paddingTop: 4 }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <FormControlLabel
+                    value={isMetaverse}
+                    control={
+                      <Checkbox
+                        checked={isMetaverse}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            isMetaverse: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label={metaverseText}
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
                 }
               />
 
@@ -625,26 +609,25 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 tooltipPlacement='left'
                 text={suppCastText}
                 icon='handshake'
-                component={
-                  isEditing ? (
-                    <FormControlLabel
-                      value={hasSupportingCast}
-                      control={
-                        <Checkbox
-                          checked={hasSupportingCast}
-                          onChange={(e) =>
-                            setEditProject({
-                              ...project,
-                              hasSupportingCast: e.currentTarget.checked,
-                            })
-                          }
-                          style={{ padding: 0, paddingRight: 8 }}
-                        />
-                      }
-                      label={suppCastText}
-                      style={{ margin: 0, paddingTop: 4 }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <FormControlLabel
+                    value={hasSupportingCast}
+                    control={
+                      <Checkbox
+                        checked={hasSupportingCast}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            hasSupportingCast: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label={suppCastText}
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
                 }
               />
 
@@ -654,26 +637,25 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
                 text={questCompatibleText}
                 icon='meta'
                 iconPrefix='fab'
-                component={
-                  isEditing ? (
-                    <FormControlLabel
-                      value={isQuestCompatible}
-                      control={
-                        <Checkbox
-                          checked={isQuestCompatible}
-                          onChange={(e) =>
-                            setEditProject({
-                              ...project,
-                              isQuestCompatible: e.currentTarget.checked,
-                            })
-                          }
-                          style={{ padding: 0, paddingRight: 8 }}
-                        />
-                      }
-                      label={questCompatibleText}
-                      style={{ margin: 0, paddingTop: 4 }}
-                    />
-                  ) : undefined
+                isEditing={isEditing}
+                editComponent={
+                  <FormControlLabel
+                    value={isQuestCompatible}
+                    control={
+                      <Checkbox
+                        checked={isQuestCompatible}
+                        onChange={(e) =>
+                          setEditProject({
+                            ...project,
+                            isQuestCompatible: e.currentTarget.checked,
+                          })
+                        }
+                        style={{ padding: 0, paddingRight: 8 }}
+                      />
+                    }
+                    label={questCompatibleText}
+                    style={{ margin: 0, paddingTop: 4 }}
+                  />
                 }
               />
             </div>

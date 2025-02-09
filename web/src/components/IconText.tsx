@@ -1,11 +1,10 @@
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { TextFieldProps, Tooltip, Typography } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
+import { HTMLAttributes, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-import { BlurrableTextField } from './BlurrableTextField';
-
-interface IconTextProps {
+export interface IconTextProps {
   text?: string;
   url?: string;
   tooltip?: string;
@@ -26,10 +25,14 @@ interface IconTextProps {
   iconPrefix?: IconPrefix;
   iconPadding?: number | string;
   containerStyle?: React.CSSProperties;
-  component?: JSX.Element;
+  isEditing?: boolean;
+  component?: ReactNode;
+  editComponent?: ReactNode;
 }
 
-export const IconText = (props: IconTextProps) => {
+export const IconText = (
+  props: IconTextProps & HTMLAttributes<HTMLDivElement>,
+) => {
   const {
     text,
     url,
@@ -39,10 +42,14 @@ export const IconText = (props: IconTextProps) => {
     iconPrefix,
     iconPadding,
     containerStyle = {},
+    isEditing = false,
     component,
+    editComponent,
+    ...divProps
   } = props;
 
-  if (!text && !component) {
+  const showEditComponent = !!(isEditing && editComponent);
+  if (!text && !component && !showEditComponent) {
     return null;
   }
 
@@ -50,9 +57,10 @@ export const IconText = (props: IconTextProps) => {
     <div
       style={{
         display: 'flex',
-        alignItems: component ? 'center' : 'flex-start',
+        alignItems: showEditComponent ? 'center' : 'flex-start',
         ...containerStyle,
       }}
+      {...divProps}
     >
       {icon && (
         <Tooltip
@@ -79,12 +87,19 @@ export const IconText = (props: IconTextProps) => {
           />
         </Tooltip>
       )}
-      {component || (text && <Typography variant='body1'>{text}</Typography>)}
+      {component ||
+        (isEditing
+          ? editComponent
+          : text && <Typography variant='body1'>{text}</Typography>)}
     </div>
   );
 
   if (url) {
-    textElement = <Link to={url}>{textElement}</Link>;
+    textElement = (
+      <Link className='icon-text-link' to={url}>
+        {textElement}
+      </Link>
+    );
   }
   return textElement;
 };

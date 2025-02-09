@@ -44,7 +44,7 @@ import {
   RoleplayProject,
   RoleplayLink,
   RoleplayStatus,
-  getProjectDates,
+  mapProject,
 } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
@@ -138,7 +138,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
           return project;
         })
         .then(clearNulls),
-    select: getProjectDates,
+    select: mapProject,
   });
 
   if (error) {

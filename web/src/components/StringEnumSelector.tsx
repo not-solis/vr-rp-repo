@@ -8,7 +8,7 @@ import {
 
 interface StringEnumSelectorProps {
   enumType: Record<string, string>;
-  label: string;
+  label?: string;
   includeEmptyValue?: boolean;
 }
 
@@ -16,7 +16,7 @@ export const StringEnumSelector = (
   props: StringEnumSelectorProps & SelectProps,
 ) => {
   const { enumType, label, style, includeEmptyValue, ...restProps } = props;
-  const labelId = `${label.toLowerCase().replace(' ', '-')}-label`;
+  const labelId = `${label?.toLowerCase().replace(' ', '-')}-label`;
 
   const select = (
     <Select labelId={labelId} label={label} size='small' {...restProps}>

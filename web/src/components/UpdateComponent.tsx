@@ -12,10 +12,10 @@ import { RefObject, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTimeAgo } from 'react-time-ago';
 
-import { getLocale } from '../App';
 import { AutoLink } from './AutoLink';
 import { Update } from '../model/Update';
 import { UserRole } from '../model/User';
+import { getLocale } from '../util/Time';
 
 interface UpdateComponentProps {
   update: Update;
