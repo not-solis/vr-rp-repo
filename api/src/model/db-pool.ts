@@ -1,17 +1,13 @@
 import pg, { PoolClient, PoolConfig } from 'pg';
-import dotenv from 'dotenv';
-const { Pool } = pg;
-
-dotenv.config();
-
-const {
-  POSTGRES_URL,
-  POSTGRES_USER,
-  POSTGRES_HOST,
+import {
   POSTGRES_DATABASE,
+  POSTGRES_HOST,
   POSTGRES_PASSWORD,
   POSTGRES_PORT,
-} = process.env;
+  POSTGRES_URL,
+  POSTGRES_USER,
+} from '../env/config.js';
+const { Pool } = pg;
 
 const connectionDetails: PoolConfig = POSTGRES_URL
   ? {

@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 export const {
   NODE_ENV = 'development',
   DISCORD_REDIRECT_PATH = '',
@@ -12,7 +15,17 @@ export const {
   JWT_SECRET = '',
   CLIENT_URL = '',
   CLIENT_URL_PATTERN = '',
-  BLOB_READ_WRITE_TOKEN = '',
+  R2_BUCKET_NAME = '',
+  R2_URL = '',
+  R2_ENDPOINT = '',
+  AWS_ACCESS_KEY_ID = '',
+  AWS_SECRET_ACCESS_KEY = '',
+  POSTGRES_URL,
+  POSTGRES_USER,
+  POSTGRES_HOST,
+  POSTGRES_DATABASE,
+  POSTGRES_PASSWORD,
+  POSTGRES_PORT,
 } = process.env;
 
 if (!DISCORD_REDIRECT_PATH) {
@@ -37,8 +50,16 @@ if (!DISCORD_REDIRECT_PATH) {
   throw new Error('No JWT_SECRET provided');
 } else if (!CLIENT_URL && !CLIENT_URL_PATTERN) {
   throw new Error('No CLIENT_URL provided');
-} else if (!BLOB_READ_WRITE_TOKEN) {
-  throw new Error('No BLOB_READ_WRITE_TOKEN provided');
+} else if (!R2_BUCKET_NAME) {
+  throw new Error('No R2_BUCKET_NAME provided');
+} else if (!R2_URL) {
+  throw new Error('No R2_URL provided');
+} else if (!R2_ENDPOINT) {
+  throw new Error('No R2_ENDPOINT provided');
+} else if (!AWS_ACCESS_KEY_ID) {
+  throw new Error('No AWS_ACCESS_KEY_ID provided');
+} else if (!AWS_SECRET_ACCESS_KEY) {
+  throw new Error('No AWS_SECRET_ACCESS_KEY provided');
 }
 
 export const isDev = NODE_ENV === 'development';
