@@ -36,6 +36,13 @@ export interface RoleplayProject {
   otherLinks?: RoleplayLink[];
 }
 
+export interface RoleplayEvent {
+  isConfirmed: boolean;
+  startDate: Date;
+  endDate: Date;
+  project: RoleplayProject;
+}
+
 const remapRoleplayProject = (project: any): RoleplayProject => {
   return {
     id: project.id,
@@ -82,17 +89,61 @@ const validSortByKeys = new Set([
   'started',
 ]);
 
-interface ProjectSearchParams {
+export interface ProjectSearchParams {
   start?: number;
   limit?: number;
   region?: ScheduleRegion;
   sortBy?: string;
   name?: string;
-  tags: string[];
+  tags?: string[];
   asc?: boolean;
   activeOnly?: boolean;
 }
+
+export interface EventSearchParams {
+  startDate: Date;
+  endDate: Date;
+  region?: ScheduleRegion;
+  tags?: string[];
+  activeOnly?: boolean;
+}
+
+const projectQueryFields = `
+        roleplay_projects.*,
+        users.user_id as owner_id,
+        users.name as owner_name,
+        users.role as owner_role,
+        users.email as owner_email,
+        array_agg(
+          json_build_object(
+            'label', roleplay_links.label,
+            'url', roleplay_links.url
+          )
+        ) filter (where roleplay_links.url is not null) as other_links,
+        min(schedules.schedule_type) as schedule_type,
+        min(schedules.region) as schedule_region,
+        min(schedules.schedule_link) as schedule_link,
+        min(schedules.other_text) as schedule_other_text,
+        array_agg(
+          json_build_object(
+            'region', runtimes.region,
+            'start', runtimes.start,
+            'end', runtimes.end,
+            'between', runtimes.between
+          )
+        ) filter (where runtimes.start is not null) as runtimes`;
+const projectQueryTable = `
+      roleplay_projects
+        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
+        LEFT JOIN users on (users.user_id = ownership.user_id and users.role != 'Banned')
+        LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
+        LEFT JOIN schedules ON roleplay_projects.id = schedules.project_id
+        LEFT JOIN runtimes ON roleplay_projects.id = runtimes.project_id`;
+
+const DEFAULT_EVENT_LENGTH = '4 hours';
+
 export const getProjects = async (params: ProjectSearchParams) => {
+  // TODO: use SQL nullness checks and feed all params into query
   const {
     start = 0,
     limit = DEFAULT_QUERY_LIMIT,
@@ -138,35 +189,8 @@ export const getProjects = async (params: ProjectSearchParams) => {
 
   const queryString = `
       SELECT
-        roleplay_projects.*,
-        users.user_id as owner_id,
-        users.name as owner_name,
-        users.role as owner_role,
-        users.email as owner_email,
-        array_agg(
-          json_build_object(
-            'label', roleplay_links.label,
-            'url', roleplay_links.url
-          )
-        ) filter (where roleplay_links.url is not null) as other_links,
-        min(schedules.schedule_type) as schedule_type,
-        min(schedules.region) as schedule_region,
-        min(schedules.schedule_link) as schedule_link,
-        min(schedules.other_text) as schedule_other_text,
-        array_agg(
-          json_build_object(
-            'region', runtimes.region,
-            'start', runtimes.start,
-            'end', runtimes.end,
-            'between', runtimes.between
-          )
-        ) filter (where runtimes.start is not null) as runtimes
-      FROM roleplay_projects
-        LEFT JOIN ownership ON (ownership.project_id = roleplay_projects.id AND ownership.active)
-        LEFT JOIN users on (users.user_id = ownership.user_id and users.role != 'Banned')
-        LEFT JOIN roleplay_links ON roleplay_projects.id = roleplay_links.project_id
-        LEFT JOIN schedules ON roleplay_projects.id = schedules.project_id
-        LEFT JOIN runtimes ON roleplay_projects.id = runtimes.project_id
+        ${projectQueryFields}
+      FROM ${projectQueryTable}
       ${where.length > 0 ? `WHERE ${where.join(' AND ')} ` : ''}
       GROUP BY
         roleplay_projects.id,
@@ -188,7 +212,7 @@ export const getProjects = async (params: ProjectSearchParams) => {
           hasNext: rowCount > limit,
           data: rows.map(remapRoleplayProject),
           nextCursor: start + limit,
-        } as PageData<RoleplayProject>;
+        } as PageData<RoleplayProject, number>;
       } else {
         throw new Error('No results found.');
       }
@@ -196,6 +220,72 @@ export const getProjects = async (params: ProjectSearchParams) => {
     .catch((err) => {
       console.error(err);
       throw new Error('Internal server error.');
+    });
+};
+
+export const getEvents = async (
+  params: EventSearchParams,
+): Promise<PageData<RoleplayEvent, { startDate: Date; endDate: Date }>> => {
+  const { startDate, endDate, tags = [], activeOnly = false } = params;
+
+  //   select
+  // 	*,
+  // 	event_start + coalesce(runtimes.end - runtimes.start, '4 hours'::interval) as event_end
+  // from schedules
+  // 	inner join runtimes on schedules.project_id = runtimes.project_id,
+  // 	constants,
+  // 	generate_series(runtimes.start, end_date, coalesce(runtimes.between, '7 days'::interval)) as event_start
+  // where
+  // 	event_start > start_date;
+
+  return await pool
+    .query(
+      `
+      SELECT
+        runtimes.between IS NOT NULL as is_confirmed,
+        event_start,
+        event_start + COALESCE(min(runtimes.end) - runtimes.start, $1::interval) AS event_end,
+        ${projectQueryFields}
+      FROM ${projectQueryTable},
+        generate_series(
+          runtimes.start,
+          $3,
+          COALESCE(runtimes.between, '7 days'::interval)) AS event_start
+      WHERE event_start > $2
+        AND (coalesce(array_length($4::varchar[], 1), 0) = 0 OR tags @> $4::varchar[])
+        AND (NOT $5 OR roleplay_projects.status = 'Active')
+      GROUP BY
+        roleplay_projects.id,
+        users.user_id,
+        event_start,
+        runtimes.between,
+        runtimes.start
+      ORDER BY event_start
+      ;`,
+      [DEFAULT_EVENT_LENGTH, startDate, endDate, tags, activeOnly],
+    )
+    .then((results) => {
+      const { rows, rowCount } = results;
+      if (rows && rowCount !== null) {
+        return {
+          hasNext: true,
+          data: rows.map((row) => ({
+            isConfirmed: row.is_confirmed,
+            startDate: row.event_start,
+            endDate: row.event_end,
+            project: remapRoleplayProject(row),
+          })),
+          nextCursor: {
+            startDate,
+            endDate,
+          },
+        };
+      } else {
+        throw new Error('No results found.');
+      }
+    })
+    .catch((err) => {
+      throw err;
     });
 };
 

@@ -11,10 +11,10 @@ export interface ResponseError {
   message: string | string[];
 }
 
-export interface PageData<T> {
+export interface PageData<T, U> {
   hasNext: boolean;
   data: T[];
-  nextCursor: number;
+  nextCursor: U;
 }
 
 interface QueryServerProps {

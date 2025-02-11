@@ -1,0 +1,16 @@
+#repo-timeline-container {
+  --timeline-hour-width: 10px;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-auto-rows: max-content;
+  grid-auto-columns: var(--timeline-hour-width);
+}
+
+#repo-timeline {
+  cursor: grab;
+  display: grid;
+  grid-auto-flow: dense;
+  grid-row: 2 / 3;
+  grid-column-start: 1;
+  grid-template-columns: subgrid;
+}

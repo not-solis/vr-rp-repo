@@ -4,6 +4,8 @@ import {
   ArrowDownward,
   ArrowUpward,
   CheckBoxOutlined,
+  ViewModule,
+  Wysiwyg,
 } from '@mui/icons-material';
 import {
   Box,
@@ -23,16 +25,19 @@ import {
   LinearProgress,
   MenuItem,
   Select,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { APP_KEYWORDS, APP_TITLE } from '../App';
+import { RepoTimeline } from './RepoTimeline';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagTextField } from '../components/TagTextField';
@@ -42,6 +47,11 @@ import { ScheduleRegion } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
+
+enum RepoView {
+  List = 'list',
+  Timeline = 'timeline',
+}
 
 enum SortBy {
   Name = 'name',
@@ -53,6 +63,14 @@ enum SortBy {
 const TITLE = 'Repo';
 
 export const Repo = () => {
+  // TODO: hook search params into filters
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get('view');
+  const [view, setView] = useState<RepoView>(
+    Object.values(RepoView).includes(viewParam as RepoView)
+      ? (viewParam as RepoView)
+      : RepoView.List,
+  );
   const [name, setName] = useState('');
   const [nameFilter, setNameFilter] = useState('');
   const [tagFilters, setTagFilters] = useState<string[]>([]);
@@ -71,6 +89,7 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
+    enabled: view === RepoView.List,
     queryKey: [
       'projects',
       nameFilter,
@@ -81,7 +100,7 @@ export const Repo = () => {
       sortAscending,
     ],
     queryFn: async ({ pageParam }) =>
-      queryServer<PageData<RoleplayProject>>('/projects', {
+      queryServer<PageData<RoleplayProject, number>>('/projects', {
         queryParams: {
           start: `${pageParam}`,
           limit: `${PAGE_SIZE}`,
@@ -173,6 +192,20 @@ export const Repo = () => {
       </Helmet>
       <Box id='filter-bar'>
         <FormGroup id='repo-filters'>
+          <ToggleButtonGroup
+            exclusive
+            size='small'
+            value={view}
+            onChange={(_, newView) => setView(newView)}
+            aria-label='view-toggle'
+          >
+            <ToggleButton value={RepoView.List} aria-label='list view'>
+              <ViewModule />
+            </ToggleButton>
+            <ToggleButton value={RepoView.Timeline} aria-label='timeline view'>
+              <Wysiwyg />
+            </ToggleButton>
+          </ToggleButtonGroup>
           <BlurrableTextField
             label='Name'
             variant='outlined'
@@ -301,21 +334,26 @@ export const Repo = () => {
           )}
         </FormGroup>
       </Box>
-      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
-        {isFetching && (
-          <LinearProgress
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              height: 6,
-              left: 0,
-              right: 0,
-              zIndex: 2,
-            }}
-          />
-        )}
-        {results}
-      </div>
+      {view === RepoView.List && (
+        <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
+          {isFetching && (
+            <LinearProgress
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                height: 6,
+                left: 0,
+                right: 0,
+                zIndex: 2,
+              }}
+            />
+          )}
+          {results}
+        </div>
+      )}
+      {view === RepoView.Timeline && (
+        <RepoTimeline tags={tagFilters} activeOnly={showActiveOnly} />
+      )}
       <Dialog
         id='new-roleplay-dialog'
         open={showNewDialog}

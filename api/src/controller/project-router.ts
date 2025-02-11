@@ -139,7 +139,6 @@ const checkOwnership: RequestHandler = async (
 };
 
 const router = Router();
-
 router.get('/', (req, res) => {
   const { start, limit, region, sortBy, name, tags, asc, active } = req.query;
   getProjects({
