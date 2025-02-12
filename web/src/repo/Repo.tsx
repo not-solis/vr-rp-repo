@@ -27,10 +27,11 @@ import {
   Select,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -62,22 +63,45 @@ enum SortBy {
 
 const TITLE = 'Repo';
 
+const defaultSortAsc = (sortBy: SortBy) => sortBy === SortBy.Name;
+
 export const Repo = () => {
   // TODO: hook search params into filters
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get('view');
+  const nameParam = searchParams.get('name');
+  const tagsParam = searchParams.get('tags');
+  const regionParam = searchParams.get('region');
+  const sortByParam = searchParams.get('sort_by');
+  const ascParam = searchParams.get('asc');
+  const activeParam = searchParams.get('active_only');
+
   const [view, setView] = useState<RepoView>(
     Object.values(RepoView).includes(viewParam as RepoView)
       ? (viewParam as RepoView)
       : RepoView.List,
   );
   const [name, setName] = useState('');
-  const [nameFilter, setNameFilter] = useState('');
-  const [tagFilters, setTagFilters] = useState<string[]>([]);
-  const [regionFilter, setRegionFilter] = useState<ScheduleRegion>();
-  const [sortBy, setSortBy] = useState(SortBy.Name);
-  const [sortAscending, setSortAscending] = useState(true);
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [nameFilter, setNameFilter] = useState(nameParam || '');
+  const [tagFilters, setTagFilters] = useState<string[]>(
+    tagsParam?.split('|') || [],
+  );
+  const [regionFilter, setRegionFilter] = useState<ScheduleRegion>(
+    (Object.values(ScheduleRegion).includes(regionParam as ScheduleRegion)
+      ? regionParam
+      : undefined) as ScheduleRegion,
+  );
+  const [sortBy, setSortBy] = useState(
+    Object.values(SortBy).includes(sortByParam as SortBy)
+      ? (sortByParam as SortBy)
+      : SortBy.Name,
+  );
+
+  const [sortAscending, setSortAscending] = useState(
+    !!ascParam || defaultSortAsc(sortBy),
+  );
+  const [showActiveOnly, setShowActiveOnly] = useState(!!activeParam || false);
+
   const [showNewDialog, setShowNewDialog] = useState(false);
   const { hasPermission } = useAuth();
   const navigate = useNavigate();
@@ -125,6 +149,45 @@ export const Repo = () => {
       lastPage.hasNext ? lastPage.nextCursor : undefined,
     placeholderData: (prev) => prev,
   });
+
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('view', view);
+
+    if (view === RepoView.List && nameFilter) {
+      newSearchParams.set('name', nameFilter);
+    }
+
+    if (tagFilters.length > 0) {
+      newSearchParams.set('tags', tagFilters.join('|'));
+    }
+
+    if (view === RepoView.List && regionFilter) {
+      newSearchParams.set('region', regionFilter);
+    }
+
+    if (view === RepoView.List) {
+      newSearchParams.set('sort_by', sortBy);
+    }
+
+    if (view === RepoView.List && sortAscending) {
+      newSearchParams.set('asc', '1');
+    }
+
+    if (showActiveOnly) {
+      newSearchParams.set('active_only', '1');
+    }
+
+    setSearchParams(newSearchParams);
+  }, [
+    view,
+    nameFilter,
+    tagFilters,
+    regionFilter,
+    sortBy,
+    sortAscending,
+    showActiveOnly,
+  ]);
 
   const addTag = (tag: string) => {
     if (tagFilters.includes(tag)) {
@@ -199,36 +262,65 @@ export const Repo = () => {
             onChange={(_, newView) => setView(newView)}
             aria-label='view-toggle'
           >
-            <ToggleButton value={RepoView.List} aria-label='list view'>
-              <ViewModule />
-            </ToggleButton>
-            <ToggleButton value={RepoView.Timeline} aria-label='timeline view'>
-              <Wysiwyg />
-            </ToggleButton>
+            <Tooltip
+              title={'List'}
+              placement={'top'}
+              slotProps={{
+                popper: {
+                  modifiers: [
+                    { name: 'offset', options: { offset: [0, -10] } },
+                  ],
+                },
+              }}
+            >
+              <ToggleButton value={RepoView.List} aria-label='list view'>
+                <ViewModule />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip
+              title={'Timeline'}
+              placement={'top'}
+              slotProps={{
+                popper: {
+                  modifiers: [
+                    { name: 'offset', options: { offset: [0, -10] } },
+                  ],
+                },
+              }}
+            >
+              <ToggleButton
+                value={RepoView.Timeline}
+                aria-label='timeline view'
+              >
+                <Wysiwyg />
+              </ToggleButton>
+            </Tooltip>
           </ToggleButtonGroup>
-          <BlurrableTextField
-            label='Name'
-            variant='outlined'
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => {
-              setNameFilter(name);
-            }}
-            value={name}
-            size='small'
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <img
-                    id='honse'
-                    src='/honse1.png'
-                    className={
-                      nameFilter.toLowerCase() === 'honse' ? 'show' : ''
-                    }
-                  />
-                ),
-              },
-            }}
-          />
+          {view === RepoView.List && (
+            <BlurrableTextField
+              label='Name'
+              variant='outlined'
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => {
+                setNameFilter(name);
+              }}
+              value={name}
+              size='small'
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <img
+                      id='honse'
+                      src='/honse1.png'
+                      className={
+                        nameFilter.toLowerCase() === 'honse' ? 'show' : ''
+                      }
+                    />
+                  ),
+                },
+              }}
+            />
+          )}
           <TagTextField
             label='Tags'
             variant='outlined'
@@ -239,64 +331,68 @@ export const Repo = () => {
             onTagClick={removeTag}
           />
 
-          <FormControl style={{ minWidth: 100 }}>
-            <InputLabel size='small' id='repo-region-filter'>
-              Region
-            </InputLabel>
-            <StringEnumSelector
-              includeEmptyValue
-              enumType={ScheduleRegion}
-              value={regionFilter ?? ''}
-              labelId='repo-region-filter'
-              label='Region'
-              size='small'
-              onChange={(e) => {
-                const newRegion = e.target.value as ScheduleRegion;
-                if (regionFilter !== newRegion) {
-                  setRegionFilter(newRegion);
-                }
-              }}
-            />
-          </FormControl>
+          {view === RepoView.List && (
+            <>
+              <FormControl style={{ minWidth: 100 }}>
+                <InputLabel size='small' id='repo-region-filter'>
+                  Region
+                </InputLabel>
+                <StringEnumSelector
+                  includeEmptyValue
+                  enumType={ScheduleRegion}
+                  value={regionFilter ?? ''}
+                  labelId='repo-region-filter'
+                  label='Region'
+                  size='small'
+                  onChange={(e) => {
+                    const newRegion = e.target.value as ScheduleRegion;
+                    if (regionFilter !== newRegion) {
+                      setRegionFilter(newRegion);
+                    }
+                  }}
+                />
+              </FormControl>
 
-          <FormControl disabled={!!nameFilter} style={{ minWidth: 100 }}>
-            <InputLabel size='small' id='repo-sort-by'>
-              Sort by
-            </InputLabel>
-            <Select
-              value={sortBy}
-              labelId='repo-sort-by'
-              label='Sort by'
-              size='small'
-              onChange={(e) => {
-                const newSortBy = e.target.value as SortBy;
-                if (sortBy !== newSortBy) {
-                  setSortBy(newSortBy);
-                  setSortAscending(newSortBy === SortBy.Name);
-                }
-              }}
-            >
-              <MenuItem value={SortBy.Name}>Name</MenuItem>
-              <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
-              <MenuItem value={SortBy.CreatedAt}>Date added</MenuItem>
-              <MenuItem value={SortBy.DateStarted}>Date started</MenuItem>
-            </Select>
-          </FormControl>
+              <FormControl disabled={!!nameFilter} style={{ minWidth: 100 }}>
+                <InputLabel size='small' id='repo-sort-by'>
+                  Sort by
+                </InputLabel>
+                <Select
+                  value={sortBy}
+                  labelId='repo-sort-by'
+                  label='Sort by'
+                  size='small'
+                  onChange={(e) => {
+                    const newSortBy = e.target.value as SortBy;
+                    if (sortBy !== newSortBy) {
+                      setSortBy(newSortBy);
+                      setSortAscending(newSortBy === SortBy.Name);
+                    }
+                  }}
+                >
+                  <MenuItem value={SortBy.Name}>Name</MenuItem>
+                  <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
+                  <MenuItem value={SortBy.CreatedAt}>Date added</MenuItem>
+                  <MenuItem value={SortBy.DateStarted}>Date started</MenuItem>
+                </Select>
+              </FormControl>
 
-          <FormControlLabel
-            disabled={!!nameFilter}
-            control={
-              <Checkbox
-                color='default'
-                checked={sortAscending}
-                icon={<ArrowDownward color='secondary' />}
-                checkedIcon={<ArrowUpward color='primary' />}
-                onChange={(e) => setSortAscending(e.target.checked)}
+              <FormControlLabel
+                disabled={!!nameFilter}
+                control={
+                  <Checkbox
+                    color='default'
+                    checked={sortAscending}
+                    icon={<ArrowDownward color='secondary' />}
+                    checkedIcon={<ArrowUpward color='primary' />}
+                    onChange={(e) => setSortAscending(e.target.checked)}
+                  />
+                }
+                label={getSortByText()}
+                labelPlacement='end'
               />
-            }
-            label={getSortByText()}
-            labelPlacement='end'
-          />
+            </>
+          )}
 
           <FormControlLabel
             control={

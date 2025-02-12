@@ -95,5 +95,5 @@ export const useDragScroll = () => {
     };
   }, [node]);
 
-  return { ref };
+  return { ref, node };
 };

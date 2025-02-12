@@ -244,14 +244,19 @@ export const getEvents = async (
       SELECT
         runtimes.between IS NOT NULL as is_confirmed,
         event_start,
-        event_start + COALESCE(min(runtimes.end) - runtimes.start, $1::interval) AS event_end,
+        event_start + COALESCE(runtimes.end - runtimes.start, $1::interval) AS event_end,
         ${projectQueryFields}
       FROM ${projectQueryTable},
         generate_series(
-          runtimes.start,
+          $2::timestamptz + make_interval(secs => 
+            mod(
+              extract(EPOCH FROM runtimes.start) - extract(EPOCH FROM $2::timestamptz),
+              extract(EPOCH from coalesce(runtimes.between, '7 days'::interval))
+            )
+          ),
           $3,
-          COALESCE(runtimes.between, '7 days'::interval)) AS event_start
-      WHERE event_start > $2
+          coalesce(runtimes.between, '7 days'::interval)) as event_start
+      WHERE event_start BETWEEN $2 AND $3 - '1 millisecond'::interval
         AND (coalesce(array_length($4::varchar[], 1), 0) = 0 OR tags @> $4::varchar[])
         AND (NOT $5 OR roleplay_projects.status = 'Active')
       GROUP BY
@@ -259,7 +264,8 @@ export const getEvents = async (
         users.user_id,
         event_start,
         runtimes.between,
-        runtimes.start
+        runtimes.start,
+        runtimes.end
       ORDER BY event_start
       ;`,
       [DEFAULT_EVENT_LENGTH, startDate, endDate, tags, activeOnly],
