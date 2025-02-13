@@ -1,4 +1,4 @@
-import { Stack, useTheme } from '@mui/material';
+import { Stack, Typography, useTheme } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
 import { UserComponent } from './UserComponent';
@@ -17,7 +17,9 @@ export const Navbar = () => {
         flexWrap='wrap'
       >
         <Link id='repo-title' to='/' className='no-underline'>
-          <h1>VR Roleplay Repo</h1>
+          <Typography variant='h1' noWrap>
+            VR Roleplay Repo
+          </Typography>
         </Link>
         <Stack direction='row' alignItems='center' gap={2.4}>
           {['Repo', 'Community', 'About'].map((t) => {
