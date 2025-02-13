@@ -87,6 +87,7 @@ export const useDragScroll = () => {
     if (!node) {
       return;
     }
+    resetCursor(node);
     node.addEventListener('mousedown', handleMouseDown);
     node.addEventListener('touchstart', handleTouchStart);
     return () => {

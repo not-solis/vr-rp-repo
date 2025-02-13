@@ -259,17 +259,20 @@ export const Repo = () => {
             exclusive
             size='small'
             value={view}
-            onChange={(_, newView) => setView(newView)}
+            onChange={(_, newView) => {
+              if (newView === RepoView.Timeline) {
+                setShowActiveOnly(true);
+              }
+              setView(newView);
+            }}
             aria-label='view-toggle'
           >
             <Tooltip
-              title={'List'}
-              placement={'top'}
+              title='List'
+              placement='top'
               slotProps={{
-                popper: {
-                  modifiers: [
-                    { name: 'offset', options: { offset: [0, -10] } },
-                  ],
+                tooltip: {
+                  style: { marginBottom: 4 },
                 },
               }}
             >
@@ -278,13 +281,11 @@ export const Repo = () => {
               </ToggleButton>
             </Tooltip>
             <Tooltip
-              title={'Timeline'}
-              placement={'top'}
+              title='Timeline'
+              placement='top'
               slotProps={{
-                popper: {
-                  modifiers: [
-                    { name: 'offset', options: { offset: [0, -10] } },
-                  ],
+                tooltip: {
+                  style: { marginBottom: 4 },
                 },
               }}
             >

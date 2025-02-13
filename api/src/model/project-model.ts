@@ -38,6 +38,7 @@ export interface RoleplayProject {
 
 export interface RoleplayEvent {
   isConfirmed: boolean;
+  isDefaultEnd: boolean;
   startDate: Date;
   endDate: Date;
   project: RoleplayProject;
@@ -243,6 +244,7 @@ export const getEvents = async (
       `
       SELECT
         runtimes.between IS NOT NULL as is_confirmed,
+        runtimes.end IS NULL as is_default_end,
         event_start,
         event_start + COALESCE(runtimes.end - runtimes.start, $1::interval) AS event_end,
         ${projectQueryFields}
@@ -277,6 +279,7 @@ export const getEvents = async (
           hasNext: true,
           data: rows.map((row) => ({
             isConfirmed: row.is_confirmed,
+            isDefaultEnd: row.is_default_end,
             startDate: row.event_start,
             endDate: row.event_end,
             project: remapRoleplayProject(row),

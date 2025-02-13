@@ -2,14 +2,25 @@
   background-color: var(--mui-palette-background-dark);
 }
 
-#repo-timeline-container {
+#repo-timeline-grid {
   min-width: 100%;
   min-height: 100%;
   position: relative;
   display: grid;
   grid-template-rows: auto auto 1fr;
   grid-auto-rows: max-content;
-  row-gap: 4px;
+}
+
+#timeline-now {
+  position: absolute;
+  pointer-events: none;
+  width: 0.6px;
+  top: 0;
+  height: 100%;
+  background-color: #a92121;
+  box-shadow:
+    rgba(156, 0, 0, 0.3) 0px 0px 0.25rem 0.1875rem,
+    rgba(24, 24, 27, 0.3) 0px 0px 0.25rem 0.1875rem;
 }
 
 #repo-timeline-header {
@@ -27,13 +38,22 @@
 }
 
 #repo-timeline-header .day {
-  height: 44px;
+  height: 45px;
   position: relative;
   display: flex;
   align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--mui-palette-divider);
+  border-top: none;
+}
+
+#repo-timeline-header .hour {
+  height: 30px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  border-right: 1px solid var(--mui-palette-divider);
-  border-left: 1px solid var(--mui-palette-divider);
+  border: 1px solid var(--mui-palette-divider);
+  border-bottom: none;
 }
 
 #repo-timeline-body {
@@ -56,5 +76,65 @@
   grid-row: 2 / 3;
   grid-column-start: 1;
   grid-template-columns: subgrid;
-  row-gap: 2px;
+}
+
+#repo-timeline .event-wrapper {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  padding: 10px 1px 1px;
+}
+
+#repo-timeline .event {
+  height: 90px;
+  background-color: var(--mui-palette-background-default);
+  box-shadow: var(--mui-shadows-4);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+#repo-timeline .event:hover {
+  filter: brightness(110%);
+}
+
+#repo-timeline .event.no-end {
+  --size: 11.3%;
+  --angle: 30deg;
+  mask-composite: intersect;
+}
+
+#repo-timeline .event.not-confirmed {
+  filter: brightness(80%);
+  --size: 4px;
+  --m: 1.4;
+  --p: calc(var(--m) * var(--size));
+  --R: calc(var(--size) * sqrt(var(--m) * var(--m) + 1));
+
+  mask:
+    radial-gradient(
+        var(--R) at left 50% bottom calc(var(--size) + var(--p)),
+        #000 99%,
+        #0000 101%
+      )
+      calc(50% - 2 * var(--size)) 0 / calc(4 * var(--size)) 100%,
+    radial-gradient(
+        var(--R) at left 50% bottom calc(-1 * var(--p)),
+        #0000 99%,
+        #000 101%
+      )
+      left 50% bottom var(--size) / calc(4 * var(--size)) 100% repeat-x;
+}
+
+#repo-timeline .event .header,
+#repo-timeline .event .footer {
+  box-sizing: border-box;
+  width: 100%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+#repo-timeline .event .header {
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 16px;
 }

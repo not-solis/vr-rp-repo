@@ -1,5 +1,6 @@
 import './RepoTimeline.css';
-import { Avatar, Typography } from '@mui/material';
+import { WarningAmber } from '@mui/icons-material';
+import { Avatar, Tooltip, Typography } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
@@ -32,7 +33,7 @@ const initialEndDate = offsetDateByDays(
   initialStartDate,
   QUERY_INTERVAL_LENGTH,
 );
-const PIXELS_PER_HOUR = 40;
+const PIXELS_PER_HOUR = 60;
 const SCROLL_LOAD_TRESHOLD_PX = 100;
 
 const getEventMargins = (event: RoleplayEvent) => {
@@ -77,6 +78,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
         }
         pageData.data = pageData.data.map((event) => ({
           isConfirmed: event.isConfirmed,
+          isDefaultEnd: event.isDefaultEnd,
           startDate: new Date(event.startDate),
           endDate: new Date(event.endDate),
           project: mapProject(event.project),
@@ -105,6 +107,9 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const timelineHours = Math.ceil(
     (totalEndDate.getTime() - totalStartDate.getTime()) / (60 * 60 * 1000),
   );
+  const getAbsolutePosition = (date: Date) =>
+    ((date.getTime() - totalStartDate.getTime()) / (1000 * 60 * 60)) *
+    PIXELS_PER_HOUR;
 
   const { ref: dragRef } = useDragScroll();
   const infiniteScrollRef = useInfiniteScroll({
@@ -121,8 +126,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
       return Promise.resolve();
     },
     initialScroll: {
-      left:
-        QUERY_INTERVAL_LENGTH * 12 * PIXELS_PER_HOUR - window.innerWidth / 2,
+      left: getAbsolutePosition(currentDate) - window.innerWidth / 2,
     },
     scrollThreshold: SCROLL_LOAD_TRESHOLD_PX,
     columnCount: events?.length ?? 0,
@@ -168,119 +172,161 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
       className='scrollable-y scrollable-x hidden-scrollbar'
       style={{ height: '100%', width: '100%' }}
     >
-      <div
-        id='repo-timeline-container'
-        style={{ gridAutoColumns: PIXELS_PER_HOUR }}
-      >
+      <div style={{ position: 'relative', height: '100%' }}>
         <div
-          id='repo-timeline-header'
-          style={{ gridColumnEnd: timelineHours + 1 }}
-        >
-          {dayColumns.map(({ day, gridColumnStart, gridColumnEnd }) => (
-            <div
-              key={day}
-              className='day'
-              style={{ gridColumnStart, gridColumnEnd }}
-            >
-              {(() => {
-                const date = new Date(totalStartDate);
-                return (
-                  <Typography>
-                    {dayjs(date.setDate(totalStartDate.getDate() + day)).format(
-                      'dddd, MMMM Do',
-                    )}
-                  </Typography>
-                );
-              })()}
-            </div>
-          ))}
-        </div>
+          id='timeline-now'
+          style={{ left: getAbsolutePosition(currentDate) }}
+        ></div>
+
         <div
-          id='repo-timeline-body'
-          style={{ gridColumnEnd: timelineHours + 1 }}
+          id='repo-timeline-grid'
+          style={{ gridAutoColumns: PIXELS_PER_HOUR }}
         >
-          {hourColumns.map(({ gridColumnStart, gridColumnEnd }) => (
-            <div
-              key={gridColumnStart}
-              className='day'
-              style={{ gridColumnStart, gridColumnEnd }}
-            />
-          ))}
-        </div>
-        {/* <div
-          style={{
-            position: 'absolute',
-            width: 2,
-            top: 0,
-            bottom: 0,
-            left: (currentDate.getTime() - totalStartDate.getTime()) / 100,
-          }}
-        ></div> */}
-        <div id='repo-timeline' style={{ gridColumnEnd: timelineHours + 1 }}>
-          {events?.map((event) => {
-            const { startDate, endDate, project } = event;
-            const { id: projectId, urlName, name, imageUrl } = project;
-            const { gridColumnStart, gridColumnEnd } =
-              getColumnsFromEvent(event);
-            const { marginLeft, marginRight } = getEventMargins(event);
-            return (
-              <Link
-                to={`/repo/${urlName}`}
-                key={projectId + startDate}
-                className='no-underline colorless'
-                style={{
-                  boxSizing: 'border-box',
-                  padding: 1,
-                  gridColumnStart,
-                  gridColumnEnd,
-                }}
+          <div
+            id='repo-timeline-header'
+            style={{ gridColumnEnd: timelineHours + 1 }}
+          >
+            {dayColumns.map(({ day, gridColumnStart, gridColumnEnd }) => (
+              <div
+                key={day}
+                className='day'
+                style={{ gridColumnStart, gridColumnEnd }}
               >
+                {(() => {
+                  const date = new Date(totalStartDate);
+                  return (
+                    <Typography position='sticky' left={12}>
+                      {dayjs(
+                        date.setDate(totalStartDate.getDate() + day),
+                      ).format('dddd, MMMM Do')}
+                    </Typography>
+                  );
+                })()}
+              </div>
+            ))}
+            {hourColumns.map(({ hour, gridColumnStart, gridColumnEnd }) => (
+              <div
+                key={gridColumnStart}
+                className='hour'
+                style={{ gridColumnStart, gridColumnEnd }}
+              >
+                {
+                  <Typography variant='body2'>
+                    {`${((hour + 11) % 12) + 1}${hour > 12 ? 'PM' : 'AM'}`}
+                  </Typography>
+                }
+              </div>
+            ))}
+          </div>
+          <div
+            id='repo-timeline-body'
+            style={{ gridColumnEnd: timelineHours + 1 }}
+          >
+            {hourColumns.map(({ gridColumnStart, gridColumnEnd }) => (
+              <div
+                key={gridColumnStart}
+                className='day'
+                style={{ gridColumnStart, gridColumnEnd }}
+              />
+            ))}
+          </div>
+          <div id='repo-timeline' style={{ gridColumnEnd: timelineHours + 1 }}>
+            {events?.map((event) => {
+              const { startDate, endDate, project } = event;
+              const { id: projectId, urlName, name, imageUrl } = project;
+              const { gridColumnStart, gridColumnEnd } =
+                getColumnsFromEvent(event);
+              const { marginLeft, marginRight } = getEventMargins(event);
+              return (
                 <div
+                  key={projectId + startDate}
+                  className='event-wrapper'
                   style={{
-                    boxSizing: 'border-box',
-                    height: 90,
-                    marginLeft,
-                    marginRight,
-                    backgroundColor: 'var(--mui-palette-background-default)',
-                    boxShadow: 'var(--mui-shadows-4)',
-                    borderRadius: 16,
+                    gridColumnStart,
+                    gridColumnEnd,
                   }}
                 >
-                  <div
-                    style={{
-                      boxSizing: 'border-box',
-                      backgroundColor: 'var(--mui-palette-background-light)',
-                      width: '100%',
-                      height: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderRadius: 16,
-                      padding: '0 8px',
-                    }}
+                  <Link
+                    to={`/repo/${urlName}`}
+                    className='no-underline colorless'
                   >
                     <div
+                      aria-disabled={!event.isConfirmed}
+                      className={`event ${event.isConfirmed ? '' : 'not-confirmed'} ${event.isDefaultEnd ? 'no-end' : ''}`}
                       style={{
-                        position: 'sticky',
-                        left: 12,
-                        display: 'flex',
-                        alignItems: 'center',
-                        minWidth: 0,
+                        marginLeft,
+                        marginRight,
+                        mask: event.isDefaultEnd
+                          ? `linear-gradient(to left, #0000 5px, #0001 20px, #000f ${2 * PIXELS_PER_HOUR}px)`
+                          : 'none',
                       }}
                     >
-                      {imageUrl && (
-                        <Avatar
-                          alt={name}
-                          src={imageUrl}
-                          style={{ width: 32, height: 32, marginRight: 8 }}
-                        />
-                      )}
-                      <Typography noWrap>{name}</Typography>
+                      <div className='header'>
+                        <div
+                          style={{
+                            position: 'sticky',
+                            left: 12,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            minWidth: 0,
+                          }}
+                        >
+                          {imageUrl && (
+                            <Avatar
+                              alt={name}
+                              src={imageUrl}
+                              style={{ width: 32, height: 32 }}
+                            />
+                          )}
+                          <Typography noWrap>{name}</Typography>
+                        </div>
+                      </div>
+                      <div className='footer'>
+                        <div
+                          style={{
+                            position: 'sticky',
+                            left: 12,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            minWidth: 0,
+                          }}
+                        >
+                          {!event.isConfirmed && (
+                            <Tooltip
+                              title='This event runs on various weeks.'
+                              placement='top'
+                              slotProps={{
+                                tooltip: {
+                                  style: { marginBottom: 4 },
+                                },
+                              }}
+                            >
+                              <WarningAmber color='warning' fontSize='small' />
+                            </Tooltip>
+                          )}
+                          {event.isDefaultEnd && (
+                            <Tooltip
+                              title='This event has no end time.'
+                              placement='top'
+                              slotProps={{
+                                tooltip: {
+                                  style: { marginBottom: 4 },
+                                },
+                              }}
+                            >
+                              <WarningAmber color='warning' fontSize='small' />
+                            </Tooltip>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
-              </Link>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
