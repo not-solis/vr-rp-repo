@@ -1,11 +1,8 @@
 import './Repo.css';
 import {
   Add,
-  ArrowDownward,
-  ArrowUpward,
   CheckBoxOutlined,
-  Navigation,
-  Place,
+  ForwardOutlined,
   ViewModule,
   Wysiwyg,
 } from '@mui/icons-material';
@@ -398,8 +395,18 @@ export const Repo = () => {
                   <Checkbox
                     color='default'
                     checked={sortAscending}
-                    icon={<ArrowDownward color='secondary' />}
-                    checkedIcon={<ArrowUpward color='primary' />}
+                    icon={
+                      <ForwardOutlined
+                        color='secondary'
+                        style={{ transform: 'rotate(90deg)' }}
+                      />
+                    }
+                    checkedIcon={
+                      <ForwardOutlined
+                        color='primary'
+                        style={{ transform: 'rotate(-90deg)' }}
+                      />
+                    }
                     onChange={(e) => setSortAscending(e.target.checked)}
                   />
                 }
