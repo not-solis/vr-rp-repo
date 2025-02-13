@@ -267,16 +267,19 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
     );
   });
 
-  const metaverseText =
-    isMetaverse != null || isEditing
+  const metaverseText = isEditing
+    ? 'In the Metaverse'
+    : isMetaverse != null
       ? `${isMetaverse ? 'In' : 'Not in'} the Metaverse`
       : '';
-  const suppCastText =
-    hasSupportingCast != null || isEditing
+  const suppCastText = isEditing
+    ? 'Supporting cast positions available'
+    : hasSupportingCast != null
       ? `Supporting Cast positions ${hasSupportingCast ? '' : 'not '}available`
       : '';
-  const questCompatibleText =
-    isQuestCompatible != null || isEditing
+  const questCompatibleText = isEditing
+    ? 'Quest compatible'
+    : isQuestCompatible != null
       ? `${isQuestCompatible ? '' : 'Not '}Quest compatible`
       : '';
 
