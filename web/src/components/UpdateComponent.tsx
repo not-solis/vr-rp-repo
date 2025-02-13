@@ -85,10 +85,8 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
                 enterDelay={400}
                 leaveDelay={100}
                 slotProps={{
-                  popper: {
-                    modifiers: [
-                      { name: 'offset', options: { offset: [0, -12] } },
-                    ],
+                  tooltip: {
+                    style: { marginBottom: 2 },
                   },
                 }}
               >
@@ -124,10 +122,8 @@ export const UpdateComponent = (props: UpdateComponentProps) => {
               enterDelay={700}
               leaveDelay={100}
               slotProps={{
-                popper: {
-                  modifiers: [
-                    { name: 'offset', options: { offset: [0, -12] } },
-                  ],
+                tooltip: {
+                  style: { marginBottom: 2 },
                 },
               }}
             >

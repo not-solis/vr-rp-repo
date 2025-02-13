@@ -73,10 +73,23 @@ export const saveSchedule = async (
         [ScheduleType.Periodic, ScheduleType.OneShot].includes(schedule.type)
       ) {
         const mappedRuntimes = runtimes.map((runtime) => {
-          if (!runtime.between) {
-            return runtime;
+          const { between: oldBetween } = runtime;
+          const start = new Date(runtime.start);
+          const end = runtime.end && new Date(runtime.end);
+          const days = oldBetween?.days;
+          const between = days ? `${days} days` : undefined;
+          if (schedule.type === ScheduleType.Periodic && end) {
+            end.setFullYear(
+              start.getFullYear(),
+              start.getMonth(),
+              start.getDate(),
+            );
+            if (end < start) {
+              end.setDate(end.getDate() + 1);
+            }
+            runtime.end = end;
           }
-          return { ...runtime, between: `${runtime.between.days} days` };
+          return { ...runtime, between };
         });
         await client.query(
           `

@@ -1,5 +1,5 @@
-export interface PageData<T> {
+export interface PageData<T, U> {
   hasNext: boolean;
   data: T[];
-  nextCursor: number;
+  nextCursor: U;
 }

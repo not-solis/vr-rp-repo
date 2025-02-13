@@ -42,7 +42,7 @@ export const HomePage = () => {
   } = useInfiniteQuery({
     queryKey: ['updates', 'home'],
     queryFn: async ({ pageParam }) =>
-      queryServer<PageData<Update>>('/updates', {
+      queryServer<PageData<Update, number>>('/updates', {
         queryParams: {
           start: `${pageParam}`,
           limit: `${UPDATE_PAGE_SIZE}`,
@@ -65,7 +65,7 @@ export const HomePage = () => {
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['projects', 'home'],
     queryFn: () =>
-      queryServer<PageData<RoleplayProject>>('/projects', {
+      queryServer<PageData<RoleplayProject, number>>('/projects', {
         queryParams: {
           start: '0',
           limit: `${PROJECT_CAROUSEL_TOTAL}`,
@@ -78,7 +78,7 @@ export const HomePage = () => {
         }
         return pageData;
       }),
-    select: (pageData: PageData<RoleplayProject>) =>
+    select: (pageData: PageData<RoleplayProject, number>) =>
       pageData.data.map(mapProject),
   });
 

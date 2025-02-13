@@ -76,8 +76,14 @@ function clearNulls<T>(obj: T): T {
 
 export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   const { isNew = false } = props;
-  const windowWidth = useWindowWidth({ wait: 30 });
   const [isEditing, setEditing] = useState(isNew);
+  const navigate = useNavigate();
+  if (isNew && !isEditing) {
+    // No empty new page.
+    navigate('/repo');
+  }
+
+  const windowWidth = useWindowWidth({ wait: 30 });
   const [imageFile, setImageFile] = useState<File>();
   const [isPreviewDescription, setPreviewDescription] = useState(false);
   const [isErrorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -96,14 +102,8 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   );
   const { user, isAuthenticated } = useAuth();
   const { createSnackbar, createErrorSnackbar } = useSnackbar();
-  const navigate = useNavigate();
   const { urlName } = useParams();
   const queryClient = useQueryClient();
-
-  if (isNew && !isEditing) {
-    // No empty new page.
-    navigate('/repo');
-  }
 
   const stackUpdates = windowWidth < UPDATE_STACK_TRESHOLD;
 
@@ -157,7 +157,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
     enabled: !isNew && id !== undefined,
     queryKey: ['project', 'updates', urlName],
     queryFn: () => {
-      return queryServer<PageData<Update>>('/updates', {
+      return queryServer<PageData<Update, number>>('/updates', {
         queryParams: { projectId: id! },
       }).then((pageData) => {
         return pageData?.data?.map((update) => {
@@ -328,7 +328,6 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
   };
 
   const saveProject = async () => {
-    console.log(project);
     if (imageFile) {
       const formData = new FormData();
       formData.append('image', imageFile);

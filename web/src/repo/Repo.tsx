@@ -4,6 +4,10 @@ import {
   ArrowDownward,
   ArrowUpward,
   CheckBoxOutlined,
+  Navigation,
+  Place,
+  ViewModule,
+  Wysiwyg,
 } from '@mui/icons-material';
 import {
   Box,
@@ -23,16 +27,20 @@ import {
   LinearProgress,
   MenuItem,
   Select,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { RoleplayProjectCard } from './RoleplayProjectCard';
 import { APP_KEYWORDS, APP_TITLE } from '../App';
+import { RepoTimeline } from './RepoTimeline';
 import { BlurrableTextField } from '../components/BlurrableTextField';
 import { StringEnumSelector } from '../components/StringEnumSelector';
 import { TagTextField } from '../components/TagTextField';
@@ -43,6 +51,11 @@ import { PageData, queryServer } from '../model/ServerResponse';
 
 const PAGE_SIZE = 50;
 
+enum RepoView {
+  List = 'list',
+  Timeline = 'timeline',
+}
+
 enum SortBy {
   Name = 'name',
   LastUpdated = 'last_updated',
@@ -52,14 +65,51 @@ enum SortBy {
 
 const TITLE = 'Repo';
 
+const defaultSortAsc = (sortBy: SortBy) => sortBy === SortBy.Name;
+
 export const Repo = () => {
+  // TODO: hook search params into filters
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get('view');
+  const nameParam = searchParams.get('name');
+  const tagsParam = searchParams.get('tags');
+  const regionParam = searchParams.get('region');
+  const sortByParam = searchParams.get('sort_by');
+  const ascParam = searchParams.get('asc');
+  const activeParam = searchParams.get('active_only');
+  const initialDateParam = searchParams.get('time');
+
+  const initialDate = initialDateParam
+    ? new Date(parseInt(initialDateParam))
+    : new Date();
+
+  const [view, setView] = useState<RepoView>(
+    Object.values(RepoView).includes(viewParam as RepoView)
+      ? (viewParam as RepoView)
+      : RepoView.List,
+  );
   const [name, setName] = useState('');
-  const [nameFilter, setNameFilter] = useState('');
-  const [tagFilters, setTagFilters] = useState<string[]>([]);
-  const [regionFilter, setRegionFilter] = useState<ScheduleRegion>();
-  const [sortBy, setSortBy] = useState(SortBy.Name);
-  const [sortAscending, setSortAscending] = useState(true);
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [nameFilter, setNameFilter] = useState(nameParam || '');
+  const [tagFilters, setTagFilters] = useState<string[]>(
+    tagsParam?.split('|') || [],
+  );
+  const [regionFilter, setRegionFilter] = useState<ScheduleRegion>(
+    (Object.values(ScheduleRegion).includes(regionParam as ScheduleRegion)
+      ? regionParam
+      : undefined) as ScheduleRegion,
+  );
+  const [sortBy, setSortBy] = useState(
+    Object.values(SortBy).includes(sortByParam as SortBy)
+      ? (sortByParam as SortBy)
+      : SortBy.Name,
+  );
+
+  const [sortAscending, setSortAscending] = useState(
+    !!ascParam || defaultSortAsc(sortBy),
+  );
+  const [showActiveOnly, setShowActiveOnly] = useState(!!activeParam || false);
+  const [timelineTime, setTimelineTime] = useState(initialDate);
+
   const [showNewDialog, setShowNewDialog] = useState(false);
   const { hasPermission } = useAuth();
   const navigate = useNavigate();
@@ -71,6 +121,7 @@ export const Repo = () => {
     isFetching,
     isFetchingNextPage,
   } = useInfiniteQuery({
+    enabled: view === RepoView.List,
     queryKey: [
       'projects',
       nameFilter,
@@ -81,7 +132,7 @@ export const Repo = () => {
       sortAscending,
     ],
     queryFn: async ({ pageParam }) =>
-      queryServer<PageData<RoleplayProject>>('/projects', {
+      queryServer<PageData<RoleplayProject, number>>('/projects', {
         queryParams: {
           start: `${pageParam}`,
           limit: `${PAGE_SIZE}`,
@@ -106,6 +157,50 @@ export const Repo = () => {
       lastPage.hasNext ? lastPage.nextCursor : undefined,
     placeholderData: (prev) => prev,
   });
+
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('view', view);
+
+    if (view === RepoView.List && nameFilter) {
+      newSearchParams.set('name', nameFilter);
+    }
+
+    if (tagFilters.length > 0) {
+      newSearchParams.set('tags', tagFilters.join('|'));
+    }
+
+    if (view === RepoView.List && regionFilter) {
+      newSearchParams.set('region', regionFilter);
+    }
+
+    if (view === RepoView.List) {
+      newSearchParams.set('sort_by', sortBy);
+    }
+
+    if (view === RepoView.List && sortAscending) {
+      newSearchParams.set('asc', '1');
+    }
+
+    if (showActiveOnly) {
+      newSearchParams.set('active_only', '1');
+    }
+
+    if (view === RepoView.Timeline) {
+      newSearchParams.set('time', `${timelineTime.getTime()}`);
+    }
+
+    setSearchParams(newSearchParams);
+  }, [
+    view,
+    nameFilter,
+    tagFilters,
+    regionFilter,
+    sortBy,
+    sortAscending,
+    showActiveOnly,
+    timelineTime,
+  ]);
 
   const addTag = (tag: string) => {
     if (tagFilters.includes(tag)) {
@@ -173,29 +268,74 @@ export const Repo = () => {
       </Helmet>
       <Box id='filter-bar'>
         <FormGroup id='repo-filters'>
-          <BlurrableTextField
-            label='Name'
-            variant='outlined'
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => {
-              setNameFilter(name);
-            }}
-            value={name}
+          <ToggleButtonGroup
+            exclusive
             size='small'
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <img
-                    id='honse'
-                    src='/honse1.png'
-                    className={
-                      nameFilter.toLowerCase() === 'honse' ? 'show' : ''
-                    }
-                  />
-                ),
-              },
+            value={view}
+            onChange={(_, newView) => {
+              setShowActiveOnly(newView === RepoView.Timeline);
+              setView(newView);
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete('time');
+              setSearchParams(newSearchParams);
             }}
-          />
+            aria-label='view-toggle'
+          >
+            <Tooltip
+              title='List'
+              placement='top'
+              slotProps={{
+                tooltip: {
+                  style: { marginBottom: 4 },
+                },
+              }}
+            >
+              <ToggleButton value={RepoView.List} aria-label='list view'>
+                <ViewModule />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip
+              title='Timeline'
+              placement='top'
+              slotProps={{
+                tooltip: {
+                  style: { marginBottom: 4 },
+                },
+              }}
+            >
+              <ToggleButton
+                value={RepoView.Timeline}
+                aria-label='timeline view'
+              >
+                <Wysiwyg />
+              </ToggleButton>
+            </Tooltip>
+          </ToggleButtonGroup>
+          {view === RepoView.List && (
+            <BlurrableTextField
+              label='Name'
+              variant='outlined'
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => {
+                setNameFilter(name);
+              }}
+              value={name}
+              size='small'
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <img
+                      id='honse'
+                      src='/honse1.png'
+                      className={
+                        nameFilter.toLowerCase() === 'honse' ? 'show' : ''
+                      }
+                    />
+                  ),
+                },
+              }}
+            />
+          )}
           <TagTextField
             label='Tags'
             variant='outlined'
@@ -206,64 +346,68 @@ export const Repo = () => {
             onTagClick={removeTag}
           />
 
-          <FormControl style={{ minWidth: 100 }}>
-            <InputLabel size='small' id='repo-region-filter'>
-              Region
-            </InputLabel>
-            <StringEnumSelector
-              includeEmptyValue
-              enumType={ScheduleRegion}
-              value={regionFilter ?? ''}
-              labelId='repo-region-filter'
-              label='Region'
-              size='small'
-              onChange={(e) => {
-                const newRegion = e.target.value as ScheduleRegion;
-                if (regionFilter !== newRegion) {
-                  setRegionFilter(newRegion);
-                }
-              }}
-            />
-          </FormControl>
+          {view === RepoView.List && (
+            <>
+              <FormControl style={{ minWidth: 100 }}>
+                <InputLabel size='small' id='repo-region-filter'>
+                  Region
+                </InputLabel>
+                <StringEnumSelector
+                  includeEmptyValue
+                  enumType={ScheduleRegion}
+                  value={regionFilter ?? ''}
+                  labelId='repo-region-filter'
+                  label='Region'
+                  size='small'
+                  onChange={(e) => {
+                    const newRegion = e.target.value as ScheduleRegion;
+                    if (regionFilter !== newRegion) {
+                      setRegionFilter(newRegion);
+                    }
+                  }}
+                />
+              </FormControl>
 
-          <FormControl disabled={!!nameFilter} style={{ minWidth: 100 }}>
-            <InputLabel size='small' id='repo-sort-by'>
-              Sort by
-            </InputLabel>
-            <Select
-              value={sortBy}
-              labelId='repo-sort-by'
-              label='Sort by'
-              size='small'
-              onChange={(e) => {
-                const newSortBy = e.target.value as SortBy;
-                if (sortBy !== newSortBy) {
-                  setSortBy(newSortBy);
-                  setSortAscending(newSortBy === SortBy.Name);
-                }
-              }}
-            >
-              <MenuItem value={SortBy.Name}>Name</MenuItem>
-              <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
-              <MenuItem value={SortBy.CreatedAt}>Date added</MenuItem>
-              <MenuItem value={SortBy.DateStarted}>Date started</MenuItem>
-            </Select>
-          </FormControl>
+              <FormControl disabled={!!nameFilter} style={{ minWidth: 100 }}>
+                <InputLabel size='small' id='repo-sort-by'>
+                  Sort by
+                </InputLabel>
+                <Select
+                  value={sortBy}
+                  labelId='repo-sort-by'
+                  label='Sort by'
+                  size='small'
+                  onChange={(e) => {
+                    const newSortBy = e.target.value as SortBy;
+                    if (sortBy !== newSortBy) {
+                      setSortBy(newSortBy);
+                      setSortAscending(newSortBy === SortBy.Name);
+                    }
+                  }}
+                >
+                  <MenuItem value={SortBy.Name}>Name</MenuItem>
+                  <MenuItem value={SortBy.LastUpdated}>Last updated</MenuItem>
+                  <MenuItem value={SortBy.CreatedAt}>Date added</MenuItem>
+                  <MenuItem value={SortBy.DateStarted}>Date started</MenuItem>
+                </Select>
+              </FormControl>
 
-          <FormControlLabel
-            disabled={!!nameFilter}
-            control={
-              <Checkbox
-                color='default'
-                checked={sortAscending}
-                icon={<ArrowDownward color='secondary' />}
-                checkedIcon={<ArrowUpward color='primary' />}
-                onChange={(e) => setSortAscending(e.target.checked)}
+              <FormControlLabel
+                disabled={!!nameFilter}
+                control={
+                  <Checkbox
+                    color='default'
+                    checked={sortAscending}
+                    icon={<ArrowDownward color='secondary' />}
+                    checkedIcon={<ArrowUpward color='primary' />}
+                    onChange={(e) => setSortAscending(e.target.checked)}
+                  />
+                }
+                label={getSortByText()}
+                labelPlacement='end'
               />
-            }
-            label={getSortByText()}
-            labelPlacement='end'
-          />
+            </>
+          )}
 
           <FormControlLabel
             control={
@@ -301,21 +445,31 @@ export const Repo = () => {
           )}
         </FormGroup>
       </Box>
-      <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
-        {isFetching && (
-          <LinearProgress
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              height: 6,
-              left: 0,
-              right: 0,
-              zIndex: 2,
-            }}
-          />
-        )}
-        {results}
-      </div>
+      {view === RepoView.List && (
+        <div id='repo-scroll-box' className='scrollable-y hidden-scrollbar'>
+          {isFetching && (
+            <LinearProgress
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                height: 6,
+                left: 0,
+                right: 0,
+                zIndex: 2,
+              }}
+            />
+          )}
+          {results}
+        </div>
+      )}
+      {view === RepoView.Timeline && (
+        <RepoTimeline
+          tags={tagFilters}
+          activeOnly={showActiveOnly}
+          initialDate={initialDate}
+          setTimeQuery={setTimelineTime}
+        />
+      )}
       <Dialog
         id='new-roleplay-dialog'
         open={showNewDialog}
