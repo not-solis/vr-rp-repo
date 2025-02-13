@@ -97,14 +97,15 @@ const DateComponent = (props: DateComponentProps) => {
     plural = false,
     onChange,
   } = props;
-  const dateDayJs = dayjs(date);
+  const dateDayJs = date && dayjs(date);
   const isPeriodic = scheduleType === ScheduleType.Periodic;
   const format = isPeriodic ? 'dddd' : 'MMMM Do, YYYY';
   return isEditing ? (
     <DatePicker
       className='runtime-date-picker'
       label={label}
-      defaultValue={date && dateDayJs}
+      defaultValue={dateDayJs}
+      value={dateDayJs}
       format={format}
       onChange={onChange}
       slotProps={{
@@ -116,7 +117,7 @@ const DateComponent = (props: DateComponentProps) => {
       }}
     />
   ) : (
-    <>{dateDayJs.format(format + (isPeriodic && plural ? '[s]' : ''))}</>
+    <>{dateDayJs?.format(format + (isPeriodic && plural ? '[s]' : ''))}</>
   );
 };
 
@@ -128,13 +129,14 @@ interface TimeComponentProps {
 }
 const TimeComponent = (props: TimeComponentProps) => {
   const { isEditing, time, label, onChange } = props;
-  const timeDayJs = dayjs(time);
+  const timeDayJs = time && dayjs(time);
   const format = 'h:mmA';
   return isEditing ? (
     <MobileTimePicker
       className='runtime-time-picker'
       label={label}
-      defaultValue={time && timeDayJs}
+      defaultValue={timeDayJs}
+      value={timeDayJs}
       format={format}
       onChange={onChange}
       slotProps={{
@@ -145,7 +147,7 @@ const TimeComponent = (props: TimeComponentProps) => {
       }}
     />
   ) : (
-    <>{timeDayJs.format(format)}</>
+    <>{timeDayJs?.format(format)}</>
   );
 };
 
@@ -242,6 +244,7 @@ export const ScheduleDisplay = (
                   {runtimes
                     .map((runtime) => {
                       const { start, end, between, region } = runtime;
+                      console.log(start);
                       const parts: (JSX.Element | string)[] = [];
                       parts.push(
                         <RegionComponent
@@ -256,14 +259,21 @@ export const ScheduleDisplay = (
                               className='runtime-remove-button'
                               size='small'
                               color='error'
-                              onClick={() =>
+                              onClick={() => {
+                                console.log('schedule', schedule);
+                                console.log('runtimes', runtimes);
+                                console.log('runtime to delete', runtime);
+                                console.log(
+                                  'filter',
+                                  runtimes.filter((r) => r !== runtime),
+                                );
                                 setSchedule({
                                   ...schedule,
                                   runtimes: runtimes.filter(
                                     (r) => r !== runtime,
                                   ),
-                                })
-                              }
+                                });
+                              }}
                             >
                               <Delete
                                 className='runtime-delete'
@@ -300,7 +310,11 @@ export const ScheduleDisplay = (
                               return;
                             }
 
-                            runtime.start = newDate;
+                            runtime.start.setFullYear(
+                              newDate.getFullYear(),
+                              newDate.getMonth(),
+                              newDate.getDate(),
+                            );
                             internalSetSchedule();
                           }}
                         />,
@@ -319,7 +333,12 @@ export const ScheduleDisplay = (
                               return;
                             }
 
-                            runtime.start = newDate;
+                            runtime.start.setHours(
+                              newDate.getHours(),
+                              newDate.getMinutes(),
+                              newDate.getSeconds(),
+                              newDate.getMilliseconds(),
+                            );
                             internalSetSchedule();
                           }}
                         />,
@@ -333,7 +352,17 @@ export const ScheduleDisplay = (
                             label='End'
                             onChange={(val) => {
                               const newDate = val?.toDate();
-                              runtime.end = newDate;
+                              if (!newDate || !runtime.end) {
+                                runtime.end = newDate;
+                              } else {
+                                runtime.end.setHours(
+                                  newDate.getHours(),
+                                  newDate.getMinutes(),
+                                  newDate.getSeconds(),
+                                  newDate.getMilliseconds(),
+                                );
+                              }
+
                               internalSetSchedule();
                             }}
                           />,
@@ -426,7 +455,11 @@ export const ScheduleDisplay = (
                               return;
                             }
 
-                            runtime.start = newDate;
+                            runtime.start.setFullYear(
+                              newDate.getFullYear(),
+                              newDate.getMonth(),
+                              newDate.getDate(),
+                            );
                             internalSetSchedule();
                           }}
                         />,
@@ -443,7 +476,12 @@ export const ScheduleDisplay = (
                               return;
                             }
 
-                            runtime.start = newDate;
+                            runtime.start.setHours(
+                              newDate.getHours(),
+                              newDate.getMinutes(),
+                              newDate.getSeconds(),
+                              newDate.getMilliseconds(),
+                            );
                             internalSetSchedule();
                           }}
                         />,
@@ -458,7 +496,16 @@ export const ScheduleDisplay = (
                             scheduleType={type}
                             onChange={(val) => {
                               const newDate = val?.toDate();
-                              runtime.end = newDate;
+                              if (!newDate || !runtime.end) {
+                                runtime.end = newDate;
+                              } else {
+                                runtime.end.setFullYear(
+                                  newDate.getFullYear(),
+                                  newDate.getMonth(),
+                                  newDate.getDate(),
+                                );
+                              }
+
                               internalSetSchedule();
                             }}
                           />,
@@ -470,7 +517,16 @@ export const ScheduleDisplay = (
                             label='End'
                             onChange={(val) => {
                               const newDate = val?.toDate();
-                              runtime.end = newDate;
+                              if (!newDate || !runtime.end) {
+                                runtime.end = newDate;
+                              } else {
+                                runtime.end.setHours(
+                                  newDate.getHours(),
+                                  newDate.getMinutes(),
+                                  newDate.getSeconds(),
+                                  newDate.getMilliseconds(),
+                                );
+                              }
                               internalSetSchedule();
                             }}
                           />,
@@ -547,6 +603,7 @@ export const ScheduleDisplay = (
             const start = new Date();
             start.setHours(0, 0, 0, 0);
             runtimes.push({ start, between: { days: 7 } });
+            console.log(runtimes);
             internalSetSchedule();
           }}
           style={{ borderRadius: 10, padding: 4 }}
