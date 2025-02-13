@@ -16,19 +16,19 @@ div.tag.region-tag {
 }
 
 div.tag.active {
-  background-color: #268426;
+  background-color: var(--color-active);
 }
 
 div.tag.inactive {
-  background-color: #424647;
+  background-color: var(--color-inactive);
 }
 
 div.tag.upcoming {
-  background-color: #067f8c;
+  background-color: var(--color-upcoming);
 }
 
 div.tag.hiatus {
-  background-color: #9e561b;
+  background-color: var(--color-hiatus);
 }
 
 div.tag.interactable:hover {

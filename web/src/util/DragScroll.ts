@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const useDragScroll = () => {
+interface DragScrollProps {
+  onDragEnd?: (nodeEle: HTMLElement | null) => void;
+}
+export const useDragScroll = (props?: DragScrollProps) => {
+  const { onDragEnd = () => {} } = props ?? {};
   const [node, setNode] = useState<HTMLElement | null>(null);
 
   const ref = useCallback((nodeEle: HTMLElement | null) => {
@@ -31,6 +35,7 @@ export const useDragScroll = () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
         resetCursor(node);
+        onDragEnd(node);
       };
 
       document.addEventListener('mousemove', handleMouseMove);
@@ -65,6 +70,7 @@ export const useDragScroll = () => {
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
         resetCursor(node);
+        onDragEnd(node);
       };
 
       document.addEventListener('touchmove', handleTouchMove);

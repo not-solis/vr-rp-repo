@@ -1,0 +1,95 @@
+#repo-timeline .event-wrapper {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.4));
+  padding: 6px 1px 1px;
+}
+
+#repo-timeline .event {
+  height: 80px;
+  background-color: var(--mui-palette-background-default);
+  box-shadow: var(--mui-shadows-4);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+#repo-timeline .event .active {
+  color: var(--color-active);
+}
+
+#repo-timeline .event .inactive {
+  color: var(--color-inactive);
+}
+
+#repo-timeline .event .upcoming {
+  color: var(--color-upcoming);
+}
+
+#repo-timeline .event .hiatus {
+  color: var(--color-hiatus);
+}
+
+#repo-timeline .event:hover {
+  filter: brightness(110%);
+}
+
+#repo-timeline .event.no-end {
+  --size: 11.3%;
+  --angle: 30deg;
+  mask-composite: intersect;
+}
+
+#repo-timeline .event.not-confirmed {
+  --size: 4px;
+  --m: 1.4;
+  --p: calc(var(--m) * var(--size));
+  --R: calc(var(--size) * sqrt(var(--m) * var(--m) + 1));
+
+  mask:
+    radial-gradient(
+        var(--R) at left 50% bottom calc(var(--size) + var(--p)),
+        #000 99%,
+        #0000 101%
+      )
+      calc(50% - 2 * var(--size)) 0 / calc(4 * var(--size)) 100%,
+    radial-gradient(
+        var(--R) at left 50% bottom calc(-1 * var(--p)),
+        #0000 99%,
+        #000 101%
+      )
+      left 50% bottom var(--size) / calc(4 * var(--size)) 100% repeat-x;
+}
+
+#repo-timeline .event .header,
+#repo-timeline .event .footer {
+  box-sizing: border-box;
+  width: 100%;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+#repo-timeline .event .sticky {
+  position: sticky;
+  left: 12px;
+}
+
+#repo-timeline .event .content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+#repo-timeline .event .header {
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 16px;
+}
+
+#repo-timeline .event .footer {
+  padding-left: 12px;
+}
+
+#repo-timeline .event .footer a:hover {
+  filter: brightness(85%);
+}

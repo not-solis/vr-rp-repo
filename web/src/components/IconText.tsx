@@ -24,10 +24,12 @@ export interface IconTextProps {
   icon?: IconName;
   iconPrefix?: IconPrefix;
   iconPadding?: number | string;
+  iconStyle?: React.CSSProperties;
   containerStyle?: React.CSSProperties;
   isEditing?: boolean;
   component?: ReactNode;
   editComponent?: ReactNode;
+  forceRender?: boolean;
 }
 
 export const IconText = (
@@ -41,15 +43,17 @@ export const IconText = (
     icon,
     iconPrefix,
     iconPadding,
+    iconStyle = {},
     containerStyle = {},
     isEditing = false,
     component,
     editComponent,
+    forceRender = false,
     ...divProps
   } = props;
 
   const showEditComponent = !!(isEditing && editComponent);
-  if (!text && !component && !showEditComponent) {
+  if (!forceRender && !text && !component && !showEditComponent) {
     return null;
   }
 
@@ -70,7 +74,12 @@ export const IconText = (
           leaveDelay={100}
           slotProps={{
             popper: {
-              modifiers: [{ name: 'offset', options: { offset: [0, -6] } }],
+              modifiers: [{ name: 'offset', options: { offset: [0, 6] } }],
+            },
+            tooltip: {
+              style: {
+                margin: 2,
+              },
             },
           }}
         >
@@ -82,6 +91,7 @@ export const IconText = (
               fontSize: 16,
               paddingTop: 4,
               paddingRight: icon ? (iconPadding ?? 12) : 0,
+              ...iconStyle,
             }}
             icon={[iconPrefix ?? 'fas', icon]}
           />

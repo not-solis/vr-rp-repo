@@ -229,16 +229,6 @@ export const getEvents = async (
 ): Promise<PageData<RoleplayEvent, { startDate: Date; endDate: Date }>> => {
   const { startDate, endDate, tags = [], activeOnly = false } = params;
 
-  //   select
-  // 	*,
-  // 	event_start + coalesce(runtimes.end - runtimes.start, '4 hours'::interval) as event_end
-  // from schedules
-  // 	inner join runtimes on schedules.project_id = runtimes.project_id,
-  // 	constants,
-  // 	generate_series(runtimes.start, end_date, coalesce(runtimes.between, '7 days'::interval)) as event_start
-  // where
-  // 	event_start > start_date;
-
   return await pool
     .query(
       `
@@ -250,14 +240,22 @@ export const getEvents = async (
         ${projectQueryFields}
       FROM ${projectQueryTable},
         generate_series(
-          $2::timestamptz + make_interval(secs => 
-            mod(
-              extract(EPOCH FROM runtimes.start) - extract(EPOCH FROM $2::timestamptz),
-              extract(EPOCH from coalesce(runtimes.between, '7 days'::interval))
+          case
+            when schedules.schedule_type = 'Periodic'
+            then $2::timestamptz + make_interval(secs => 
+              mod(
+                extract(EPOCH FROM runtimes.start) - extract(EPOCH FROM $2::timestamptz),
+                extract(EPOCH from coalesce(runtimes.between, '7 days'::interval))
+              )
             )
-          ),
+            else runtimes.start
+          end,
           $3,
-          coalesce(runtimes.between, '7 days'::interval)) as event_start
+          case
+            when schedules.schedule_type = 'Periodic'
+            then coalesce(runtimes.between, '7 days'::interval)
+            else '10000 years'::interval
+          end) as event_start
       WHERE event_start BETWEEN $2 AND $3 - '1 millisecond'::interval
         AND (coalesce(array_length($4::varchar[], 1), 0) = 0 OR tags @> $4::varchar[])
         AND (NOT $5 OR roleplay_projects.status = 'Active')

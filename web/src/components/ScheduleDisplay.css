@@ -47,6 +47,10 @@
   width: 82px;
 }
 
+.runtime-date-picker label:not(.MuiFormLabel-filled) {
+  transform: translate(8px, 4px);
+}
+
 .runtime-time-picker label:not(.MuiFormLabel-filled) {
   transform: translate(8px, 4px);
 }

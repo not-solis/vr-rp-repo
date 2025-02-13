@@ -413,6 +413,7 @@ export const ScheduleDisplay = (
                         />,
                       );
 
+                      const showEnd = end || isEditing;
                       parts.push(
                         <DateComponent
                           isEditing={isEditing}
@@ -431,8 +432,6 @@ export const ScheduleDisplay = (
                         />,
                       );
 
-                      const showEnd = end || isEditing;
-                      parts.push(showEnd ? 'from' : 'at');
                       parts.push(
                         <TimeComponent
                           isEditing={isEditing}
@@ -451,6 +450,19 @@ export const ScheduleDisplay = (
                       );
                       if (showEnd) {
                         parts.push('to');
+                        parts.push(
+                          <DateComponent
+                            isEditing={isEditing}
+                            date={end}
+                            label='Day'
+                            scheduleType={type}
+                            onChange={(val) => {
+                              const newDate = val?.toDate();
+                              runtime.end = newDate;
+                              internalSetSchedule();
+                            }}
+                          />,
+                        );
                         parts.push(
                           <TimeComponent
                             isEditing={isEditing}

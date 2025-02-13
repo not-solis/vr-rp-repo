@@ -4,6 +4,8 @@ import {
   ArrowDownward,
   ArrowUpward,
   CheckBoxOutlined,
+  Navigation,
+  Place,
   ViewModule,
   Wysiwyg,
 } from '@mui/icons-material';
@@ -75,6 +77,11 @@ export const Repo = () => {
   const sortByParam = searchParams.get('sort_by');
   const ascParam = searchParams.get('asc');
   const activeParam = searchParams.get('active_only');
+  const initialDateParam = searchParams.get('time');
+
+  const initialDate = initialDateParam
+    ? new Date(parseInt(initialDateParam))
+    : new Date();
 
   const [view, setView] = useState<RepoView>(
     Object.values(RepoView).includes(viewParam as RepoView)
@@ -101,6 +108,7 @@ export const Repo = () => {
     !!ascParam || defaultSortAsc(sortBy),
   );
   const [showActiveOnly, setShowActiveOnly] = useState(!!activeParam || false);
+  const [timelineTime, setTimelineTime] = useState(initialDate);
 
   const [showNewDialog, setShowNewDialog] = useState(false);
   const { hasPermission } = useAuth();
@@ -178,6 +186,10 @@ export const Repo = () => {
       newSearchParams.set('active_only', '1');
     }
 
+    if (view === RepoView.Timeline) {
+      newSearchParams.set('time', `${timelineTime.getTime()}`);
+    }
+
     setSearchParams(newSearchParams);
   }, [
     view,
@@ -187,6 +199,7 @@ export const Repo = () => {
     sortBy,
     sortAscending,
     showActiveOnly,
+    timelineTime,
   ]);
 
   const addTag = (tag: string) => {
@@ -260,10 +273,11 @@ export const Repo = () => {
             size='small'
             value={view}
             onChange={(_, newView) => {
-              if (newView === RepoView.Timeline) {
-                setShowActiveOnly(true);
-              }
+              setShowActiveOnly(newView === RepoView.Timeline);
               setView(newView);
+              const newSearchParams = new URLSearchParams(searchParams);
+              newSearchParams.delete('time');
+              setSearchParams(newSearchParams);
             }}
             aria-label='view-toggle'
           >
@@ -449,7 +463,12 @@ export const Repo = () => {
         </div>
       )}
       {view === RepoView.Timeline && (
-        <RepoTimeline tags={tagFilters} activeOnly={showActiveOnly} />
+        <RepoTimeline
+          tags={tagFilters}
+          activeOnly={showActiveOnly}
+          initialDate={initialDate}
+          setTimeQuery={setTimelineTime}
+        />
       )}
       <Dialog
         id='new-roleplay-dialog'
