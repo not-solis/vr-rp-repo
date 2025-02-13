@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora');
 
 body {
+  --color-active: #268426;
+  --color-inactive: #424647;
+  --color-upcoming: #067f8c;
+  --color-hiatus: #9e561b;
   color: var(--mui-palette-text-primary);
   background-color: var(--mui-palette-background-default);
   margin: 0;

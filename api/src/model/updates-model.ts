@@ -62,7 +62,7 @@ export const getUpdates = async (
             created: row.created,
           })),
           nextCursor: start + limit,
-        } as PageData<Update>;
+        } as PageData<Update, number>;
       } else {
         throw new Error('Get updates failed.');
       }

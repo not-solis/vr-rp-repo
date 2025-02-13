@@ -7,6 +7,7 @@ import { userRouter } from './controller/user-router.js';
 import { updatesRouter } from './controller/updates-router.js';
 import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
+import { eventRouter } from './controller/event-router.js';
 
 export interface ResponseData<T> {
   success: boolean;
@@ -79,5 +80,6 @@ app.use('/projects', projectRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/updates', updatesRouter);
+app.use('/events', eventRouter);
 app.listen(PORT, () => console.log(`App running on port ${PORT}`));
 export { app };

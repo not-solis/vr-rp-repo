@@ -91,10 +91,8 @@ export const RoleplayProjectCard = (
                   leaveDelay={100}
                   disableHoverListener={!isTitleOverflowed}
                   slotProps={{
-                    popper: {
-                      modifiers: [
-                        { name: 'offset', options: { offset: [0, -8] } },
-                      ],
+                    tooltip: {
+                      style: { marginBottom: 6 },
                     },
                   }}
                 >
