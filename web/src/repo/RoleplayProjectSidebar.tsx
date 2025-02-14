@@ -463,7 +463,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
 
               {(schedule || isEditing) && (
                 <ScheduleDisplay
-                  enablePreview
+                  enablePreview={isEditing}
                   schedule={schedule}
                   isEditing={isEditing}
                   setSchedule={(schedule) =>
