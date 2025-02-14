@@ -55,102 +55,101 @@ export const TimelineCard = (props: TimelineCardProps) => {
         gridColumnEnd,
       }}
     >
-      <Link to={`/repo/${urlName}`} className='no-underline colorless'>
-        <div
-          aria-disabled={!event.isConfirmed}
-          className={`event ${event.isConfirmed ? '' : 'not-confirmed'} ${event.isDefaultEnd ? 'no-end' : ''}`}
-          style={{
-            marginLeft,
-            marginRight,
-            mask: event.isDefaultEnd
-              ? `linear-gradient(to left, #0000 5px, #0001 20px, #000f ${2 * PIXELS_PER_HOUR}px)`
-              : 'none',
-          }}
-        >
-          <div className='header'>
-            <div className='content sticky'>
-              {imageUrl && (
-                <Avatar
-                  alt={name}
-                  src={imageUrl}
-                  style={{ width: 32, height: 32 }}
-                />
-              )}
-              <Typography title={name} noWrap>
-                {name}
-              </Typography>
-              <Tooltip
-                title={status}
-                placement='top'
-                slotProps={{
-                  tooltip: {
-                    style: { marginBottom: 4 },
-                  },
-                }}
-              >
-                <RadioButtonChecked
-                  className={status.toLowerCase()}
-                  fontSize='small'
-                />
-              </Tooltip>
-            </div>
+      <div
+        aria-disabled={!event.isConfirmed}
+        className={`event ${event.isConfirmed ? '' : 'not-confirmed'} ${event.isDefaultEnd ? 'no-end' : ''}`}
+        style={{
+          marginLeft,
+          marginRight,
+          mask: event.isDefaultEnd
+            ? `linear-gradient(to left, #0000 5px, #0001 20px, #000f ${2 * PIXELS_PER_HOUR}px)`
+            : 'none',
+        }}
+      >
+        <Link to={`/repo/${urlName}`} className='header no-underline colorless'>
+          <div className='content sticky'>
+            {imageUrl && (
+              <Avatar
+                alt={name}
+                src={imageUrl}
+                style={{ width: 32, height: 32 }}
+              />
+            )}
+            <Typography title={name} noWrap>
+              {name}
+            </Typography>
+            <Tooltip
+              title={status}
+              placement='top'
+              slotProps={{
+                tooltip: {
+                  style: { marginBottom: 4 },
+                },
+              }}
+            >
+              <RadioButtonChecked
+                className={status.toLowerCase()}
+                fontSize='small'
+              />
+            </Tooltip>
           </div>
-          <div className='footer'>
-            <div className='content sticky'>
-              {!event.isConfirmed && (
-                <WarningIcon text='This event might not run every week' />
-              )}
-              {event.isDefaultEnd && (
-                <WarningIcon text='This event has no end time' />
-              )}
-              {isMetaverse && (
-                <IconText
-                  forceRender
-                  tooltip='Metaverse'
-                  icon='globe'
-                  iconStyle={{ padding: 0 }}
-                />
-              )}
-              {hasSupportingCast && (
-                <IconText
-                  forceRender
-                  tooltip='Supporting Cast positions available'
-                  icon='handshake'
-                  iconStyle={{ padding: 0 }}
-                />
-              )}
-              {isQuestCompatible && (
-                <IconText
-                  forceRender
-                  tooltip='Quest compatible'
-                  icon='meta'
-                  iconPrefix='fab'
-                  iconStyle={{ padding: 0 }}
-                />
-              )}
-              {discordUrl && (
-                <IconText
-                  forceRender
-                  tooltip='Discord'
-                  url={discordUrl}
-                  icon='discord'
-                  iconPrefix='fab'
-                  iconStyle={{ padding: 0 }}
-                />
-              )}
-              {otherLinks?.map((link) => (
-                <IconText
-                  forceRender
-                  tooltip={link.label}
-                  url={link.url}
-                  icon='link'
-                  iconStyle={{ padding: 0 }}
-                />
-              ))}
-            </div>
+        </Link>
+        <div className='footer'>
+          <div className='content sticky'>
+            {!event.isConfirmed && (
+              <WarningIcon text='This event might not run every week' />
+            )}
+            {event.isDefaultEnd && (
+              <WarningIcon text='This event has no end time' />
+            )}
+            {isMetaverse && (
+              <IconText
+                forceRender
+                tooltip='Metaverse'
+                icon='globe'
+                iconStyle={{ padding: 0 }}
+              />
+            )}
+            {hasSupportingCast && (
+              <IconText
+                forceRender
+                tooltip='Supporting Cast positions available'
+                icon='handshake'
+                iconStyle={{ padding: 0 }}
+              />
+            )}
+            {isQuestCompatible && (
+              <IconText
+                forceRender
+                tooltip='Quest compatible'
+                icon='meta'
+                iconPrefix='fab'
+                iconStyle={{ padding: 0 }}
+              />
+            )}
+            {discordUrl && (
+              <IconText
+                forceRender
+                tooltip='Discord'
+                url={discordUrl}
+                icon='discord'
+                iconPrefix='fab'
+                iconStyle={{ padding: 0 }}
+              />
+            )}
+            {otherLinks?.map((link) => (
+              <IconText
+                key={link.label + link.url}
+                forceRender
+                tooltip={link.label}
+                url={link.url}
+                icon='link'
+                iconStyle={{ padding: 0 }}
+              />
+            ))}
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };
