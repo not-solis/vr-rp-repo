@@ -223,7 +223,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
               >
                 {
                   <Typography variant='body2'>
-                    {`${((hour + 11) % 12) + 1}${hour > 12 ? 'PM' : 'AM'}`}
+                    {`${((hour + 11) % 12) + 1}${hour > 11 ? 'PM' : 'AM'}`}
                   </Typography>
                 }
               </div>
@@ -244,6 +244,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
           <div id='repo-timeline' style={{ gridColumnEnd: timelineHours + 1 }}>
             {events?.map((event) => (
               <TimelineCard
+                key={event.project.id + event.startDate}
                 event={event}
                 {...getColumnsFromEvent(event)}
               ></TimelineCard>
