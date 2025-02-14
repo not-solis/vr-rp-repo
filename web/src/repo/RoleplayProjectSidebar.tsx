@@ -36,7 +36,6 @@ import {
   RoleplayLink,
   RoleplayProject,
 } from '../model/RoleplayProject';
-import { ScheduleRegion, ScheduleType } from '../model/RoleplayScheduling';
 import { queryServer } from '../model/ServerResponse';
 import { User, UserRole } from '../model/User';
 
@@ -464,6 +463,7 @@ export const RoleplayProjectSidebar = (props: RoleplayProjectSidebarProps) => {
 
               {(schedule || isEditing) && (
                 <ScheduleDisplay
+                  enablePreview
                   schedule={schedule}
                   isEditing={isEditing}
                   setSchedule={(schedule) =>
