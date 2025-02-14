@@ -1,16 +1,17 @@
 import './ScheduleDisplay.css';
 
-import { Add, Delete, Remove } from '@mui/icons-material';
+import { Add, Delete, Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Divider,
   IconButton,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { DatePicker, MobileTimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { IconText, IconTextProps } from './IconText';
 import { StringEnumSelector } from './StringEnumSelector';
@@ -32,19 +33,26 @@ interface RegionComponentProps {
 }
 const RegionComponent = (props: RegionComponentProps) => {
   const { isEditing, region, onChange, extraComponent } = props;
+  const selector = (
+    <StringEnumSelector
+      includeEmptyValue
+      value={region || ''}
+      enumType={ScheduleRegion}
+      onChange={(e) =>
+        onChange((e.target.value as ScheduleRegion) || undefined)
+      }
+      slotProps={{ root: { style: { minWidth: 46 } } }}
+    />
+  );
   return isEditing ? (
-    <span style={{ position: 'relative' }}>
-      <StringEnumSelector
-        includeEmptyValue
-        value={region || ''}
-        enumType={ScheduleRegion}
-        onChange={(e) =>
-          onChange((e.target.value as ScheduleRegion) || undefined)
-        }
-        slotProps={{ root: { style: { minWidth: 46 } } }}
-      />
-      {extraComponent}
-    </span>
+    extraComponent ? (
+      <span style={{ position: 'relative' }}>
+        {selector}
+        {extraComponent}
+      </span>
+    ) : (
+      selector
+    )
   ) : (
     // <>{region && getRegionString(region)}</>
     <>{region && <TagChip className='region-tag' label={region} />}</>
@@ -151,14 +159,37 @@ const TimeComponent = (props: TimeComponentProps) => {
   );
 };
 
+interface OtherTextComponentProps {
+  isEditing: boolean;
+  text?: string;
+  label: string;
+  onChange: (text: string) => void;
+}
+const OtherTextComponent = (props: OtherTextComponentProps) => {
+  const { isEditing, text, label, onChange } = props;
+  return isEditing ? (
+    <TextField
+      variant='standard'
+      label={label}
+      value={text ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ) : (
+    <>{text}</>
+  );
+};
+
 interface ScheduleDisplayProps {
+  enablePreview?: boolean;
   schedule?: RoleplaySchedule;
   setSchedule?: (schedule: RoleplaySchedule) => void;
 }
 export const ScheduleDisplay = (
   props: ScheduleDisplayProps & IconTextProps,
 ) => {
+  const [isPreviewSchedule, setPreviewSchedule] = useState(false);
   const {
+    enablePreview = false,
     schedule = { type: ScheduleType.Periodic, runtimes: [] },
     setSchedule = () => {},
     containerStyle = {},
@@ -172,11 +203,12 @@ export const ScheduleDisplay = (
 
   const internalSetSchedule = () => setSchedule({ ...schedule });
   const { type, region, scheduleLink, otherText, runtimes } = schedule;
-  const hasRuntimes = [ScheduleType.Periodic, ScheduleType.OneShot].includes(
+  const usesRuntime = [ScheduleType.Periodic, ScheduleType.OneShot].includes(
     type,
   );
+  const hasRuntimes = usesRuntime && runtimes.length > 0;
 
-  if (!isEditing && hasRuntimes && runtimes.length === 0) {
+  if (!isEditing && usesRuntime && runtimes.length === 0 && !otherText) {
     return null;
   }
 
@@ -188,6 +220,10 @@ export const ScheduleDisplay = (
     return null;
   }
 
+  const showEdit = isEditing && !isPreviewSchedule;
+  const setOtherText = (text: string) =>
+    setSchedule({ ...schedule, otherText: text });
+
   return (
     <>
       <IconText
@@ -198,19 +234,21 @@ export const ScheduleDisplay = (
           ...containerStyle,
         }}
         url={
-          !isEditing && schedule.type === ScheduleType.ScheduleLink
+          !showEdit && schedule.type === ScheduleType.ScheduleLink
             ? schedule.scheduleLink
             : undefined
         }
         component={
           <>
-            <div>
-              {isEditing && (
+            <div style={{ flexGrow: 1 }}>
+              {showEdit && (
                 <Stack
                   direction='row'
                   width='100%'
+                  height='min-content'
+                  alignItems='flex-start'
                   gap={1}
-                  marginBottom={hasRuntimes ? 2 : 0.5}
+                  marginBottom={hasRuntimes ? 1 : 0}
                 >
                   <StringEnumSelector
                     value={type}
@@ -225,7 +263,7 @@ export const ScheduleDisplay = (
                     style={{ position: 'relative' }}
                   />
                   <RegionComponent
-                    isEditing={isEditing}
+                    isEditing={showEdit}
                     region={region}
                     onChange={(newRegion) => {
                       setSchedule({ ...schedule, region: newRegion });
@@ -239,7 +277,7 @@ export const ScheduleDisplay = (
                   className='periodic-schedule-display'
                   component='span'
                   width='100%'
-                  lineHeight={isEditing ? 2 : undefined}
+                  lineHeight={showEdit ? 2 : undefined}
                 >
                   {runtimes
                     .map((runtime) => {
@@ -248,7 +286,7 @@ export const ScheduleDisplay = (
                       const parts: (JSX.Element | string)[] = [];
                       parts.push(
                         <RegionComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           region={region}
                           onChange={(newRegion) => {
                             runtime.region = newRegion;
@@ -287,7 +325,7 @@ export const ScheduleDisplay = (
                       const weeks = between?.days && between.days / 7;
                       parts.push(
                         <WeeksComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           weeks={weeks}
                           onChange={(val) => {
                             runtime.between = val
@@ -299,7 +337,7 @@ export const ScheduleDisplay = (
                       );
                       parts.push(
                         <DateComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           date={start}
                           label='Day'
                           scheduleType={type}
@@ -320,11 +358,11 @@ export const ScheduleDisplay = (
                         />,
                       );
 
-                      const showEnd = end || isEditing;
+                      const showEnd = end || showEdit;
                       parts.push(showEnd ? 'from' : 'at');
                       parts.push(
                         <TimeComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           time={start}
                           label='Start'
                           onChange={(val) => {
@@ -347,7 +385,7 @@ export const ScheduleDisplay = (
                         parts.push('to');
                         parts.push(
                           <TimeComponent
-                            isEditing={isEditing}
+                            isEditing={showEdit}
                             time={end}
                             label='End'
                             onChange={(val) => {
@@ -385,12 +423,24 @@ export const ScheduleDisplay = (
                         empty,
                       );
                     })
+                    .concat(
+                      showEdit || otherText
+                        ? [
+                            <OtherTextComponent
+                              isEditing={showEdit}
+                              text={otherText}
+                              label='Additional info'
+                              onChange={setOtherText}
+                            />,
+                          ]
+                        : [],
+                    )
                     .reduce(
                       (acc, x) =>
                         acc !== empty ? (
                           <>
                             {acc}
-                            {isEditing ? <Divider variant='middle' /> : ', '}
+                            {showEdit ? <Divider variant='middle' /> : ', '}
                             {x}
                           </>
                         ) : (
@@ -405,7 +455,7 @@ export const ScheduleDisplay = (
                   className='one-shot-schedule-display'
                   component='span'
                   width='100%'
-                  lineHeight={isEditing ? 2 : undefined}
+                  lineHeight={showEdit ? 2 : undefined}
                 >
                   {runtimes
                     .map((runtime) => {
@@ -413,7 +463,7 @@ export const ScheduleDisplay = (
                       const parts: (JSX.Element | string)[] = [];
                       parts.push(
                         <RegionComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           region={region}
                           onChange={(newRegion) => {
                             runtime.region = newRegion;
@@ -442,10 +492,10 @@ export const ScheduleDisplay = (
                         />,
                       );
 
-                      const showEnd = end || isEditing;
+                      const showEnd = end || showEdit;
                       parts.push(
                         <DateComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           date={start}
                           label='Day'
                           scheduleType={type}
@@ -467,7 +517,7 @@ export const ScheduleDisplay = (
 
                       parts.push(
                         <TimeComponent
-                          isEditing={isEditing}
+                          isEditing={showEdit}
                           time={start}
                           label='Start'
                           onChange={(val) => {
@@ -490,7 +540,7 @@ export const ScheduleDisplay = (
                         parts.push('to');
                         parts.push(
                           <DateComponent
-                            isEditing={isEditing}
+                            isEditing={showEdit}
                             date={end}
                             label='Day'
                             scheduleType={type}
@@ -512,7 +562,7 @@ export const ScheduleDisplay = (
                         );
                         parts.push(
                           <TimeComponent
-                            isEditing={isEditing}
+                            isEditing={showEdit}
                             time={end}
                             label='End'
                             onChange={(val) => {
@@ -549,12 +599,24 @@ export const ScheduleDisplay = (
                         empty,
                       );
                     })
+                    .concat(
+                      showEdit || otherText
+                        ? [
+                            <OtherTextComponent
+                              isEditing={showEdit}
+                              text={otherText}
+                              label='Additional info'
+                              onChange={setOtherText}
+                            />,
+                          ]
+                        : [],
+                    )
                     .reduce(
                       (acc, x) =>
                         acc !== empty ? (
                           <>
                             {acc}
-                            {isEditing ? <Divider variant='middle' /> : ', '}
+                            {showEdit ? <Divider variant='middle' /> : ', '}
                             {x}
                           </>
                         ) : (
@@ -565,7 +627,7 @@ export const ScheduleDisplay = (
                 </Typography>
               )}
               {type === ScheduleType.ScheduleLink &&
-                (isEditing ? (
+                (showEdit ? (
                   <TextField
                     variant='standard'
                     label='Schedule link'
@@ -577,25 +639,38 @@ export const ScheduleDisplay = (
                 ) : (
                   <Typography>Schedule</Typography>
                 ))}
-              {type === ScheduleType.Other &&
-                (isEditing ? (
-                  <TextField
-                    variant='standard'
-                    label='Description'
-                    value={otherText ?? ''}
-                    onChange={(e) =>
-                      setSchedule({ ...schedule, otherText: e.target.value })
-                    }
-                  />
-                ) : (
-                  <Typography>{otherText}</Typography>
-                ))}
+              {type === ScheduleType.Other && (
+                <OtherTextComponent
+                  isEditing={showEdit}
+                  text={otherText}
+                  label='Schedule description'
+                  onChange={setOtherText}
+                />
+              )}
             </div>
+            {enablePreview && (
+              <Tooltip
+                title='Preview'
+                placement='top'
+                slotProps={{
+                  tooltip: {
+                    style: { marginBottom: 2 },
+                  },
+                }}
+              >
+                <IconButton
+                  style={{ padding: 8, margin: -8 }}
+                  onClick={() => setPreviewSchedule(!isPreviewSchedule)}
+                >
+                  {isPreviewSchedule ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </Tooltip>
+            )}
           </>
         }
         {...restIconTextProps}
       />
-      {isEditing && hasRuntimes && (
+      {showEdit && usesRuntime && (
         <IconButton
           id='add-runtime-button'
           onClick={() => {
