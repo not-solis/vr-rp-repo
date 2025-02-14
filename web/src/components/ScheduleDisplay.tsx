@@ -282,6 +282,7 @@ export const ScheduleDisplay = (
                   {runtimes
                     .map((runtime) => {
                       const { start, end, between, region } = runtime;
+                      console.log(start);
                       const parts: (JSX.Element | string)[] = [];
                       parts.push(
                         <RegionComponent
@@ -296,14 +297,21 @@ export const ScheduleDisplay = (
                               className='runtime-remove-button'
                               size='small'
                               color='error'
-                              onClick={() =>
+                              onClick={() => {
+                                console.log('schedule', schedule);
+                                console.log('runtimes', runtimes);
+                                console.log('runtime to delete', runtime);
+                                console.log(
+                                  'filter',
+                                  runtimes.filter((r) => r !== runtime),
+                                );
                                 setSchedule({
                                   ...schedule,
                                   runtimes: runtimes.filter(
                                     (r) => r !== runtime,
                                   ),
-                                })
-                              }
+                                });
+                              }}
                             >
                               <Delete
                                 className='runtime-delete'
@@ -670,6 +678,7 @@ export const ScheduleDisplay = (
             const start = new Date();
             start.setHours(0, 0, 0, 0);
             runtimes.push({ start, between: { days: 7 } });
+            console.log(runtimes);
             internalSetSchedule();
           }}
           style={{ borderRadius: 10, padding: 4 }}
