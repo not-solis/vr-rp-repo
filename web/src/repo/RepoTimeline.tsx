@@ -13,6 +13,7 @@ import { RoleplayEvent } from '../model/RoleplayEvent';
 import { mapProject } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { useDragScroll } from '../util/DragScroll';
+import { lerp } from '../util/Math';
 import { offsetDateByDays } from '../util/Time';
 
 /**
@@ -47,6 +48,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [totalStartDate, setTotalStartDate] = useState(initialStartDate);
   const [totalEndDate, setTotalEndDate] = useState(initialEndDate);
+  const [timelineNode, setTimelineNode] = useState<HTMLDivElement | null>();
   const {
     data: pageData,
     error,
@@ -174,10 +176,41 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     gridColumnEnd: 24 * i + 25,
   }));
 
+  const left = timelineNode
+    ? timelineNode.scrollLeft - timelineNode.clientWidth
+    : 0;
+  const right = timelineNode ? left + 3 * timelineNode.clientWidth : 0;
+  const leftDate = timelineNode
+    ? new Date(
+        lerp(
+          totalStartDate.getTime(),
+          totalEndDate.getTime(),
+          left / timelineNode.scrollWidth,
+        ),
+      )
+    : totalStartDate;
+  const rightDate = timelineNode
+    ? new Date(
+        lerp(
+          totalStartDate.getTime(),
+          totalEndDate.getTime(),
+          right / timelineNode.scrollWidth,
+        ),
+      )
+    : totalStartDate;
+  const canRender = (columnStart: number, columnEnd: number) => {
+    const startDate = new Date(totalStartDate);
+    startDate.setHours(startDate.getHours() + columnStart - 1);
+    const endDate = new Date(totalStartDate);
+    endDate.setDate(endDate.getDate() + columnEnd - 1);
+    return startDate < rightDate && endDate > leftDate;
+  };
+
   return (
     <div
       id='repo-timeline-component'
       ref={(node) => {
+        setTimelineNode(node);
         infiniteScrollRef.current = node;
         dragRef(node);
       }}
@@ -187,7 +220,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
         <div
           id='timeline-now'
           style={{ left: getAbsolutePosition(currentDate) }}
-        ></div>
+        />
 
         <div
           id='repo-timeline-grid'
@@ -197,58 +230,76 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
             id='repo-timeline-header'
             style={{ gridColumnEnd: timelineHours + 1 }}
           >
-            {dayColumns.map(({ day, gridColumnStart, gridColumnEnd }) => (
-              <div
-                key={day}
-                className='day'
-                style={{ gridColumnStart, gridColumnEnd }}
-              >
-                {(() => {
-                  const date = new Date(totalStartDate);
-                  return (
-                    <Typography position='sticky' left={12}>
-                      {dayjs(
-                        date.setDate(totalStartDate.getDate() + day),
-                      ).format('dddd, MMMM Do')}
+            {dayColumns
+              .filter((column) =>
+                canRender(column.gridColumnStart, column.gridColumnEnd),
+              )
+              .map(({ day, gridColumnStart, gridColumnEnd }) => (
+                <div
+                  key={day}
+                  className='day'
+                  style={{ gridColumnStart, gridColumnEnd }}
+                >
+                  {(() => {
+                    const date = new Date(totalStartDate);
+                    return (
+                      <Typography position='sticky' left={12}>
+                        {dayjs(
+                          date.setDate(totalStartDate.getDate() + day),
+                        ).format('dddd, MMMM Do')}
+                      </Typography>
+                    );
+                  })()}
+                </div>
+              ))}
+            {hourColumns
+              .filter((column) =>
+                canRender(column.gridColumnStart, column.gridColumnEnd),
+              )
+              .map(({ hour, gridColumnStart, gridColumnEnd }) => (
+                <div
+                  key={gridColumnStart}
+                  className='hour'
+                  style={{ gridColumnStart, gridColumnEnd }}
+                >
+                  {
+                    <Typography variant='body2'>
+                      {`${((hour + 11) % 12) + 1}${hour > 11 ? 'PM' : 'AM'}`}
                     </Typography>
-                  );
-                })()}
-              </div>
-            ))}
-            {hourColumns.map(({ hour, gridColumnStart, gridColumnEnd }) => (
-              <div
-                key={gridColumnStart}
-                className='hour'
-                style={{ gridColumnStart, gridColumnEnd }}
-              >
-                {
-                  <Typography variant='body2'>
-                    {`${((hour + 11) % 12) + 1}${hour > 11 ? 'PM' : 'AM'}`}
-                  </Typography>
-                }
-              </div>
-            ))}
+                  }
+                </div>
+              ))}
           </div>
           <div
             id='repo-timeline-body'
             style={{ gridColumnEnd: timelineHours + 1 }}
           >
-            {hourColumns.map(({ gridColumnStart, gridColumnEnd }) => (
-              <div
-                key={gridColumnStart}
-                className='day'
-                style={{ gridColumnStart, gridColumnEnd }}
-              />
-            ))}
+            {hourColumns
+              .filter((column) =>
+                canRender(column.gridColumnStart, column.gridColumnEnd),
+              )
+              .map(({ gridColumnStart, gridColumnEnd }) => (
+                <div
+                  key={gridColumnStart}
+                  className='day'
+                  style={{ gridColumnStart, gridColumnEnd }}
+                />
+              ))}
           </div>
           <div id='repo-timeline' style={{ gridColumnEnd: timelineHours + 1 }}>
-            {events?.map((event) => (
-              <TimelineCard
-                key={event.project.id + event.startDate}
-                event={event}
-                {...getColumnsFromEvent(event)}
-              ></TimelineCard>
-            ))}
+            {events
+              ?.filter((event) => {
+                const { gridColumnStart, gridColumnEnd } =
+                  getColumnsFromEvent(event);
+                return canRender(gridColumnStart, gridColumnEnd);
+              })
+              .map((event) => (
+                <TimelineCard
+                  key={event.project.id + event.startDate}
+                  event={event}
+                  {...getColumnsFromEvent(event)}
+                />
+              ))}
           </div>
         </div>
       </div>
