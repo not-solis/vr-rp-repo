@@ -234,7 +234,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     if (!timelineContainsDate(date)) {
       setTimeout(() => navigate(0), 500);
     } else {
-      setTimeout(() => setCurrentDate(new Date()), 500);
+      setTimeout(() => setCurrentDate(new Date()), 1000);
     }
     timelineNode?.scrollTo({
       behavior: 'smooth',
