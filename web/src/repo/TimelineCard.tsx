@@ -4,7 +4,6 @@ import { RadioButtonChecked, WarningAmber } from '@mui/icons-material';
 import { Avatar, Tooltip, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { PIXELS_PER_HOUR } from './RepoTimeline';
 import { IconText } from '../components/IconText';
 import { RoleplayEvent } from '../model/RoleplayEvent';
 import { RoleplayStatus } from '../model/RoleplayProject';
@@ -44,8 +43,9 @@ export const TimelineCard = (props: TimelineCardProps) => {
     otherLinks,
   } = project;
 
-  const marginLeft = PIXELS_PER_HOUR * (event.startDate.getMinutes() / 60);
-  const marginRight = PIXELS_PER_HOUR * (1 - event.endDate.getMinutes() / 60);
+  const totalGridMinutes = (gridColumnEnd - gridColumnStart) * 60;
+  const marginLeft = `${(event.startDate.getMinutes() / totalGridMinutes) * 100}%`;
+  const marginRight = `${((60 - event.endDate.getMinutes()) / totalGridMinutes) * 100}%`;
   return (
     <div
       key={projectId + startDate}
@@ -62,7 +62,7 @@ export const TimelineCard = (props: TimelineCardProps) => {
           marginLeft,
           marginRight,
           mask: event.isDefaultEnd
-            ? `linear-gradient(to left, #0000 5px, #0001 20px, #000f ${2 * PIXELS_PER_HOUR}px)`
+            ? `linear-gradient(to left, #0000 5px, #0001 20px, #000f 50%)`
             : 'none',
         }}
       >
