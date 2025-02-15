@@ -7,10 +7,12 @@ const DRAG_RESET_THRESHOLD = 1000;
 
 interface DragScrollProps {
   onDragEnd?: (nodeEle: HTMLElement | null) => void;
+  onOffsetNode?: (nodeEle: HTMLElement | null) => void;
 }
 export const useDragScroll = (props?: DragScrollProps) => {
-  const { onDragEnd = () => {} } = props ?? {};
+  const { onDragEnd = () => {}, onOffsetNode = () => {} } = props ?? {};
   const [node, setNode] = useState<HTMLElement | null>(null);
+  const [isDragging, setDragging] = useState(false);
 
   const ref = useCallback((nodeEle: HTMLElement | null) => {
     setNode(nodeEle);
@@ -35,7 +37,9 @@ export const useDragScroll = (props?: DragScrollProps) => {
         y: number,
         offsetX: boolean = false,
       ) => {
-        console.log(x, y, offsetX);
+        if (offsetX) {
+          onOffsetNode(node);
+        }
         startPos.left =
           node.scrollLeft + (offsetX ? node.scrollWidth - startPos.width : 0);
         startPos.top = node.scrollTop;
@@ -44,15 +48,13 @@ export const useDragScroll = (props?: DragScrollProps) => {
         startPos.x = x;
         startPos.y = y;
       };
+      setDragging(true);
 
       const handleMouseMove = (e: MouseEvent) => {
         if (
           node.scrollWidth !== startPos.width ||
           node.scrollHeight !== startPos.height
         ) {
-          console.log(node.scrollLeft);
-          console.log(startPos.width);
-          console.log(node.clientWidth);
           resetStartPos(
             e.clientX,
             e.clientY,
@@ -71,6 +73,7 @@ export const useDragScroll = (props?: DragScrollProps) => {
         document.removeEventListener('mouseup', handleMouseUp);
         resetCursor(node);
         onDragEnd(node);
+        setDragging(false);
       };
 
       document.addEventListener('mousemove', handleMouseMove);
@@ -93,9 +96,18 @@ export const useDragScroll = (props?: DragScrollProps) => {
         x: touch.clientX,
         y: touch.clientY,
       };
+      setDragging(true);
 
-      const resetStartPos = (x: number, y: number) => {
-        startPos.width = node.scrollWidth;
+      const resetStartPos = (
+        x: number,
+        y: number,
+        offsetX: boolean = false,
+      ) => {
+        if (offsetX) {
+          onOffsetNode(node);
+        }
+        startPos.width =
+          node.scrollWidth + (offsetX ? node.scrollWidth - startPos.width : 0);
         startPos.height = node.scrollHeight;
         startPos.left = node.scrollWidth;
         startPos.top = node.scrollTop;
@@ -109,7 +121,11 @@ export const useDragScroll = (props?: DragScrollProps) => {
           node.scrollWidth !== startPos.width ||
           node.scrollHeight !== startPos.height
         ) {
-          resetStartPos(touch.clientX, touch.clientY);
+          resetStartPos(
+            touch.clientX,
+            touch.clientY,
+            node.scrollLeft < (startPos.width - node.clientWidth) / 2,
+          );
         }
         const dx = touch.clientX - startPos.x;
         const dy = touch.clientY - startPos.y;
@@ -131,6 +147,7 @@ export const useDragScroll = (props?: DragScrollProps) => {
         document.removeEventListener('touchend', handleTouchEnd);
         resetCursor(node);
         onDragEnd(node);
+        setDragging(false);
       };
 
       document.addEventListener('touchmove', handleTouchMove);
@@ -162,5 +179,5 @@ export const useDragScroll = (props?: DragScrollProps) => {
     };
   }, [node]);
 
-  return { ref, node };
+  return { ref, node, isDragging };
 };

@@ -48,7 +48,6 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [totalStartDate, setTotalStartDate] = useState(initialStartDate);
   const [totalEndDate, setTotalEndDate] = useState(initialEndDate);
-  const [timelineNode, setTimelineNode] = useState<HTMLDivElement | null>();
   const {
     data: pageData,
     error,
@@ -109,7 +108,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     ((date.getTime() - totalStartDate.getTime()) / (1000 * 60 * 60)) *
     PIXELS_PER_HOUR;
 
-  const { ref: dragRef } = useDragScroll({
+  const { ref: dragRef, node: timelineNode } = useDragScroll({
     onDragEnd: (node) => {
       if (!node) {
         return;
@@ -124,6 +123,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
       );
       setTimeQuery(newDate);
     },
+    onOffsetNode: () => setCurrentDate(new Date()),
   });
   const infiniteScrollRef: InfiniteScrollRef<HTMLDivElement> =
     useInfiniteScroll({
@@ -177,7 +177,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   }));
 
   const left = timelineNode
-    ? timelineNode.scrollLeft - timelineNode.clientWidth
+    ? timelineNode.scrollLeft + timelineNode.clientWidth
     : 0;
   const right = timelineNode ? left + 3 * timelineNode.clientWidth : 0;
   const leftDate = timelineNode
@@ -210,7 +210,6 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     <div
       id='repo-timeline-component'
       ref={(node) => {
-        setTimelineNode(node);
         infiniteScrollRef.current = node;
         dragRef(node);
       }}
