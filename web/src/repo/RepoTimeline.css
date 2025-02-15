@@ -83,7 +83,7 @@
 
 #timeline-controls {
   --timeline-button-color: #d26262;
-  --timeline-button-background-color: #333;
+  --timeline-button-background-color: #303030;
   position: absolute;
   bottom: 48px;
   right: 48px;
@@ -124,6 +124,10 @@
 
 #timeline-controls #military-time-toggle button {
   width: 56px;
+}
+
+#timeline-controls #military-time-toggle button.Mui-selected:hover {
+  filter: none;
 }
 
 #timeline-controls

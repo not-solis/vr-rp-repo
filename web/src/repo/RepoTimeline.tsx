@@ -384,34 +384,39 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
           size='small'
           value={useMilitaryTime}
           onChange={(_, newUseMilitaryTime) => {
-            setUseMilitaryTime(newUseMilitaryTime);
+            if (newUseMilitaryTime !== null) {
+              setUseMilitaryTime(newUseMilitaryTime);
+            }
           }}
           aria-label='view-toggle'
         >
-          <ToggleButton className='timeline-control' value={false}>
-            12AM
-          </ToggleButton>
-          <ToggleButton className='timeline-control' value={true}>
-            00:00
-          </ToggleButton>
-        </ToggleButtonGroup>
-        {/* <Tooltip
-          title='Column width'
-          placement='top'
-          slotProps={{
-            tooltip: {
-              style: { marginBottom: 4 },
-            },
-          }}
-        >
-          <IconButton
-            className='timeline-control'
-            style={{ borderRadius: 8 }}
-            onClick={() => setShowColumnWidthSlider(!showColumnWidthSlider)}
+          <Tooltip
+            title='12 hour time'
+            placement='top'
+            slotProps={{
+              tooltip: {
+                style: { marginBottom: 4 },
+              },
+            }}
           >
-            <Typography fontSize={16}>AM/PM</Typography>
-          </IconButton>
-        </Tooltip> */}
+            <ToggleButton className='timeline-control' value={false}>
+              12AM
+            </ToggleButton>
+          </Tooltip>
+          <Tooltip
+            title='24 hour time'
+            placement='top'
+            slotProps={{
+              tooltip: {
+                style: { marginBottom: 4 },
+              },
+            }}
+          >
+            <ToggleButton className='timeline-control' value={true}>
+              00:00
+            </ToggleButton>
+          </Tooltip>
+        </ToggleButtonGroup>
       </Stack>
 
       <div
