@@ -1,12 +1,25 @@
 import './RepoTimeline.css';
-import { LinearProgress, Typography } from '@mui/material';
+import { Event, Expand, Place } from '@mui/icons-material';
+import {
+  Grow,
+  IconButton,
+  LinearProgress,
+  Slider,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import { DateCalendar } from '@mui/x-date-pickers';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useInfiniteScroll, {
   InfiniteScrollRef,
   ScrollDirection,
 } from 'react-easy-infinite-scroll-hook';
+import { useNavigate } from 'react-router-dom';
 
 import { TimelineCard } from './TimelineCard';
 import { RoleplayEvent } from '../model/RoleplayEvent';
@@ -20,8 +33,8 @@ import { offsetDateByDays } from '../util/Time';
  * Queries for timeline events will be done in intervals of this length in days.
  */
 const QUERY_INTERVAL_LENGTH = 14;
-export const PIXELS_PER_HOUR = 70;
-const SCROLL_LOAD_TRESHOLD_PX = PIXELS_PER_HOUR * 6;
+const DEFAULT_PIXELS_PER_HOUR = 70;
+const SCROLL_LOAD_TRESHOLD_PX = 500;
 
 interface RepoTimelineProps {
   tags?: string[];
@@ -36,6 +49,13 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     initialDate = new Date(),
     setTimeQuery = () => {},
   } = props;
+  const navigate = useNavigate();
+  const [pixelsPerHour, setPixelsPerHour] = useState(DEFAULT_PIXELS_PER_HOUR);
+  const [useMilitaryTime, setUseMilitaryTime] = useState(false);
+  const [showColumnWidthSlider, setShowColumnWidthSlider] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
   const initialStartDate = offsetDateByDays(
     initialDate,
     -QUERY_INTERVAL_LENGTH / 2,
@@ -106,7 +126,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   );
   const getAbsolutePosition = (date: Date) =>
     ((date.getTime() - totalStartDate.getTime()) / (1000 * 60 * 60)) *
-    PIXELS_PER_HOUR;
+    pixelsPerHour;
 
   const { ref: dragRef, node: timelineNode } = useDragScroll({
     onDragEnd: (node) => {
@@ -116,7 +136,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
 
       const newDate = new Date(
         totalStartDate.getTime() +
-          ((node.scrollLeft + window.innerWidth / 2) / PIXELS_PER_HOUR) *
+          ((node.scrollLeft + window.innerWidth / 2) / pixelsPerHour) *
             60 *
             60 *
             1000,
@@ -177,7 +197,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   }));
 
   const left = timelineNode
-    ? timelineNode.scrollLeft + timelineNode.clientWidth
+    ? timelineNode.scrollLeft - timelineNode.clientWidth
     : 0;
   const right = timelineNode ? left + 3 * timelineNode.clientWidth : 0;
   const leftDate = timelineNode
@@ -206,25 +226,210 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     return startDate < rightDate && endDate > leftDate;
   };
 
-  return (
-    <div
-      id='repo-timeline-component'
-      ref={(node) => {
-        infiniteScrollRef.current = node;
-        dragRef(node);
-      }}
-      className='scrollable-y scrollable-x hidden-scrollbar'
-    >
-      <div style={{ position: 'relative', height: '100%' }}>
-        <div
-          id='timeline-now'
-          style={{ left: getAbsolutePosition(currentDate) }}
-        />
+  const timelineContainsDate = (date: Date) =>
+    date > totalStartDate && date < totalEndDate;
 
-        <div
-          id='repo-timeline-grid'
-          style={{ gridAutoColumns: PIXELS_PER_HOUR }}
+  const scrollToDate = (date: Date) => {
+    setTimeQuery(date);
+    if (!timelineContainsDate(date)) {
+      setTimeout(() => navigate(0), 500);
+    } else {
+      setTimeout(() => setCurrentDate(new Date()), 500);
+    }
+    timelineNode?.scrollTo({
+      behavior: 'smooth',
+      left: getAbsolutePosition(date) - timelineNode.clientWidth / 2,
+    });
+  };
+
+  // Uses native MouseEvent
+  const handleClickOutsideDatePicker = (event: MouseEvent) => {
+    // Close if click is outside the button or calendar.
+    if (
+      calendarRef.current &&
+      buttonRef.current &&
+      !calendarRef.current.contains(event.target as Node) &&
+      !buttonRef.current.contains(event.target as Node)
+    ) {
+      closeCalendar();
+    }
+  };
+
+  const openCalendar = () => {
+    document.addEventListener('click', handleClickOutsideDatePicker, {
+      capture: true,
+    });
+    setShowDatePicker(true);
+  };
+
+  const closeCalendar = () => {
+    document.removeEventListener('click', handleClickOutsideDatePicker, {
+      capture: true,
+    });
+    setShowDatePicker(false);
+  };
+
+  return (
+    <div id='repo-timeline-component' style={{ position: 'relative' }}>
+      <Stack id='timeline-controls'>
+        <Tooltip
+          title='Jump to current time'
+          placement='top'
+          slotProps={{
+            tooltip: {
+              style: { marginBottom: 4 },
+            },
+          }}
         >
+          <IconButton
+            className='timeline-control'
+            onClick={() => scrollToDate(currentDate)}
+          >
+            <Place fontSize='large' />
+          </IconButton>
+        </Tooltip>
+        <Stack direction='row' alignItems='flex-end' gap={2} height='48px'>
+          <Grow in={showDatePicker} style={{ transformOrigin: 'bottom right' }}>
+            <DateCalendar
+              ref={calendarRef}
+              value={initialDate && dayjs(initialDate)}
+              onChange={(value) => {
+                if (value) {
+                  const date = value.toDate() as Date;
+                  date.setHours(12, 0, 0, 0);
+                  scrollToDate(date);
+                }
+                closeCalendar();
+              }}
+            />
+          </Grow>
+          <Tooltip
+            title='Jump to date'
+            placement='top'
+            slotProps={{
+              tooltip: {
+                style: { marginBottom: 4 },
+              },
+            }}
+          >
+            <IconButton
+              ref={buttonRef}
+              className='timeline-control'
+              onClick={() => {
+                if (showDatePicker) {
+                  closeCalendar();
+                } else {
+                  openCalendar();
+                }
+              }}
+            >
+              <Event fontSize='large' />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+        <Stack direction='row' alignItems='center' gap={2}>
+          <Grow
+            in={showColumnWidthSlider}
+            style={{ transformOrigin: 'right center' }}
+          >
+            <div id='hour-width-slider-container'>
+              <Slider
+                id='hour-width-slider'
+                min={50}
+                max={100}
+                value={pixelsPerHour}
+                valueLabelDisplay='auto'
+                valueLabelFormat={(v) => `${v}px`}
+                onChange={(_, val) => {
+                  const newPixelsPerHour = val as number;
+                  setPixelsPerHour(newPixelsPerHour);
+                  // TODO: make this a bit less choppy
+                  if (timelineNode) {
+                    const { scrollLeft, scrollWidth, clientWidth } =
+                      timelineNode;
+                    const scrollPercent =
+                      (scrollLeft + clientWidth / 2) / scrollWidth;
+                    const percentChange = newPixelsPerHour / pixelsPerHour;
+                    timelineNode.scrollLeft =
+                      scrollWidth * percentChange * scrollPercent -
+                      clientWidth / 2;
+                  }
+                }}
+                slotProps={{
+                  thumb: { style: { borderRadius: 2, height: 24, width: 8 } },
+                }}
+              />
+            </div>
+          </Grow>
+          <Tooltip
+            title='Column width'
+            placement='top'
+            slotProps={{
+              tooltip: {
+                style: { marginBottom: 4 },
+              },
+            }}
+          >
+            <IconButton
+              className='timeline-control'
+              onClick={() => setShowColumnWidthSlider(!showColumnWidthSlider)}
+            >
+              <Expand fontSize='large' style={{ transform: 'rotate(90deg)' }} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+        <ToggleButtonGroup
+          id='military-time-toggle'
+          exclusive
+          size='small'
+          value={useMilitaryTime}
+          onChange={(_, newUseMilitaryTime) => {
+            setUseMilitaryTime(newUseMilitaryTime);
+          }}
+          aria-label='view-toggle'
+        >
+          <ToggleButton className='timeline-control' value={false}>
+            12AM
+          </ToggleButton>
+          <ToggleButton className='timeline-control' value={true}>
+            00:00
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {/* <Tooltip
+          title='Column width'
+          placement='top'
+          slotProps={{
+            tooltip: {
+              style: { marginBottom: 4 },
+            },
+          }}
+        >
+          <IconButton
+            className='timeline-control'
+            style={{ borderRadius: 8 }}
+            onClick={() => setShowColumnWidthSlider(!showColumnWidthSlider)}
+          >
+            <Typography fontSize={16}>AM/PM</Typography>
+          </IconButton>
+        </Tooltip> */}
+      </Stack>
+
+      <div
+        ref={(node) => {
+          infiniteScrollRef.current = node;
+          dragRef(node);
+        }}
+        className='scrollable-y scrollable-x hidden-scrollbar'
+        style={{ position: 'relative', height: '100%' }}
+      >
+        {timelineContainsDate(currentDate) && (
+          <div
+            id='timeline-now'
+            style={{ left: getAbsolutePosition(currentDate) }}
+          />
+        )}
+
+        <div id='repo-timeline-grid' style={{ gridAutoColumns: pixelsPerHour }}>
           <div
             id='repo-timeline-header'
             style={{ gridColumnEnd: timelineHours + 1 }}
@@ -263,7 +468,9 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
                 >
                   {
                     <Typography variant='body2'>
-                      {`${((hour + 11) % 12) + 1}${hour > 11 ? 'PM' : 'AM'}`}
+                      {useMilitaryTime
+                        ? `${`${hour}`.padStart(2, '0')}:00`
+                        : `${((hour + 11) % 12) + 1}${hour > 11 ? 'PM' : 'AM'}`}
                     </Typography>
                   }
                 </div>

@@ -80,3 +80,78 @@
   grid-template-columns: subgrid;
   pointer-events: none;
 }
+
+#timeline-controls {
+  --timeline-button-color: #d26262;
+  --timeline-button-background-color: #333;
+  position: absolute;
+  bottom: 48px;
+  right: 48px;
+  gap: 24px;
+  align-items: flex-end;
+  z-index: 10;
+}
+
+#timeline-controls button.timeline-control {
+  color: var(--timeline-button-color);
+  background-color: var(--timeline-button-background-color);
+  box-shadow: var(--mui-shadows-6);
+  transition: filter 0.1s;
+}
+
+#timeline-controls button.timeline-control:hover {
+  filter: brightness(110%);
+}
+
+#timeline-controls button.timeline-control:active {
+  filter: brightness(90%);
+}
+
+#timeline-controls .MuiDateCalendar-root {
+  background-color: var(--timeline-button-background-color);
+  border-radius: 16px;
+}
+
+#timeline-controls .MuiDateCalendar-root .MuiButtonBase-root.Mui-selected {
+  background-color: var(--timeline-button-color);
+}
+
+#timeline-controls
+  .MuiDateCalendar-root
+  .MuiButtonBase-root:not(.Mui-selected):hover {
+  background-color: #cf666620;
+}
+
+#timeline-controls #military-time-toggle button {
+  width: 56px;
+}
+
+#timeline-controls
+  #military-time-toggle
+  .MuiButtonBase-root:not(.Mui-selected) {
+  background-color: var(--mui-palette-background-dark);
+}
+
+#hour-width-slider-container {
+  display: flex;
+  border-radius: 24px;
+  background-color: var(--timeline-button-background-color);
+  padding: 0 12px;
+}
+
+#hour-width-slider {
+  width: 200px;
+  height: 12px;
+  color: var(--timeline-button-color);
+}
+
+span.MuiSlider-thumb:focus,
+span.MuiSlider-thumb:hover,
+span.MuiSlider-thumb.Mui-active,
+span.MuiSlider-thumb.Mui-focusVisible {
+  box-shadow: inherit;
+}
+
+span.MuiSlider-thumb::before {
+  display: none;
+}
