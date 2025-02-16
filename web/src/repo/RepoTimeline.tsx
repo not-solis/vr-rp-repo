@@ -70,7 +70,6 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const [totalEndDate, setTotalEndDate] = useState(initialEndDate);
   const {
     data: pageData,
-    error,
     fetchPreviousPage,
     fetchNextPage,
     isFetching,
@@ -289,7 +288,11 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
           </IconButton>
         </Tooltip>
         <Stack direction='row' alignItems='flex-end' gap={2} height='48px'>
-          <Grow in={showDatePicker} style={{ transformOrigin: 'bottom right' }}>
+          <Grow
+            in={showDatePicker}
+            style={{ transformOrigin: 'bottom right' }}
+            unmountOnExit
+          >
             <DateCalendar
               ref={calendarRef}
               value={initialDate && dayjs(initialDate)}
@@ -331,6 +334,7 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
           <Grow
             in={showColumnWidthSlider}
             style={{ transformOrigin: 'right center' }}
+            unmountOnExit
           >
             <div id='hour-width-slider-container'>
               <Slider
