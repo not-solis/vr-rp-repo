@@ -90,6 +90,11 @@
   gap: 24px;
   align-items: flex-end;
   z-index: 10;
+  pointer-events: none;
+}
+
+#timeline-controls * {
+  pointer-events: all;
 }
 
 #timeline-controls button.timeline-control {
