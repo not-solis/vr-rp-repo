@@ -2,6 +2,22 @@ import dayjs from 'dayjs';
 
 import { ScheduleRegion } from '../model/RoleplayScheduling';
 
+const stdTimezoneOffset = (date: Date) => {
+  const jan = new Date(date.getFullYear(), 0, 1);
+  const jul = new Date(date.getFullYear(), 6, 1);
+  return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+};
+
+export const observesDst = (date: Date) => {
+  const jan = new Date(date.getFullYear(), 0, 1);
+  const jul = new Date(date.getFullYear(), 6, 1);
+  return jan.getTimezoneOffset() != jul.getTimezoneOffset();
+};
+
+export const isDst = (date: Date) => {
+  return date.getTimezoneOffset() < stdTimezoneOffset(date);
+};
+
 export const getLocale = () => {
   return navigator.languages ? navigator.languages[0] : navigator.language;
 };

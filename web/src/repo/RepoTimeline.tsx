@@ -27,7 +27,7 @@ import { mapProject } from '../model/RoleplayProject';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { useDragScroll } from '../util/DragScroll';
 import { lerp } from '../util/Math';
-import { offsetDateByDays } from '../util/Time';
+import { isDst, observesDst, offsetDateByDays } from '../util/Time';
 
 /**
  * Queries for timeline events will be done in intervals of this length in days.
@@ -56,11 +56,12 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const startOfInitialDate = new Date(initialDate);
+  startOfInitialDate.setHours(0, 0, 0);
   const initialStartDate = offsetDateByDays(
-    initialDate,
+    startOfInitialDate,
     -QUERY_INTERVAL_LENGTH / 2,
   );
-  initialStartDate.setHours(0, 0, 0, 0);
   const initialEndDate = offsetDateByDays(
     initialStartDate,
     QUERY_INTERVAL_LENGTH,
@@ -92,11 +93,19 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
         if (!pageData) {
           throw new Error('Missing page data');
         }
+        const adjustDst = (date: Date) => {
+          if (observesDst(date) && isDst(date) && isDst(totalStartDate)) {
+            date.setHours(date.getHours() - 1);
+          }
+
+          return date;
+        };
+
         pageData.data = pageData.data.map((event) => ({
           isConfirmed: event.isConfirmed,
           isDefaultEnd: event.isDefaultEnd,
-          startDate: new Date(event.startDate),
-          endDate: new Date(event.endDate),
+          startDate: adjustDst(new Date(event.startDate)),
+          endDate: adjustDst(new Date(event.endDate)),
           project: mapProject(event.project),
         }));
 
