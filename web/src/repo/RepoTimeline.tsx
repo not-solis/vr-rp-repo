@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { TimelineCard } from './TimelineCard';
 import { RoleplayEvent } from '../model/RoleplayEvent';
 import { mapProject } from '../model/RoleplayProject';
+import { ScheduleType } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { useDragScroll } from '../util/DragScroll';
 import { lerp } from '../util/Math';
@@ -66,6 +67,9 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
     initialStartDate,
     QUERY_INTERVAL_LENGTH,
   );
+  const dstOffset =
+    (initialStartDate.getTimezoneOffset() - initialDate.getTimezoneOffset()) /
+    60;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [totalStartDate, setTotalStartDate] = useState(initialStartDate);
   const [totalEndDate, setTotalEndDate] = useState(initialEndDate);
@@ -93,21 +97,30 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
         if (!pageData) {
           throw new Error('Missing page data');
         }
-        const adjustDst = (date: Date) => {
-          if (observesDst(date) && isDst(date) && isDst(totalStartDate)) {
-            date.setHours(date.getHours() - 1);
-          }
 
-          return date;
-        };
+        pageData.data = pageData.data.map((event) => {
+          const adjustDst = (date: Date) => {
+            const eventDstOffset =
+              event.project.schedule?.type === ScheduleType.Periodic ? 1 : 0;
+            if (observesDst(date) && isDst(date)) {
+              date.setHours(date.getHours() - eventDstOffset + dstOffset);
+            }
+          };
 
-        pageData.data = pageData.data.map((event) => ({
-          isConfirmed: event.isConfirmed,
-          isDefaultEnd: event.isDefaultEnd,
-          startDate: adjustDst(new Date(event.startDate)),
-          endDate: adjustDst(new Date(event.endDate)),
-          project: mapProject(event.project),
-        }));
+          const startDate = new Date(event.startDate);
+          const endDate = new Date(event.endDate);
+
+          adjustDst(startDate);
+          adjustDst(endDate);
+
+          return {
+            isConfirmed: event.isConfirmed,
+            isDefaultEnd: event.isDefaultEnd,
+            startDate,
+            endDate,
+            project: mapProject(event.project),
+          };
+        });
 
         const nextCursorStart = new Date(pageData.nextCursor.startDate);
         const nextCursorEnd = new Date(pageData.nextCursor.endDate);

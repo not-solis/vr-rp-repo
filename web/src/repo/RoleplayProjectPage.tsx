@@ -47,6 +47,7 @@ import {
   RoleplayStatus,
   mapProject,
 } from '../model/RoleplayProject';
+import { ScheduleType } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
@@ -343,7 +344,7 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
 
     const savedProject = { ...project };
     const adjustDst = observesDst(new Date()) && isDst(new Date());
-    if (adjustDst) {
+    if (adjustDst && project.schedule?.type === ScheduleType.Periodic) {
       savedProject.schedule?.runtimes?.forEach((runtime) => {
         runtime.start.setHours(runtime.start.getHours() + 1);
         runtime.end?.setHours(runtime.end.getHours() + 1);
