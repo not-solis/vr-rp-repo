@@ -24,10 +24,11 @@ import { useNavigate } from 'react-router-dom';
 import { TimelineCard } from './TimelineCard';
 import { RoleplayEvent } from '../model/RoleplayEvent';
 import { mapProject } from '../model/RoleplayProject';
+import { ScheduleType } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { useDragScroll } from '../util/DragScroll';
 import { lerp } from '../util/Math';
-import { offsetDateByDays } from '../util/Time';
+import { isDst, observesDst, offsetDateByDays } from '../util/Time';
 
 /**
  * Queries for timeline events will be done in intervals of this length in days.
@@ -56,15 +57,19 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const startOfInitialDate = new Date(initialDate);
+  startOfInitialDate.setHours(0, 0, 0);
   const initialStartDate = offsetDateByDays(
-    initialDate,
+    startOfInitialDate,
     -QUERY_INTERVAL_LENGTH / 2,
   );
-  initialStartDate.setHours(0, 0, 0, 0);
   const initialEndDate = offsetDateByDays(
     initialStartDate,
     QUERY_INTERVAL_LENGTH,
   );
+  const dstOffset =
+    (initialStartDate.getTimezoneOffset() - initialDate.getTimezoneOffset()) /
+    60;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [totalStartDate, setTotalStartDate] = useState(initialStartDate);
   const [totalEndDate, setTotalEndDate] = useState(initialEndDate);
@@ -92,13 +97,30 @@ export const RepoTimeline = (props: RepoTimelineProps) => {
         if (!pageData) {
           throw new Error('Missing page data');
         }
-        pageData.data = pageData.data.map((event) => ({
-          isConfirmed: event.isConfirmed,
-          isDefaultEnd: event.isDefaultEnd,
-          startDate: new Date(event.startDate),
-          endDate: new Date(event.endDate),
-          project: mapProject(event.project),
-        }));
+
+        pageData.data = pageData.data.map((event) => {
+          const adjustDst = (date: Date) => {
+            const eventDstOffset =
+              event.project.schedule?.type === ScheduleType.Periodic ? 1 : 0;
+            if (observesDst(date) && isDst(date)) {
+              date.setHours(date.getHours() - eventDstOffset + dstOffset);
+            }
+          };
+
+          const startDate = new Date(event.startDate);
+          const endDate = new Date(event.endDate);
+
+          adjustDst(startDate);
+          adjustDst(endDate);
+
+          return {
+            isConfirmed: event.isConfirmed,
+            isDefaultEnd: event.isDefaultEnd,
+            startDate,
+            endDate,
+            project: mapProject(event.project),
+          };
+        });
 
         const nextCursorStart = new Date(pageData.nextCursor.startDate);
         const nextCursorEnd = new Date(pageData.nextCursor.endDate);

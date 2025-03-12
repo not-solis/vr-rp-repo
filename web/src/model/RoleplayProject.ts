@@ -1,5 +1,6 @@
 import { RoleplaySchedule, Runtime, ScheduleType } from './RoleplayScheduling';
 import { User } from './User';
+import { isDst, observesDst } from '../util/Time';
 
 export enum RoleplayStatus {
   Active = 'Active',
@@ -56,14 +57,30 @@ export interface RoleplayProject {
 // mute
 // desktop
 
+const adjustDst = (date: Date) => {
+  if (observesDst(date) && isDst(date)) {
+    date.setHours(date.getHours() - 1);
+  }
+};
+
 export const mapProject = (project: RoleplayProject): RoleplayProject => {
   const scheduleType = project.schedule?.type;
   const runtimes =
-    project.schedule?.runtimes?.map<Runtime>((runtime) => ({
-      ...runtime,
-      start: new Date(runtime.start),
-      end: runtime.end && new Date(runtime.end),
-    })) ?? [];
+    project.schedule?.runtimes?.map<Runtime>((runtime) => {
+      const start = new Date(runtime.start);
+      if (scheduleType === ScheduleType.Periodic) {
+        adjustDst(start);
+      }
+      const end = runtime.end && new Date(runtime.end);
+      if (end && scheduleType === ScheduleType.Periodic) {
+        adjustDst(end);
+      }
+      return {
+        ...runtime,
+        start,
+        end,
+      };
+    }) ?? [];
   runtimes.sort((a, b) => {
     const { start: startA } = a;
     const { start: startB } = b;

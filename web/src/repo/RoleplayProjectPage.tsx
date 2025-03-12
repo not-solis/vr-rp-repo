@@ -1,3 +1,4 @@
+import './RoleplayProjectPage.css';
 import {
   ArrowDropDown,
   Cancel,
@@ -46,11 +47,11 @@ import {
   RoleplayStatus,
   mapProject,
 } from '../model/RoleplayProject';
+import { ScheduleType } from '../model/RoleplayScheduling';
 import { PageData, queryServer } from '../model/ServerResponse';
 import { postUpdate, Update } from '../model/Update';
 import { UserRole } from '../model/User';
-
-import './RoleplayProjectPage.css';
+import { isDst, observesDst } from '../util/Time';
 
 /**
  * Pixel width under which to stack updates under roleplay info.
@@ -341,10 +342,19 @@ export const RoleplayProjectPage = (props: RoleplayProjectPageProps) => {
         .catch(createErrorSnackbar);
     }
 
+    const savedProject = { ...project };
+    const adjustDst = observesDst(new Date()) && isDst(new Date());
+    if (adjustDst && project.schedule?.type === ScheduleType.Periodic) {
+      savedProject.schedule?.runtimes?.forEach((runtime) => {
+        runtime.start.setHours(runtime.start.getHours() + 1);
+        runtime.end?.setHours(runtime.end.getHours() + 1);
+      });
+    }
+
     if (isNew) {
       queryServer<string>('/projects', {
         method: 'POST',
-        body: project,
+        body: savedProject,
         isJson: true,
         useAuth: true,
       })
